@@ -231,6 +231,7 @@ button { font: inherit; color: inherit; }
   fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round;
 }
 .barra-e .seg svg .nucleo { fill: currentColor; stroke: none; opacity: 0.55; }
+.barra-e .seg svg circle.nucleo, .grupo small svg circle.nucleo { opacity: 1; }
 .barra-e .seg svg .nieve { stroke-width: 1.6; }
 .barra-e .ep { background: var(--ep); color: #fff; }
 .barra-e .ec { background: var(--julito); }
@@ -287,7 +288,15 @@ button { font: inherit; color: inherit; }
 .grupo { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .grupo .fs { display: flex; gap: 3px; padding-bottom: 4px; border-bottom: 1.5px solid var(--suave); }
 .grupo .ficha { width: 20px; height: 20px; }
-.grupo small { font-size: 13px; }
+.grupo small { font-size: 13px; display: flex; align-items: center; gap: 3px; }
+.grupo small svg {
+  width: 14px; height: 14px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+.grupo small svg .nucleo { fill: currentColor; stroke: none; opacity: 0.55; }
+.grupo.ep small svg { color: var(--ep); }
+.grupo.ec small svg { color: #c79513; }
+.grupo.calor small svg { color: var(--calor); }
 .ecuacion { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 10px 0 4px; }
 .ecuacion b { font-weight: normal; font-size: 22px; }
 .ecuacion span { font-size: 15px; color: var(--suave); text-align: right; }

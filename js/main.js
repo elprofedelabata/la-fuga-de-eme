@@ -415,11 +415,11 @@ function enteros({ ep, ec, calor }) {
   return { ep: p, ec: Math.max(E - p - c, 0), calor: c };
 }
 
-// Iconos de la barra de energía (trazo en currentColor): montaña = altura (Ep),
-// líneas de velocidad = movimiento (Ec), llama = calor.
+// Iconos de la energía (trazo en currentColor): montaña = altura (Ep),
+// velocímetro = rapidez (Ec), llama = calor.
 const ICONOS = {
   Ep: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20 L9.5 7 L13.5 13.5 L16.5 9.5 L22 20 Z"/><path d="M7.6 10.4 L9.5 12 L11.4 10.4" class="nieve"/></svg>',
-  Ec: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 8 H9 M1.5 12 H10 M2.5 16 H9"/><path d="M13.5 5.5 L20.5 12 L13.5 18.5"/></svg>',
+  Ec: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 17.5 A9 9 0 1 1 20.8 17.5"/><path d="M5.6 10.2 L7.2 11.2 M12 5.5 V7.4 M18.4 10.2 L16.8 11.2"/><path d="M12 15.5 L16.6 9.4"/><circle cx="12" cy="15.5" r="1.6" class="nucleo"/></svg>',
   calor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 C12.5 6.5 18.5 9 18.5 14.5 A6.5 6.5 0 0 1 5.5 14.5 C5.5 11 8 9.5 8.5 7 C10 9 10.5 10 10.5 11.5 C12.5 9.5 12.5 6 12 2.5 Z"/><path d="M12 21 A2.6 2.6 0 0 1 9.4 18.4 C9.4 16.5 11.5 15.8 12 13.8 C12.8 15.8 14.6 16.6 14.6 18.4 A2.6 2.6 0 0 1 12 21 Z" class="nucleo"/></svg>',
 };
 
@@ -446,11 +446,14 @@ const TEXTOS = {
 
 function grupo(n, clase, etiqueta) {
   const g = document.createElement('div');
-  g.className = 'grupo';
+  g.className = `grupo ${clase}`;
   const fs = document.createElement('div');
   fs.className = 'fs';
   for (let i = 0; i < n; i++) fs.append(Object.assign(document.createElement('i'), { className: `ficha ${clase}` }));
-  g.append(fs, Object.assign(document.createElement('small'), { textContent: `${etiqueta} · ${n}` }));
+  const icono = ICONOS[{ ep: 'Ep', ec: 'Ec', calor: 'calor' }[clase]];
+  const txt = document.createElement('small');
+  txt.innerHTML = `${icono}<span>${etiqueta} · ${n}</span>`;
+  g.append(fs, txt);
   return g;
 }
 
