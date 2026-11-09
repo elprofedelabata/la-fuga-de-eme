@@ -1,12 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <!-- Mano abierta: "esto se puede coger". Punto de clic en el centro de la palma (16, 16) -->
-  <g fill="#FFFEF9" stroke="#3A3530" stroke-width="1.5" stroke-linejoin="round">
-    <rect x="2.6" y="15.2" width="9" height="4.2" rx="2.1" transform="rotate(-38 7 17.3)"/>
-    <rect x="8.3" y="6.2" width="4" height="12" rx="2"/>
-    <rect x="12.4" y="3.6" width="4" height="14" rx="2"/>
-    <rect x="16.5" y="4.6" width="4" height="13" rx="2"/>
-    <rect x="20.6" y="7.6" width="3.8" height="11" rx="1.9"/>
-    <path d="M8.3 14.5 L24.4 14.5 L24.4 22 Q24.4 28.6 17.8 28.6 L14.6 28.6 Q8.3 28.6 8.3 22 Z" stroke="none"/>
-    <path d="M8.3 13.6 L8.3 22 Q8.3 28.6 14.6 28.6 L17.8 28.6 Q24.4 28.6 24.4 22 L24.4 13.6" fill="none"/>
+  <!-- Mano abierta: "esto se puede coger". Una sola silueta; punto de clic en (16, 16) -->
+  <g fill="none" stroke="#3A3530" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#FFFEF9" d="
+      M 9.2 17.6
+      L 9.2 8.4  A 2 2 0 0 1 13.2 8.4
+      L 13.2 5.6 A 2 2 0 0 1 17.2 5.6
+      L 17.2 6.6 A 2 2 0 0 1 21.2 6.6
+      L 21.2 9.6 A 1.8 1.8 0 0 1 24.8 9.6
+      L 24.8 21
+      Q 24.8 28.6 17.8 28.6
+      L 15.4 28.6
+      Q 10.6 28.6 8.6 24.4
+      L 5.2 18.4 A 1.9 1.9 0 0 1 8.4 16.4
+      Z"/>
+    <path d="M13.2 9 L13.2 15.4 M17.2 7.4 L17.2 15 M21.2 10.2 L21.2 15.4"/>
   </g>
 </svg>
