@@ -20,7 +20,7 @@ const estado = {
   colocadas: { 4: null, 8: null },
   seleccion: null,            // id de la pieza levantada
   huecoElegido: null,         // hueco tocado antes de elegir pieza
-  aviso: 0,                   // segundos que parpadean los huecos vacíos
+  avisos: {},                 // casilla -> segundos que parpadea en rojo
   intentos: 0,
   fallos: 0,
   mejor: 0,
@@ -108,23 +108,6 @@ function refrescar() {
   const completo = Object.keys(NIVEL.huecos).every((c) => estado.colocadas[c]);
   $('btn-lanzar').classList.toggle('atenuado', !completo);
 
-  const ayuda = $('ayuda');
-  ayuda.className = 'ayuda';
-  if (estado.arrastre) {
-    ayuda.innerHTML = `<b>${estado.arrastre.pieza.nombre.join(' ')}</b> · suéltala en su hueco`;
-    ayuda.classList.add('destaca');
-  } else if (estado.seleccion) {
-    const p = pieza(estado.seleccion);
-    ayuda.innerHTML = `<b>${p.nombre.join(' ')}</b> · ahora toca su hueco`;
-    ayuda.classList.add('destaca');
-  } else if (estado.huecoElegido) {
-    ayuda.innerHTML = `<b>Hueco de ${NIVEL.huecos[estado.huecoElegido]}</b> · elige una pieza`;
-    ayuda.classList.add('destaca');
-  } else if (completo) {
-    ayuda.innerHTML = '<b>¡Listo!</b> · pulsa LANZAR (o saca una pieza del tablero)';
-  } else {
-    ayuda.innerHTML = '<b>Piezas</b> · arrástralas a su hueco o tócalas';
-  }
   rehacerTablero();
 }
 
@@ -158,9 +141,7 @@ function tocarHueco(celda) {
     if (p.forma === forma) {
       colocar(celda, p);
     } else {
-      const a = $('ayuda');
-      a.innerHTML = `<b>No encaja</b> · ese hueco es de ${forma}`;
-      a.className = 'ayuda error';
+      estado.avisos[celda] = 0.9;     // no encaja: ese hueco parpadea en rojo
     }
     return;
   }
@@ -345,7 +326,7 @@ function estadosHuecos() {
   const forma = estado.arrastre?.pieza.forma ?? (estado.seleccion ? pieza(estado.seleccion).forma : null);
   for (const [cs, f] of Object.entries(NIVEL.huecos)) {
     const c = Number(cs);
-    if (estado.aviso > 0 && !estado.colocadas[c]) out[c] = 'aviso';
+    if (estado.avisos[c] > 0) out[c] = 'aviso';
     else if (forma) out[c] = f !== forma ? 'apagado' : estado.iman === c ? 'iman' : 'activo';
     else if (estado.huecoElegido) out[c] = estado.huecoElegido === c ? 'activo' : null;
   }
@@ -372,10 +353,7 @@ function lanzar() {
   ocultarBocadillo();
   const faltan = Object.keys(NIVEL.huecos).filter((c) => !estado.colocadas[c]);
   if (faltan.length) {
-    estado.aviso = 1.4;
-    const a = $('ayuda');
-    a.innerHTML = `<b>Faltan piezas</b> · ${faltan.length === 1 ? 'queda un hueco vacío' : 'quedan huecos vacíos'}`;
-    a.className = 'ayuda error';
+    for (const c of faltan) estado.avisos[c] = 1.4;   // los huecos vacíos parpadean en rojo
     return;
   }
   estado.seleccion = null;
@@ -698,7 +676,7 @@ function fotograma(ahora) {
   const dt = Math.min(0.05, (ahora - ultimo) / 1000);
   ultimo = ahora;
   reloj += dt;
-  estado.aviso = Math.max(0, estado.aviso - dt);
+  for (const c in estado.avisos) estado.avisos[c] = Math.max(0, estado.avisos[c] - dt);
 
   const s = estado.sim;
   const paso = estado.pausado ? 0 : dt * estado.velocidad;

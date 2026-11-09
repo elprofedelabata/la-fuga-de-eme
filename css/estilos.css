@@ -151,10 +151,6 @@ button { font: inherit; color: inherit; }
 
 /* ---------- bandeja ---------- */
 .bandeja { min-height: 0; }
-.ayuda { margin: 0 0 4px 2px; font-size: 15px; color: var(--suave); min-height: 1.2em; }
-.ayuda b { color: var(--lapiz); font-weight: normal; }
-.ayuda.destaca { color: var(--naranja-o); }
-.ayuda.error { color: var(--calor); }
 .piezas {
   display: flex; gap: 10px; overflow-x: auto; padding: 14px 4px 8px;
   scroll-snap-type: x proximity; scrollbar-width: thin;
