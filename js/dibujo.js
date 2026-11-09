@@ -271,11 +271,7 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
     }
   }
 
-  // regla de alturas
-  ctx.fillStyle = C.regla;
-  ctx.font = `${Math.max(9, k * 0.26)}px ${FUENTE}`;
-  ctx.textBaseline = 'bottom';
-  for (let h = 0; h <= 9; h++) ctx.fillText(String(h), 3, (9 - h) * k - 1);
+  // (la regla de alturas va fuera del tablero, en el HTML)
 
   // rejilla 3x3, bien marcada por encima del terreno
   for (const i of [1, 2]) {

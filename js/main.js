@@ -12,6 +12,7 @@ const $ = (id) => document.getElementById(id);
 const app = $('app');
 const lienzo = $('lienzo');
 const ctx = lienzo.getContext('2d');
+const marcador = $('regla-eme');
 
 const estado = {
   modo: 'montaje',            // montaje | directo | resultado
@@ -629,7 +630,7 @@ function poseEme(w) {
   const ux = tx / tl, uy = -th / tl;        // tangente en píxeles (y hacia abajo)
   const nx = uy, ny = -ux;                  // normal hacia fuera del terreno
   const ang = Math.atan2(uy, ux) + (o.extraAng ?? 0);
-  return { cx: px + nx * B / 2 * (o.sy ?? 1), cy: py + ny * B / 2 * (o.sy ?? 1), B, ang, o };
+  return { cx: px + nx * B / 2 * (o.sy ?? 1), cy: py + ny * B / 2 * (o.sy ?? 1), B, ang, o, h };
 }
 
 function pintar() {
@@ -641,6 +642,7 @@ function pintar() {
   if (estado.modo === 'montaje') dibujarResaltes(ctx, w, estadosHuecos(), reloj);
 
   const pose = poseEme(w);
+  marcador.style.setProperty('--h', Math.max(-0.4, Math.min(9.4, pose.h)).toFixed(3));
   if (!pose.o.bandera) dibujarBandera(ctx, w, NIVEL);
 
   // líneas de velocidad
@@ -734,6 +736,13 @@ function iniciar() {
   $('bocadillo').textContent = NIVEL.frase;
   $('bocadillo').addEventListener('click', ocultarBocadillo);
   crearFichas();
+  for (let h = 0; h <= 9; h++) {
+    const n = document.createElement('span');
+    n.className = `regla-n${h % 3 === 0 ? ' mayor' : ''}`;
+    n.style.setProperty('--h', h);
+    n.textContent = h;
+    $('regla').append(n);
+  }
   actualizarEnergia({ ep: NIVEL.energia, ec: 0, calor: 0 });
   for (const b of document.querySelectorAll('.hueco')) {
     const celda = Number(b.dataset.celda);

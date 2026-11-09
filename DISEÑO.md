@@ -79,6 +79,7 @@ De arriba abajo: barra superior (nivel, estrellas) · barra de julitos · tabler
 - **Lanzamiento:** la bandeja se cambia por la energía en directo; cámara lenta ×0,5, pausa y parar.
 - **Resultado:** panel inferior con estrellas, balance agrupado (8 = 4 + 3 + 1) y la frase de Eme.
 - Rejilla 3 × 3 en gris claro sobre el terreno; cuadritos de altura en azul muy suave.
+- **Regla de alturas** fuera del tablero, a la izquierda (0–9 julitos, con 0, 3, 6 y 9 resaltados en las líneas de la rejilla). Un marcador naranja sigue la altura de Eme en directo: es su Ep.
 
 ## Pendiente
 
