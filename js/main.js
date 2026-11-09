@@ -13,6 +13,7 @@ const app = $('app');
 const lienzo = $('lienzo');
 const ctx = lienzo.getContext('2d');
 const marcador = $('regla-eme');
+const DURACION_FIESTA = 1.1;   // segundos de saltitos hasta la bandera
 const CUADRITOS = 9;   // cuadritos de alto del tablero (el tablero aún está hecho para 9)
 
 const estado = {
@@ -28,6 +29,7 @@ const estado = {
   pausado: false,
   sim: null, rec: null, analisis: null,
   espera: 0, calorVisto: 0, metaVista: false,
+  fiesta: null,               // celebración al llegar a la meta: { t, x0, x1 }
   fuera: new Set(),           // piezas que no están en la bandeja (en la mano, volando o colocadas)
   arrastre: null, iman: null, vuelos: 0, mirada: null,
 };
@@ -371,6 +373,7 @@ function lanzar() {
   estado.espera = 0;
   estado.calorVisto = 0;
   estado.metaVista = false;
+  estado.fiesta = null;
   estado.pausado = false;
   $('btn-pausa').classList.remove('pausado');
   ponerModo('directo');
@@ -518,7 +521,7 @@ function comprobarResultado(dt) {
   if (tipo === 'nollega') listo ||= s.vueltas > 0;
   if (!listo) return;
   estado.espera += dt;
-  const retardo = tipo === 'meta' ? 0.6 : 1.1;
+  const retardo = tipo === 'meta' ? DURACION_FIESTA + 0.6 : 1.1;
   if (estado.espera > retardo) mostrarResultado();
 }
 
@@ -551,7 +554,7 @@ function poseEme(w) {
   const v = vistaTablero(w);
   const B = v.k * 1.02;
   const o = { seed: 3 + (Math.floor(reloj * 8) % 3), expr: 'idle' };
-  let x, h, tx = 1, th = 0;
+  let x, h, tx = 1, th = 0, salto = 0;
 
   if (!estado.sim) {
     const rec = estado.recMontaje;
@@ -591,7 +594,19 @@ function poseEme(w) {
       const dens = estado.rec.dens[m.i];
       const { ec } = energias(s, estado.rec);
       const mat = estado.rec.mats[m.i];
-      if (s.estado === 'meta') { o.expr = 'win'; o.bandera = true; o.sy = 1.04; o.sx = 0.96; tx = 1; th = 0; }   // se endereza en la repisa
+      if (s.estado === 'meta') {
+        // Celebración: se ha parado en el borde con 0 de Ec; ahora avanza a saltitos hasta la
+        // bandera (la repisa es plana: la Ep no cambia) y se la pone de sombrero.
+        tx = 1; th = 0;
+        const f = estado.fiesta;
+        const p = f ? Math.min(1, f.t / DURACION_FIESTA) : 0;
+        const u = p * p * (3 - 2 * p);
+        if (f) x = f.x0 + (f.x1 - f.x0) * u;
+        const brinco = Math.abs(Math.sin(2 * Math.PI * p));   // dos saltitos
+        salto = 0.45 * brinco;
+        if (p < 1) { o.expr = 'ice'; o.sy = 1 + 0.07 * brinco; o.sx = 2 - o.sy; }
+        else { o.expr = 'win'; o.bandera = true; o.sy = 1.04; o.sx = 0.96; }
+      }
       else if (s.estado === 'parado') o.expr = 'bored';
       else if (dens > 0) o.expr = 'effort';
       else if (ec > 3) { o.expr = 'fast'; o.px = s.dir * 0.6; }
@@ -600,7 +615,7 @@ function poseEme(w) {
     }
   }
   // colocar a Eme apoyado sobre la pista
-  const [px, py] = v.px(x, h);
+  const [px, py] = v.px(x, h + salto);
   const tl = Math.hypot(tx, th) || 1;
   const ux = tx / tl, uy = -th / tl;        // tangente en píxeles (y hacia abajo)
   const nx = uy, ny = -ux;                  // normal hacia fuera del terreno
@@ -678,6 +693,10 @@ function fotograma(ahora) {
   const paso = estado.pausado ? 0 : dt * estado.velocidad;
   if (s && paso > 0) {
     avanzar(s, estado.rec, NIVEL, paso);
+    if (s.estado === 'meta') {
+      estado.fiesta ??= { t: 0, x0: muestra(estado.rec, s.s).x, x1: NIVEL.meta.bandera - 0.25 };
+      estado.fiesta.t += paso;
+    }
     comprobarResultado(paso);
   }
   moverParticulas(paso || (estado.sim ? 0 : dt));
@@ -693,7 +712,7 @@ function fotograma(ahora) {
       estado.calorVisto++;
       particula(pose.cx, pose.cy - pose.B * 0.3, C.calor, { vx: -s.dir * 20, vy: -45, lado: pose.B * 0.28 });
     }
-    if (pose && s.estado === 'meta' && !estado.metaVista) {
+    if (pose && estado.fiesta?.t >= DURACION_FIESTA && !estado.metaVista) {
       estado.metaVista = true;
       for (let i = 0; i < 26; i++) {
         particula(pose.cx, pose.cy - pose.B, C.julito,

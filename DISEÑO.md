@@ -30,7 +30,7 @@ Nivel trampa previsto: **EME**, el primo grande (*M* mayúscula), llega igual de
 
 La meta es una repisa plana a la altura objetivo, con la bandera en su borde y un precipicio detrás. La repisa no frena. Al llegar a ella con:
 
-- **0 julitos de Ec** → se para justo en el borde, junto a la bandera (victoria).
+- **0 julitos de Ec** → se para justo en el borde (victoria). Después celebra: avanza a saltitos por la repisa hasta la bandera y se la pone de sombrero (la repisa es plana, así que la Ep no cambia).
 - **1 o más** → le sobra energía: cruza la repisa y cae por el precipicio («¡Te pasaste!»).
 - Si no tiene energía para subir hasta la repisa, se da la vuelta («¡No llega!»).
 

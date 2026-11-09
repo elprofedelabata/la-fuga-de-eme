@@ -19,7 +19,7 @@ export const NIVEL = {
   salidaX: 1.0,          // posición inicial sobre la plataforma
   meta: {
     altura: 5,           // repisa de la casilla 6: hay que llegar con 0 julitos de Ec
-    bandera: 8.25,       // Eme se para en el borde de la repisa, junto a la bandera
+    bandera: 8.55,       // al ganar, Eme avanza a saltitos desde el borde hasta la bandera
   },
   // Casillas vacías y la forma de pieza que admite cada una
   huecos: { 4: 'rampa', 8: 'suelo' },
