@@ -242,7 +242,10 @@ function posibleArrastre(e, info) {
     removeEventListener('pointermove', mover);
     removeEventListener('pointerup', limpiar);
     removeEventListener('pointercancel', limpiar);
+    if (!estado.arrastre) document.documentElement.classList.remove('arrastrando');
   };
+  // Con ratón, la mano se cierra nada más pulsar, aunque la pieza aún no se haya movido
+  if (!tactil) document.documentElement.classList.add('arrastrando');
   addEventListener('pointermove', mover);
   addEventListener('pointerup', limpiar);
   addEventListener('pointercancel', limpiar);
