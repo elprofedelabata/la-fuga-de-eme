@@ -414,21 +414,8 @@ function enteros({ ep, ec, calor }) {
   return { ep: p, ec: Math.max(E - p - c, 0), calor: c };
 }
 
-function crearFichas() {
-  const f = $('fichas');
-  f.innerHTML = '';
-  for (let i = 0; i < NIVEL.energia; i++) f.append(Object.assign(document.createElement('i'), { className: 'ficha ep' }));
-}
-
 function actualizarEnergia(e) {
   const n = enteros(e);
-  const fichas = $('fichas').children;
-  for (let i = 0; i < fichas.length; i++) {
-    fichas[i].className = 'ficha ' + (i < n.ep ? 'ep' : i < n.ep + n.ec ? 'ec' : 'calor');
-  }
-  $('n-ep').textContent = n.ep;
-  $('n-ec').textContent = n.ec;
-  $('n-calor').textContent = n.calor;
   const E = NIVEL.energia;
   const [sEp, sEc, sCal] = $('barra-e').children;
   for (const [el, val, nom] of [[sEp, n.ep, 'Ep'], [sEc, n.ec, 'Ec'], [sCal, n.calor, 'calor']]) {
@@ -728,9 +715,11 @@ function iniciar() {
   estado.recMontaje = prepararRecorrido(NIVEL, { 4: null, 8: null });
   $('titulo-nivel').textContent = `Nivel ${NIVEL.numero} · ${NIVEL.titulo}`;
   $('bocadillo').textContent = NIVEL.frase;
-  $('objetivo-texto').innerHTML = `Objetivo: que Eme se pare en la bandera, a altura <b>${NIVEL.meta.altura}</b>`;
+  $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b> julitos`;
+  $('objetivo-meta').innerHTML = `Meta: pararse a altura <b class="meta">${NIVEL.meta.altura}</b>`;
+  $('directo-pie').textContent = `Total: ${NIVEL.energia} julitos. Siempre.`;
+  $('objetivo').setAttribute('aria-label', `Eme sale con ${NIVEL.energia} julitos. Meta: que se pare en la bandera, a altura ${NIVEL.meta.altura}`);
   $('bocadillo').addEventListener('click', ocultarBocadillo);
-  crearFichas();
   // Regla de alturas: un número por cuadrito, todos iguales
   const regla = $('regla');
   regla.style.setProperty('--n', CUADRITOS);

@@ -34,7 +34,7 @@ La meta es una repisa plana a la altura objetivo, con la bandera en su borde y u
 - **1 o más** → le sobra energía: cruza la repisa y cae por el precipicio («¡Te pasaste!»).
 - Si no tiene energía para subir hasta la repisa, se da la vuelta («¡No llega!»).
 
-Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El objetivo se muestra siempre: una línea bajo el título («Objetivo: que Eme se pare en la bandera, a altura 5»), el número de la meta en rojo en la regla y una línea discontinua roja a esa altura que llega hasta la bandera.
+Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El objetivo se muestra siempre: una línea bajo el título que dice de dónde sale y adónde llega («Sale con **8** julitos · Meta: pararse a altura **5**», el 8 en naranja como Eme y su marcador, el 5 en rojo), el número de la meta en rojo en la regla y una línea discontinua roja a esa altura que llega hasta la bandera. No hay barra de julitos fija: la energía se ve en directo durante el lanzamiento y en el balance final.
 
 ## Nivel 1 · «Ni más, ni menos»
 
@@ -71,7 +71,7 @@ Referencias en `arte/`: hoja de personaje, animación *idle*, boceto de interfaz
 
 ## Interfaz (móvil en vertical primero)
 
-De arriba abajo: barra superior (nivel, estrellas) · barra de julitos · tablero cuadrado a todo el ancho · bandeja de piezas deslizable · botones grandes al alcance del pulgar.
+De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tablero cuadrado con la regla de alturas · bandeja de piezas deslizable · botones grandes al alcance del pulgar.
 
 - **Arrastrar:** la pieza sale de la bandeja (queda su silueta discontinua) y flota con sombra, con inercia y una ligera inclinación según la velocidad; en móvil va por encima del dedo. Cerca de un hueco compatible se **engancha** (imán, borde naranja); los huecos que no la admiten se apagan. Al soltar encaja con rebote, polvo y una vibración corta; si se suelta fuera, vuelve volando a su sitio. Las piezas del tablero también se pueden sacar arrastrando. Eme sigue la pieza con la mirada.
 - En la bandeja táctil, deslizar en horizontal la desplaza; tirar de una pieza hacia arriba la arrastra.

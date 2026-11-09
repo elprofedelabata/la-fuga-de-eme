@@ -70,22 +70,24 @@ button { font: inherit; color: inherit; }
 .estrellas span.llena { background: var(--lapiz); }
 .estrellas span.llena::after { background: var(--julito); }
 
-/* ---------- objetivo del nivel ---------- */
+/* ---------- objetivo del nivel: de dónde sale Eme y adónde tiene que llegar ---------- */
 .objetivo {
-  margin: -4px 0 0; display: flex; align-items: center; justify-content: center; gap: 6px;
-  font-size: 16px; line-height: 1.1; text-align: center;
+  margin: -2px 0 2px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 8px;
+  font-size: 17px; line-height: 1.1; text-align: center;
+}
+.obj-parte { display: inline-flex; align-items: center; gap: 6px; }
+.obj-sep { color: var(--suave); }
+.obj-eme {
+  width: 13px; height: 13px; display: inline-block; flex: none;
+  background: var(--naranja); border: 1.5px solid var(--lapiz); border-radius: 3px;
 }
 .objetivo svg { width: 14px; height: 18px; flex: none; fill: none; stroke: var(--lapiz); stroke-width: 1.6; stroke-linejoin: round; }
 .objetivo svg path:last-child { fill: var(--calor); }
-.objetivo b { font-weight: normal; color: var(--calor); font-size: 18px; }
+.objetivo b { font-weight: normal; font-size: 20px; }
+.objetivo .salida { color: var(--naranja-o); }
+.objetivo .meta { color: var(--calor); }
 
-/* ---------- julitos ---------- */
-.julitos {
-  display: flex; align-items: center; gap: 10px;
-  background: #fff; border: 2px solid var(--lapiz); border-radius: var(--mano);
-  padding: 8px 10px;
-}
-.fichas { flex: 1; display: flex; gap: 4px; flex-wrap: wrap; }
+/* ---------- julitos (fichas del balance de energía) ---------- */
 .ficha {
   width: 22px; height: 22px; display: inline-block; border: 1.5px solid var(--lapiz); border-radius: 2px;
   transition: background-color 0.15s;
@@ -93,10 +95,6 @@ button { font: inherit; color: inherit; }
 .ficha.ep { background: var(--ep); }
 .ficha.ec { background: var(--julito); }
 .ficha.calor { background: var(--calor); }
-.leyenda { list-style: none; margin: 0; padding: 0; font-size: 14px; line-height: 1.15; min-width: 74px; }
-.leyenda li { display: flex; align-items: center; gap: 5px; }
-.leyenda .ficha { width: 10px; height: 10px; border-width: 1px; }
-.leyenda b { margin-left: auto; font-weight: normal; font-size: 15px; }
 
 /* ---------- tablero ---------- */
 .tablero-zona { flex: 1 1 auto; min-height: 220px; container-type: size; display: grid; place-items: center; }
