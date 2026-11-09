@@ -18,10 +18,8 @@ export const NIVEL = {
   energia: 8,            // Eme sale desde altura 8 y en reposo: 8 julitos
   salidaX: 1.0,          // posición inicial sobre la plataforma
   meta: {
-    altura: 4,           // repisa de la casilla 6
-    felpudo: [7.5, 8.3],
-    pierdeFelpudo: 1,    // si llega con 1 julito de Ec, se para justo en la bandera
-    bandera: 8.75,
+    altura: 5,           // repisa de la casilla 6: hay que llegar con 0 julitos de Ec
+    bandera: 8.25,       // Eme se para en el borde de la repisa, junto a la bandera
   },
   // Casillas vacías y la forma de pieza que admite cada una
   huecos: { 4: 'rampa', 8: 'suelo' },

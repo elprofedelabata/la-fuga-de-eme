@@ -4,14 +4,18 @@
 // Su energía mecánica es E = Ep + Ec, con Ep = altura (en julitos). El rozamiento de
 // cada material se reparte a lo largo del tramo de pista de su casilla, de modo que
 // cada pieza pierde exactamente los julitos que indica, sea cual sea su forma.
+//
+// Meta: la repisa está a la altura objetivo. Si Eme llega a ella con 0 julitos de Ec,
+// se para justo en el borde, junto a la bandera. Si le sobra energía, cruza la repisa
+// (que no frena) y cae por el precipicio; si le falta, no llega y vuelve hacia atrás.
 
-import { MATERIALES } from './nivel.js';
+import { MATERIALES, NIVEL } from './nivel.js';
 
 // "Gravedad" visual en cuadritos/s². La rapidez sale de Ec = v² / (2·G).
 export const G = 3;
 
 // ---------- geometría ----------
-export function construirPista(perfilB = 'plano') {
+export function construirPista(perfilB = 'plano', alturaMeta = NIVEL.meta.altura) {
   const pts = [[0, 8], [1.2, 8]];
   // Rampa de salida: un "quarter pipe" de altura 8 a 1 que ocupa las casillas 1, 4 y 7
   for (let i = 1; i <= 48; i++) {
@@ -27,13 +31,13 @@ export function construirPista(perfilB = 'plano') {
   } else {
     for (let i = 1; i <= 12; i++) pts.push([3 + (3 * i) / 12, 1]);
   }
-  // Subida en S hasta la repisa (casillas 9 y 6)
-  for (let i = 1; i <= 36; i++) {
-    const u = i / 36;
-    pts.push([6 + 1.4 * u, 1 + 3 * u * u * (3 - 2 * u)]);
+  // Subida en S hasta la repisa de la meta (casillas 9 y 6), que empieza en x = 7.4
+  for (let i = 1; i <= 40; i++) {
+    const u = i / 40;
+    pts.push([6 + 1.4 * u, 1 + (alturaMeta - 1) * u * u * (3 - 2 * u)]);
   }
-  // Repisa con el felpudo (sus bordes coinciden con puntos de la pista)
-  for (const x of [7.5, 7.7, 7.9, 8.1, 8.3, 8.5, 8.75, 9.0]) pts.push([x, 4]);
+  // Repisa plana y sin rozamiento hasta el precipicio (borde derecho del tablero)
+  for (let i = 1; i <= 8; i++) pts.push([7.4 + (1.6 * i) / 8, alturaMeta]);
   return pts;
 }
 
@@ -54,31 +58,17 @@ export function celdasTramos(pts) {
 
 // ---------- recorrido para la simulación ----------
 export function prepararRecorrido(nivel, colocadas) {
-  const pts = construirPista(colocadas[8]?.perfil ?? 'plano');
+  const pts = construirPista(colocadas[8]?.perfil ?? 'plano', nivel.meta.altura);
   const celdas = celdasTramos(pts);
   const s = [0];
   for (let i = 1; i < pts.length; i++) {
     s.push(s[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
   }
   const material = (c) => (nivel.huecos[c] ? colocadas[c]?.material ?? 'fijo' : 'fijo');
-  const [f0, f1] = nivel.meta.felpudo;
-  const enFelpudo = (i) => {
-    const xm = (pts[i][0] + pts[i + 1][0]) / 2;
-    return pts[i][1] > 3.99 && pts[i + 1][1] > 3.99 && xm > f0 && xm < f1;
-  };
   const largo = {};
-  let largoFelpudo = 0;
-  for (let i = 0; i < celdas.length; i++) {
-    const l = s[i + 1] - s[i];
-    largo[celdas[i]] = (largo[celdas[i]] ?? 0) + l;
-    if (enFelpudo(i)) largoFelpudo += l;
-  }
+  for (let i = 0; i < celdas.length; i++) largo[celdas[i]] = (largo[celdas[i]] ?? 0) + (s[i + 1] - s[i]);
   // densidad de pérdida (julitos por cuadrito recorrido) de cada tramo
-  const dens = celdas.map((c, i) => {
-    let d = MATERIALES[material(c)].pierde / largo[c];
-    if (enFelpudo(i)) d += nivel.meta.pierdeFelpudo / largoFelpudo;
-    return d;
-  });
+  const dens = celdas.map((c) => MATERIALES[material(c)].pierde / largo[c]);
   const mats = celdas.map(material);
   return { pts, s, dens, celdas, mats, total: s[s.length - 1] };
 }
@@ -117,12 +107,8 @@ export function sDeX(rec, x) {
 export function analizar(nivel, colocadas) {
   const piezas = Object.values(colocadas).filter(Boolean);
   const perdidas = piezas.reduce((a, p) => a + MATERIALES[p.material].pierde, 0);
-  const llegada = nivel.energia - nivel.meta.altura - perdidas;
-  let tipo;
-  if (llegada === nivel.meta.pierdeFelpudo) tipo = 'meta';
-  else if (llegada > nivel.meta.pierdeFelpudo) tipo = 'pasaste';
-  else if (llegada === 0) tipo = 'borde';
-  else tipo = 'nollega';
+  const llegada = nivel.energia - nivel.meta.altura - perdidas;   // Ec al llegar a la meta
+  const tipo = llegada === 0 ? 'meta' : llegada > 0 ? 'pasaste' : 'nollega';
   return { tipo, perdidas, llegada, piezas };
 }
 
@@ -130,8 +116,8 @@ export function analizar(nivel, colocadas) {
 export function nuevaSimulacion(rec, nivel) {
   return {
     s: sDeX(rec, nivel.salidaX), dir: 1, perdido: 0, t: 0, v: 0,
-    estado: 'rodando',    // rodando | tambaleo | cayendo | meta | parado
-    vueltas: 0, gracia: 1.0, tTambaleo: 0, caida: null,   // gracia: el empujoncito inicial
+    estado: 'rodando',    // rodando | cayendo | meta | parado
+    vueltas: 0, gracia: 1.0, caida: null,   // gracia: el empujoncito inicial
     E0: nivel.energia,
   };
 }
@@ -153,16 +139,6 @@ export function avanzar(sim, rec, nivel, dt) {
     c.giro += dt * 4;
     return;
   }
-  if (sim.estado === 'tambaleo') {
-    sim.t += dt;
-    sim.tTambaleo -= dt;
-    if (sim.tTambaleo <= 0) {   // se queda sin energía en el borde y cae hacia atrás
-      sim.estado = 'rodando';
-      sim.dir = -1;
-      sim.gracia = 0.8;
-    }
-    return;
-  }
   if (sim.estado !== 'rodando') return;
 
   const pasos = Math.max(1, Math.ceil(dt * 480));
@@ -176,7 +152,7 @@ export function avanzar(sim, rec, nivel, dt) {
     sim.v = v;
     const ns = sim.s + sim.dir * v * h;
 
-    if (ns >= rec.total) {      // se sale por el final de la repisa
+    if (ns >= rec.total) {      // cruza la repisa y se sale por el precipicio
       sim.estado = 'cayendo';
       sim.caida = { x: m.x, h: m.h, vx: v, vh: 0, giro: 0 };
       return;
@@ -189,7 +165,7 @@ export function avanzar(sim, rec, nivel, dt) {
     // Tolerancia de una centésima de julito: las cuentas del nivel son enteras, pero la
     // integración numérica deja restos minúsculos que no deben mover a Eme.
     if (ecn < 0.01 && sim.gracia <= 0) {
-      detener(sim, rec, nivel, m);
+      detener(sim, nivel, m);
       return;
     }
     sim.s = Math.max(ns, 0);
@@ -197,15 +173,9 @@ export function avanzar(sim, rec, nivel, dt) {
   }
 }
 
-function detener(sim, rec, nivel, m) {
-  const [f0] = nivel.meta.felpudo;
-  if (sim.dir === 1 && m.x >= f0 - 0.02 && m.h > 3.99) {
+function detener(sim, nivel, m) {
+  if (sim.dir === 1 && m.h > nivel.meta.altura - 0.05) {   // llega a la meta sin energía: se queda
     sim.estado = 'meta';
-    return;
-  }
-  if (sim.dir === 1 && m.x > 6.9 && m.x < f0) {
-    sim.estado = 'tambaleo';
-    sim.tTambaleo = 1.1;
     return;
   }
   if (Math.abs(m.th) < 0.06) {   // en llano y sin energía: se para

@@ -70,6 +70,15 @@ button { font: inherit; color: inherit; }
 .estrellas span.llena { background: var(--lapiz); }
 .estrellas span.llena::after { background: var(--julito); }
 
+/* ---------- objetivo del nivel ---------- */
+.objetivo {
+  margin: -4px 0 0; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 16px; line-height: 1.1; text-align: center;
+}
+.objetivo svg { width: 14px; height: 18px; flex: none; fill: none; stroke: var(--lapiz); stroke-width: 1.6; stroke-linejoin: round; }
+.objetivo svg path:last-child { fill: var(--calor); }
+.objetivo b { font-weight: normal; color: var(--calor); font-size: 18px; }
+
 /* ---------- julitos ---------- */
 .julitos {
   display: flex; align-items: center; gap: 10px;
@@ -104,6 +113,8 @@ button { font: inherit; color: inherit; }
   font-size: clamp(9px, 100cqh / var(--n) * 0.42, 15px); line-height: 1; color: #4a6a94;
 }
 .regla-n::after { content: ""; width: 8px; height: 1.5px; background: #8aa3c4; border-radius: 1px; }
+.regla-n.meta { color: var(--calor); }
+.regla-n.meta::after { background: var(--calor); height: 2px; }
 /* marcador: altura actual de Eme */
 .regla-eme {
   position: absolute; right: -2px; z-index: 1;
@@ -134,7 +145,7 @@ button { font: inherit; color: inherit; }
 .app:not([data-modo="montaje"]) .hueco { pointer-events: none; }
 
 .bocadillo {
-  position: absolute; left: 37%; top: 5%; width: 59%;
+  position: absolute; left: 37%; top: 4%; width: 48%;
   margin: 0; padding: 8px 12px; font-size: clamp(14px, 4cqw, 18px); line-height: 1.2;
   background: #fff; border: 2px solid var(--lapiz); border-radius: var(--mano);
   cursor: pointer; transition: opacity 0.3s;

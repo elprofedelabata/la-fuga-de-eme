@@ -438,7 +438,6 @@ function actualizarEnergia(e) {
 const TEXTOS = {
   meta: { titulo: '¡Conseguido!', cita: '«Ni más, ni menos.»' },
   pasaste: { titulo: '¡Te pasaste!', cita: '«¡Frenoooo!»' },
-  borde: { titulo: '¡Por los pelos!', cita: '«Esto… no llego.»' },
   nollega: { titulo: '¡No llega!', cita: '«¿Eso era todo?»' },
 };
 
@@ -454,7 +453,7 @@ function grupo(n, clase, etiqueta) {
 
 function mostrarResultado() {
   const { tipo, perdidas, llegada, piezas } = estado.analisis;
-  const E = NIVEL.energia, hm = NIVEL.meta.altura, fe = NIVEL.meta.pierdeFelpudo;
+  const E = NIVEL.energia, hm = NIVEL.meta.altura;
   const t = TEXTOS[tipo];
   estado.modo = 'resultado';
   app.dataset.modo = 'resultado';
@@ -475,38 +474,31 @@ function mostrarResultado() {
   bal.innerHTML = '';
   const conPerdida = piezas.filter((p) => MATERIALES[p.material].pierde > 0);
   const piezasGrupos = () => conPerdida.forEach((p) => bal.append(grupo(MATERIALES[p.material].pierde, 'calor', MATERIALES[p.material].nombre)));
+  const perdidasPiezas = conPerdida.map((p) => MATERIALES[p.material].pierde);
   let msg, ecu;
   if (tipo === 'meta') {
-    msg = `Eme se para justo en la bandera. ${estado.fallos === 0 ? '¡A la primera!' : ''}`;
+    msg = `Llega a la meta con 0 julitos de Ec y se queda justo en la bandera. ${estado.fallos === 0 ? '¡A la primera!' : ''}`;
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
-    bal.append(grupo(fe, 'calor', 'felpudo'));
-    ecu = `${E} = ${[hm, ...conPerdida.map((p) => MATERIALES[p.material].pierde), fe].join(' + ')}`;
+    ecu = `${E} = ${[hm, ...perdidasPiezas].join(' + ')}`;
   } else if (tipo === 'pasaste') {
-    const sobran = llegada - fe;
-    msg = `Llegó a la repisa con ${llegada} julitos de Ec, pero el felpudo solo frena ${fe}. ` +
-      (sobran === 1 ? 'El otro lo mandó al precipicio.' : `Los otros ${sobran} lo mandaron al precipicio.`);
+    msg = `Llegó a la meta con ${llegada} ${llegada === 1 ? 'julito' : 'julitos'} de Ec: le sobraba energía, ` +
+      'cruzó la repisa y cayó por el precipicio.';
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
-    bal.append(grupo(fe, 'calor', 'felpudo'));
-    bal.append(grupo(llegada - fe, 'ec', 'sobran'));
-    ecu = `${E} = ${[hm, ...conPerdida.map((p) => MATERIALES[p.material].pierde), fe, llegada - fe].join(' + ')}`;
-  } else if (tipo === 'borde') {
-    msg = 'Llegó a la repisa con 0 julitos de Ec: se quedó en el borde y volvió a caer. Le faltó 1 para el felpudo.';
-    bal.append(grupo(hm, 'ep', 'altura meta'));
-    piezasGrupos();
-    ecu = `${E} = ${[hm, ...conPerdida.map((p) => MATERIALES[p.material].pierde)].join(' + ')}`;
+    bal.append(grupo(llegada, 'ec', 'sobran'));
+    ecu = `${E} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
   } else {
-    msg = `Por el camino perdió ${perdidas} julitos: solo le quedaban ${E - perdidas} para subir, y la repisa está a altura ${hm}.`;
+    msg = `Por el camino perdió ${perdidas} julitos: solo le quedaban ${E - perdidas} para subir, y la meta está a altura ${hm}.`;
     bal.append(grupo(E - perdidas, 'ep', 'altura máx.'));
     piezasGrupos();
-    ecu = `${E} = ${[E - perdidas, ...conPerdida.map((p) => MATERIALES[p.material].pierde)].join(' + ')}`;
+    ecu = `${E} = ${[E - perdidas, ...perdidasPiezas].join(' + ')}`;
   }
   $('hoja-msg').textContent = msg;
   $('ecuacion').textContent = ecu;
   const pista = $('pista-ayuda');
   pista.hidden = !(tipo !== 'meta' && estado.fallos >= 2);
-  pista.textContent = `Pista: ${E} = ${hm} (altura de la meta) + ${fe} (felpudo) + ¿? (lo que pierden las piezas)`;
+  pista.textContent = `Pista: ${E} = ${hm} (altura de la meta) + ¿? (lo que tienen que perder las piezas)`;
   $('hoja').hidden = false;
   $('btn-reintentar').focus({ preventScroll: true });
 }
@@ -523,11 +515,10 @@ function comprobarResultado(dt) {
   let listo = s.t > 14 || s.estado === 'parado';
   if (tipo === 'meta') listo ||= s.estado === 'meta';
   if (tipo === 'pasaste') listo ||= s.estado === 'cayendo';
-  if (tipo === 'borde') listo ||= s.estado === 'tambaleo' || s.vueltas > 0;
   if (tipo === 'nollega') listo ||= s.vueltas > 0;
   if (!listo) return;
   estado.espera += dt;
-  const retardo = tipo === 'meta' ? 0.6 : tipo === 'borde' ? 1.6 : 1.1;
+  const retardo = tipo === 'meta' ? 0.6 : 1.1;
   if (estado.espera > retardo) mostrarResultado();
 }
 
@@ -600,8 +591,7 @@ function poseEme(w) {
       const dens = estado.rec.dens[m.i];
       const { ec } = energias(s, estado.rec);
       const mat = estado.rec.mats[m.i];
-      if (s.estado === 'meta') { o.expr = 'win'; o.bandera = true; o.sy = 1.04; o.sx = 0.96; }
-      else if (s.estado === 'tambaleo') { o.expr = 'edge'; o.extraAng = Math.sin(s.t * 18) * 0.12; }
+      if (s.estado === 'meta') { o.expr = 'win'; o.bandera = true; o.sy = 1.04; o.sx = 0.96; tx = 1; th = 0; }   // se endereza en la repisa
       else if (s.estado === 'parado') o.expr = 'bored';
       else if (dens > 0) o.expr = 'effort';
       else if (ec > 3) { o.expr = 'fast'; o.px = s.dir * 0.6; }
@@ -719,6 +709,7 @@ function iniciar() {
   estado.recMontaje = prepararRecorrido(NIVEL, { 4: null, 8: null });
   $('titulo-nivel').textContent = `Nivel ${NIVEL.numero} · ${NIVEL.titulo}`;
   $('bocadillo').textContent = NIVEL.frase;
+  $('objetivo-texto').innerHTML = `Objetivo: que Eme se pare en la bandera, a altura <b>${NIVEL.meta.altura}</b>`;
   $('bocadillo').addEventListener('click', ocultarBocadillo);
   crearFichas();
   // Regla de alturas: un número por cuadrito, todos iguales
@@ -727,7 +718,7 @@ function iniciar() {
   regla.setAttribute('aria-label', `Regla de alturas en julitos, de 0 a ${CUADRITOS}`);
   for (let h = 0; h <= CUADRITOS; h++) {
     const n = document.createElement('span');
-    n.className = 'regla-n';
+    n.className = `regla-n${h === NIVEL.meta.altura ? ' meta' : ''}`;
     n.style.setProperty('--h', h);
     n.textContent = h;
     regla.append(n);

@@ -26,28 +26,28 @@ Nivel trampa previsto: **EME**, el primo grande (*M* mayúscula), llega igual de
 - Simplificación consciente: en el Mundo I una rampa de arena come lo mismo que un suelo de arena. En el Mundo II se rompe a propósito («¿por qué la rampa ya no come 3?»).
 - La barra de julitos siempre suma lo mismo. Colores: **Ep azul**, **Ec amarillo**, **calor rojo**.
 
-## Meta: repisa con felpudo
+## Meta: pararse a la altura objetivo
 
-El felpudo come 1 julito y detrás hay un precipicio. Llegar a la repisa con:
+La meta es una repisa plana a la altura objetivo, con la bandera en su borde y un precipicio detrás. La repisa no frena. Al llegar a ella con:
 
-- **0 julitos de Ec** → se queda en el borde y cae hacia atrás (fallo «¡Por los pelos!»).
-- **1** → se para en la bandera (victoria).
-- **2 o más** → cruza el felpudo y cae por el precipicio (fallo «¡Te pasaste!»).
+- **0 julitos de Ec** → se para justo en el borde, junto a la bandera (victoria).
+- **1 o más** → le sobra energía: cruza la repisa y cae por el precipicio («¡Te pasaste!»).
+- Si no tiene energía para subir hasta la repisa, se da la vuelta («¡No llega!»).
 
-Así cada nivel tiene una condición exacta y cada fallo es distinto y visible.
+Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El objetivo se muestra siempre: una línea bajo el título («Objetivo: que Eme se pare en la bandera, a altura 5»), el número de la meta en rojo en la regla y una línea discontinua roja a esa altura que llega hasta la bandera.
 
 ## Nivel 1 · «Ni más, ni menos»
 
-Salida a altura 8 (8 julitos), suelo a altura 1, repisa a altura 4. Huecos: casilla 4 (rampa) y casilla 8 (suelo). Hay que perder exactamente 3.
+Salida a altura 8 (8 julitos), suelo a altura 1, meta a altura 5. Huecos: casilla 4 (rampa) y casilla 8 (suelo). Hay que perder exactamente 3.
 
 | Hueco 4 | Hueco 8 | Pierde | Llega con | Resultado |
 |---|---|---|---|---|
-| Rampa de hielo | Suelo de madera | 1 | 3 | Se pasa |
-| Rampa de hielo | Suelo de asfalto | 2 | 2 | Se pasa |
-| Rampa de hielo | Hondonada de hielo | 0 | 4 | Se pasa |
-| Rampa de arena | Suelo de madera | 4 | 0 | Se queda en el borde |
+| Rampa de hielo | Suelo de madera | 1 | 2 | Se pasa |
+| Rampa de hielo | Suelo de asfalto | 2 | 1 | Se pasa |
+| Rampa de hielo | Hondonada de hielo | 0 | 3 | Se pasa |
+| Rampa de arena | Suelo de madera | 4 | — | No llega |
 | Rampa de arena | Suelo de asfalto | 5 | — | No llega |
-| **Rampa de arena** | **Hondonada de hielo** | **3** | **1** | **Victoria** |
+| **Rampa de arena** | **Hondonada de hielo** | **3** | **0** | **Victoria** |
 
 La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/validar-nivel.mjs` comprueba esta tabla con la simulación real.
 
@@ -55,7 +55,7 @@ La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/
 
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones.
 - Como la energía final solo depende de la suma de pérdidas, intercambiar dos suelos da lo mismo. Para que el orden importe, usar piezas con condiciones locales (loops, saltos).
-- Estrellas por intentos (3 a la primera, 2 a la segunda, 1 después): se puede ir probando, pero el juego premia calcular. Tras dos fallos aparece una pista con el balance incompleto.
+- Estrellas por intentos (3 a la primera, 2 a la segunda, 1 después): se puede ir probando, pero el juego premia calcular. Tras dos fallos aparece una pista con el balance incompleto («8 = 5 + ¿?»).
 
 ## Simulación
 

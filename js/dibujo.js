@@ -8,7 +8,7 @@ export const C = {
   lapiz: '#3A3530', suave: '#6E6862',
   naranja: '#F2A33A', naranjaO: '#D9822B', naranjaC: '#FCC878', tatuaje: '#C46C20',
   julito: '#F7D046', calor: '#E5533D', ep: '#5C8EE6',
-  blanco: '#FFFFFF', sudor: '#96CDF0', felpudo: '#B24A3C', regla: '#6E8CB4',
+  blanco: '#FFFFFF', sudor: '#96CDF0', regla: '#6E8CB4',
 };
 export const MAT_COLOR = {
   fijo: '#E9E1CE', hielo: '#D4EBF7', arena: '#EED298', madera: '#CD965C', asfalto: '#96969C',
@@ -242,20 +242,6 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
   }
   cerrar();
 
-  // felpudo
-  const [f0, f1] = nivel.meta.felpudo;
-  const [fx0, fy] = v.px(f0, nivel.meta.altura);
-  const [fx1] = v.px(f1, nivel.meta.altura);
-  const alto = Math.max(4, k * 0.14);
-  ctx.fillStyle = C.felpudo;
-  ctx.fillRect(fx0, fy - alto, fx1 - fx0, alto);
-  ctx.strokeStyle = 'rgba(240,150,130,0.9)';
-  ctx.lineWidth = 1;
-  for (let x = fx0 + 3; x < fx1; x += 5) {
-    ctx.beginPath(); ctx.moveTo(x, fy - alto); ctx.lineTo(x, fy); ctx.stroke();
-  }
-  lapiz(ctx, [[fx0, fy - alto], [fx1, fy - alto]], { ancho: 1.2, doble: false, amp: 0.2 });
-
   // huecos vacíos: recuadro discontinuo, icono de la forma y conectores
   for (const [cs, forma] of Object.entries(nivel.huecos)) {
     const c = Number(cs);
@@ -278,6 +264,16 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
     lapiz(ctx, [[i * 3 * k, 0], [i * 3 * k, W]], { ancho: 2.2, color: C.rejilla, seed: 400 + i, amp: 0.5 });
     lapiz(ctx, [[0, i * 3 * k], [W, i * 3 * k]], { ancho: 2.2, color: C.rejilla, seed: 410 + i, amp: 0.5 });
   }
+
+  // altura objetivo: línea discontinua roja desde la regla hasta la meta
+  const [, ym] = v.px(0, nivel.meta.altura);
+  const [xm] = v.px(7.4, nivel.meta.altura);
+  ctx.save();
+  ctx.setLineDash([7, 5]);
+  ctx.strokeStyle = 'rgba(229,83,61,0.75)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, ym); ctx.lineTo(xm, ym); ctx.stroke();
+  ctx.restore();
 }
 
 export function iconoForma(ctx, cx, cy, L, forma, color) {
