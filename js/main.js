@@ -415,13 +415,25 @@ function enteros({ ep, ec, calor }) {
   return { ep: p, ec: Math.max(E - p - c, 0), calor: c };
 }
 
+// Iconos de la barra de energía (trazo en currentColor): montaña = altura (Ep),
+// líneas de velocidad = movimiento (Ec), llama = calor.
+const ICONOS = {
+  Ep: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20 L9.5 7 L13.5 13.5 L16.5 9.5 L22 20 Z"/><path d="M7.6 10.4 L9.5 12 L11.4 10.4" class="nieve"/></svg>',
+  Ec: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 8 H9 M1.5 12 H10 M2.5 16 H9"/><path d="M13.5 5.5 L20.5 12 L13.5 18.5"/></svg>',
+  calor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 C12.5 6.5 18.5 9 18.5 14.5 A6.5 6.5 0 0 1 5.5 14.5 C5.5 11 8 9.5 8.5 7 C10 9 10.5 10 10.5 11.5 C12.5 9.5 12.5 6 12 2.5 Z"/><path d="M12 21 A2.6 2.6 0 0 1 9.4 18.4 C9.4 16.5 11.5 15.8 12 13.8 C12.8 15.8 14.6 16.6 14.6 18.4 A2.6 2.6 0 0 1 12 21 Z" class="nucleo"/></svg>',
+};
+
 function actualizarEnergia(e) {
   const n = enteros(e);
   const E = NIVEL.energia;
   const [sEp, sEc, sCal] = $('barra-e').children;
   for (const [el, val, nom] of [[sEp, n.ep, 'Ep'], [sEc, n.ec, 'Ec'], [sCal, n.calor, 'calor']]) {
     el.style.width = `${(100 * val) / E}%`;
-    el.textContent = val >= 2 ? `${nom} · ${val}` : val === 1 ? String(val) : '';
+    if (el.dataset.v === String(val)) continue;     // solo se rehace cuando cambia
+    el.dataset.v = val;
+    el.innerHTML = val >= 2 ? `${ICONOS[nom]}<span>${nom} · ${val}</span>`
+      : val === 1 ? `${ICONOS[nom]}<span>1</span>` : '';
+    el.title = `${nom}: ${val} ${val === 1 ? 'julito' : 'julitos'}`;
   }
 }
 
