@@ -423,6 +423,11 @@ const ICONOS = {
   calor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 C12.5 6.5 18.5 9 18.5 14.5 A6.5 6.5 0 0 1 5.5 14.5 C5.5 11 8 9.5 8.5 7 C10 9 10.5 10 10.5 11.5 C12.5 9.5 12.5 6 12 2.5 Z"/><path d="M12 21 A2.6 2.6 0 0 1 9.4 18.4 C9.4 16.5 11.5 15.8 12 13.8 C12.8 15.8 14.6 16.6 14.6 18.4 A2.6 2.6 0 0 1 12 21 Z" class="nucleo"/></svg>',
 };
 
+// Cómo se escriben: E con subíndice para las energías; «Calor» con mayúscula.
+const NOMBRES = { Ep: 'E<sub>p</sub>', Ec: 'E<sub>c</sub>', calor: 'Calor' };
+const NOMBRES_LARGOS = { Ep: 'Energía potencial', Ec: 'Energía cinética', calor: 'Calor' };
+const EC = 'E<sub>c</sub>';
+
 function actualizarEnergia(e) {
   const n = enteros(e);
   const E = NIVEL.energia;
@@ -431,9 +436,9 @@ function actualizarEnergia(e) {
     el.style.width = `${(100 * val) / E}%`;
     if (el.dataset.v === String(val)) continue;     // solo se rehace cuando cambia
     el.dataset.v = val;
-    el.innerHTML = val >= 2 ? `${ICONOS[nom]}<span>${nom} · ${val}</span>`
+    el.innerHTML = val >= 2 ? `${ICONOS[nom]}<span>${NOMBRES[nom]} · ${val}</span>`
       : val === 1 ? `${ICONOS[nom]}<span>1</span>` : '';
-    el.title = `${nom}: ${val} ${val === 1 ? 'julito' : 'julitos'}`;
+    el.title = `${NOMBRES_LARGOS[nom]}: ${val} ${val === 1 ? 'julito' : 'julitos'}`;
   }
 }
 
@@ -483,12 +488,12 @@ function mostrarResultado() {
   const perdidasPiezas = conPerdida.map((p) => MATERIALES[p.material].pierde);
   let msg, ecu;
   if (tipo === 'meta') {
-    msg = `Llega a la meta con 0 julitos de Ec y se queda justo en la bandera. ${estado.fallos === 0 ? '¡A la primera!' : ''}`;
+    msg = `Llega a la meta con 0 julitos de ${EC} y se queda justo en la bandera. ${estado.fallos === 0 ? '¡A la primera!' : ''}`;
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
     ecu = `${E} = ${[hm, ...perdidasPiezas].join(' + ')}`;
   } else if (tipo === 'pasaste') {
-    msg = `Llegó a la meta con ${llegada} ${llegada === 1 ? 'julito' : 'julitos'} de Ec: le sobraba energía, ` +
+    msg = `Llegó a la meta con ${llegada} ${llegada === 1 ? 'julito' : 'julitos'} de ${EC}: le sobraba energía, ` +
       'cruzó la repisa y cayó por el precipicio.';
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
@@ -500,7 +505,7 @@ function mostrarResultado() {
     piezasGrupos();
     ecu = `${E} = ${[E - perdidas, ...perdidasPiezas].join(' + ')}`;
   }
-  $('hoja-msg').textContent = msg;
+  $('hoja-msg').innerHTML = msg;
   $('ecuacion').textContent = ecu;
   const pista = $('pista-ayuda');
   pista.hidden = !(tipo !== 'meta' && estado.fallos >= 2);

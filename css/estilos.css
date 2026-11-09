@@ -233,6 +233,8 @@ button { font: inherit; color: inherit; }
 .barra-e .seg svg .nucleo { fill: currentColor; stroke: none; opacity: 0.55; }
 .barra-e .seg svg circle.nucleo, .grupo small svg circle.nucleo { opacity: 1; }
 .barra-e .seg svg .nieve { stroke-width: 1.6; }
+/* subíndices de Ep y Ec: pequeños y sin descuadrar la altura de la línea */
+sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0.04em; }
 .barra-e .ep { background: var(--ep); color: #fff; }
 .barra-e .ec { background: var(--julito); }
 .barra-e .calor { background: var(--calor); color: #fff; }
