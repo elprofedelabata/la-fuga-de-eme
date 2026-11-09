@@ -129,7 +129,7 @@ export function energias(sim, rec) {
 }
 
 export function avanzar(sim, rec, nivel, dt) {
-  if (sim.t > 25) return;
+  if (sim.t > 120) return;
   if (sim.estado === 'cayendo') {
     const c = sim.caida;
     sim.t += dt;
@@ -154,7 +154,7 @@ export function avanzar(sim, rec, nivel, dt) {
 
     if (ns >= rec.total) {      // cruza la repisa y se sale por el precipicio
       sim.estado = 'cayendo';
-      sim.caida = { x: m.x, h: m.h, vx: v, vh: 0, giro: 0 };
+      sim.caida = { x: m.x, h: m.h, vx: v, vh: 0, giro: 0, t0: sim.t };
       return;
     }
     const i = muestra(rec, (sim.s + Math.max(ns, 0)) / 2).i;
@@ -184,5 +184,5 @@ function detener(sim, nivel, m) {
   }
   sim.dir = -sim.dir;           // en cuesta: se da la vuelta
   sim.vueltas++;
-  if (sim.vueltas > 40) sim.estado = 'parado';
+  if (sim.vueltas > 400) sim.estado = 'parado';
 }

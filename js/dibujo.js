@@ -379,7 +379,7 @@ export function dibujarMiniatura(ctx, lado, celda, pieza) {
  * o.expr: idle | gulp | fast | effort | ice | edge | win | bored
  */
 export function dibujarEme(ctx, cx, cy, B, o = {}) {
-  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1 } = o;
+  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1, giro = 0, susto = false } = o;
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(ang);
@@ -420,13 +420,34 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.textBaseline = 'middle';
   ctx.fillText('m', 0.27 * bw, 0.25 * bh);
 
-  cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1 });
+  cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto });
 
   ctx.strokeStyle = C.lapiz;
   ctx.lineWidth = lw * 1.3;
   ctx.lineJoin = 'round';
   trazar(ctx, cuerpo, true);
   ctx.stroke();
+
+  if (expr === 'mareado') {
+    // estrellitas dando vueltas sobre la cabeza
+    for (let k = 0; k < 3; k++) {
+      const a = giro * 0.8 + (k * 2 * Math.PI) / 3;
+      const sxe = Math.cos(a) * bw * 0.5, sye = y0 - bh * 0.18 + Math.sin(a) * bh * 0.1;
+      const r = B * 0.09;
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const rr = i % 2 ? r * 0.45 : r;
+        const t = -Math.PI / 2 + (i * Math.PI) / 5;
+        ctx.lineTo(sxe + rr * Math.cos(t), sye + rr * Math.sin(t));
+      }
+      ctx.closePath();
+      ctx.fillStyle = C.julito;
+      ctx.fill();
+      ctx.strokeStyle = C.lapiz;
+      ctx.lineWidth = Math.max(0.7, lw * 0.8);
+      ctx.stroke();
+    }
+  }
 
   if (bandera) {
     const base = [0.06 * bw, y0 + 0.03 * bh];
@@ -444,7 +465,7 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.restore();
 }
 
-function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1 }) {
+function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto }) {
   const ey = -0.1 * bh, rx = 0.12 * bw, ry = 0.15 * bh;
   const lx = -0.2 * bw, rxx = 0.2 * bw;
   const mx = 0, my = 0.18 * bh;
@@ -545,7 +566,29 @@ function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1 }) {
     for (const x of [-0.3 * bw, 0.3 * bw]) { ctx.beginPath(); ctx.ellipse(x, my - 0.045 * bh, 0.065 * bw, 0.025 * bh, 0, 0, 6.29); ctx.fill(); }
   };
 
+  const espiral = (x, sentido) => {
+    const a = rx * 1.05, b = ry * 1.05;
+    ctx.fillStyle = C.blanco;
+    ctx.beginPath(); ctx.ellipse(x, ey, a, b, 0, 0, 6.29); ctx.fill();
+    L(); ctx.lineWidth = lw; ctx.stroke();
+    ctx.lineWidth = lw * 1.1;
+    ctx.beginPath();
+    const vueltas = 2.6 * Math.PI;
+    for (let i = 0; i <= 40; i++) {
+      const t = (i / 40) * vueltas;
+      const r = (t / vueltas) * 0.85;
+      const ang = sentido * (t + giro);
+      const xx = x + r * a * Math.cos(ang), yy = ey + r * b * Math.sin(ang);
+      i ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy);
+    }
+    ctx.stroke();
+  };
+
   switch (expr) {
+    case 'mareado':
+      espiral(lx, 1); espiral(rxx, -1); boca('ondas');
+      rubor('rgba(150,200,120,0.45)');   // un poco verde
+      break;
     case 'bored':
       ojo(lx, 1, 0.2, 0.55, 0.45, 0.5); ojo(rxx, 1, 0.2, 0.55, 0.45, 0.5); boca('plana'); break;
     case 'gulp':
@@ -557,7 +600,9 @@ function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1 }) {
       ojo(lx, 1.25, px, py, 0.24); ojo(rxx, 1.25, px, py, 0.24);
       ceja(lx - 0.8 * rx, ey - 1.95 * ry, lx + 0.8 * rx, ey - 2.0 * ry);
       ceja(rxx - 0.8 * rx, ey - 2.0 * ry, rxx + 0.8 * rx, ey - 1.95 * ry);
-      boca('O'); break;
+      boca('O');
+      if (susto) { gota(x0 - 0.06 * bw, y0 + 0.15 * bh, 0.16 * B); gota(x1 + 0.08 * bw, y0 + 0.05 * bh, 0.13 * B); }
+      break;
     case 'effort':
       aprieta(lx, false); aprieta(rxx, true);
       ceja(lx - 0.9 * rx, ey - 1.35 * ry, lx + 0.9 * rx, ey - 0.85 * ry);

@@ -261,7 +261,7 @@ button { font: inherit; color: inherit; }
 #btn-pausa.pausado .i-pausa { display: none; }
 
 /* ---------- panel de resultado ---------- */
-.hoja-fondo { position: fixed; inset: 0; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
+.hoja-fondo { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
 .hoja {
   pointer-events: auto;
   width: 100%; max-width: 460px; background: #fff;

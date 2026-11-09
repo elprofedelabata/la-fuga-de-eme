@@ -498,17 +498,24 @@ function pintarEstrellas(cont, n) {
   cont.setAttribute?.('aria-label', `${n} de 3 estrellas`);
 }
 
+// Vueltas (cambios de sentido) tras las que, si no se ha parado, se da por mareado:
+// dos ciclos completos de ida y vuelta.
+const VUELTAS_MAREO = 4;
+const mareado = (s) => s.estado === 'rodando' && s.vueltas >= VUELTAS_MAREO;
+
 function comprobarResultado(dt) {
   if (estado.modo !== 'directo') return;
   const s = estado.sim;
   const tipo = estado.analisis.tipo;
-  let listo = s.t > 14 || s.estado === 'parado';
+  let listo = s.t > 90 || s.estado === 'parado';
   if (tipo === 'meta') listo ||= s.estado === 'meta';
   if (tipo === 'pasaste') listo ||= s.estado === 'cayendo';
-  if (tipo === 'nollega') listo ||= s.vueltas > 0;
+  if (tipo === 'nollega') listo ||= mareado(s);   // se para solo, o se marea tras dos ciclos
   if (!listo) return;
   estado.espera += dt;
-  const retardo = tipo === 'meta' ? DURACION_FIESTA + 0.6 : 1.1;
+  const retardo = tipo === 'meta' ? DURACION_FIESTA + 0.6
+    : tipo === 'pasaste' ? 1.7
+      : mareado(s) ? 1.4 : 0.9;
   if (estado.espera > retardo) mostrarResultado();
 }
 
@@ -574,6 +581,7 @@ function poseEme(w) {
     if (s.estado === 'cayendo') {
       ({ x, h } = s.caida);
       o.expr = 'fast';
+      o.susto = true;
       o.extraAng = s.caida.giro;
     } else {
       const m = muestra(estado.rec, s.s);
@@ -595,6 +603,7 @@ function poseEme(w) {
         else { o.expr = 'win'; o.bandera = true; o.sy = 1.04; o.sx = 0.96; }
       }
       else if (s.estado === 'parado') o.expr = 'bored';
+      else if (mareado(s)) { o.expr = 'mareado'; o.giro = reloj * 7; }
       else if (dens > 0) o.expr = 'effort';
       else if (ec > 3) { o.expr = 'fast'; o.px = s.dir * 0.6; }
       else if (mat === 'hielo') o.expr = 'ice';
@@ -659,13 +668,33 @@ function pintar() {
   }
   ctx.globalAlpha = 1;
 
-  if (s && s.estado === 'cayendo') {
-    ctx.fillStyle = C.suave;
-    ctx.font = `${Math.round(w * 0.06)}px ${FUENTE}`;
-    ctx.textAlign = 'right';
-    ctx.fillText('¡Aaaah!', w - 8, w * 0.42);
-  }
+  if (s && s.estado === 'cayendo') gritar(w, s, pose);
   return pose;
+}
+
+/** «¡Aaaaah!» que se alarga mientras cae, tiembla, se aleja y se desvanece. */
+function gritar(w, s, pose) {
+  const t = s.t - s.caida.t0;
+  const alfa = Math.max(0, Math.min(1, 1.6 - t));
+  if (alfa <= 0) return;
+  const texto = '¡A' + 'a'.repeat(Math.min(9, 1 + Math.floor(t * 9))) + 'h!';
+  const tam = w * 0.07 * (1 - 0.3 * Math.min(t, 1.4) / 1.4);
+  ctx.save();
+  ctx.globalAlpha = alfa;
+  ctx.font = `${tam}px ${FUENTE}`;
+  ctx.fillStyle = C.lapiz;
+  ctx.textBaseline = 'middle';
+  const ancho = ctx.measureText(texto).width;
+  // sigue a Eme, pero sin salirse del tablero
+  const x1 = Math.min(Math.max(pose.cx + pose.B * 0.2, ancho + 8), w - 8);
+  const y = Math.min(Math.max(pose.cy - pose.B * 1.1, tam), w - tam);
+  let x = x1 - ancho;
+  [...texto].forEach((letra, i) => {
+    const temblor = Math.sin(reloj * 40 + i * 1.7) * tam * 0.08;
+    ctx.fillText(letra, x, y + temblor + i * tam * 0.035);
+    x += ctx.measureText(letra).width;
+  });
+  ctx.restore();
 }
 
 // ---------- bucle ----------
