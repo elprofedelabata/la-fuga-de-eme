@@ -379,7 +379,7 @@ export function dibujarMiniatura(ctx, lado, celda, pieza) {
  * o.expr: idle | gulp | fast | effort | ice | edge | win | bored
  */
 export function dibujarEme(ctx, cx, cy, B, o = {}) {
-  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1, giro = 0, susto = false } = o;
+  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1, giro = 0, susto = false, sinCara = false } = o;
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(ang);
@@ -420,7 +420,7 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.textBaseline = 'middle';
   ctx.fillText('m', 0.27 * bw, 0.25 * bh);
 
-  cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto });
+  if (!sinCara) cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto });   // sinCara: el bloque anónimo de los problemas
 
   ctx.strokeStyle = C.lapiz;
   ctx.lineWidth = lw * 1.3;

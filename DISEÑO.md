@@ -69,6 +69,20 @@ Cubo naranja (`#F2A33A`, sombra `#D9822B`) con trazo de lápiz, ojos grandes y u
 
 Referencias en `arte/`: hoja de personaje, animación *idle*, boceto de interfaz.
 
+## Historia de primer acceso
+
+Al entrar por primera vez se reproduce sola una historia de ~30 s en 7 escenas dibujadas con el estilo del juego (`js/historia.js`):
+
+1. Una página del libro de física: «Un bloque de masa *m* se desliza por un plano inclinado…» (el bloque aún no tiene cara).
+2. Problema tras problema, siempre el mismo plano y «desprecie el rozamiento».
+3. El bloque abre los ojos: «¿Otra vez?».
+4. Salta fuera de la página: decide escaparse del libro.
+5. El plan, en un mapa: cuaderno → libro de texto → pizarra → mundo real (los mundos del juego).
+6. El problema: cada pista le roba energía; los julitos que pierde se van en calor.
+7. La misión: elegir las piezas para que llegue justo a la bandera. Ni más, ni menos. Botón «¡Vamos!».
+
+El texto se escribe solo y cada escena avanza cuando ha dado tiempo a leerla. Tocar adelanta (completa el texto o pasa de escena); «Saltar» (o Esc) la cierra en cualquier momento. Se recuerda en `localStorage` y se puede volver a ver desde el menú.
+
 ## Interfaz (móvil en vertical primero)
 
 De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tablero cuadrado con la regla de alturas · bandeja de piezas deslizable · botones grandes al alcance del pulgar.

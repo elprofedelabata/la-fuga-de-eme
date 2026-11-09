@@ -7,6 +7,7 @@ import {
   vistaTablero, cuadradito, rectCelda,
 } from './dibujo.js';
 import { Fantasma } from './arrastre.js';
+import { mostrarHistoria, historiaVista } from './historia.js';
 
 const $ = (id) => document.getElementById(id);
 const app = $('app');
@@ -848,13 +849,17 @@ function iniciar() {
   $('btn-normal').addEventListener('click', () => ponerVelocidad(1));
   $('btn-parar').addEventListener('click', volverAMontar);
   $('btn-reintentar').addEventListener('click', volverAMontar);
-  $('btn-menu').addEventListener('click', () => $('acerca').showModal());
+  $('btn-menu').addEventListener('click', () => { $('acerca').returnValue = ''; $('acerca').showModal(); });
+  $('acerca').addEventListener('close', () => {
+    if ($('acerca').returnValue === 'historia') mostrarHistoria();
+  });
 
   ajustar();
   crearBandeja();
   refrescar();
   new ResizeObserver(() => ajustar()).observe($('tablero'));
   requestAnimationFrame(fotograma);
+  if (!historiaVista()) mostrarHistoria();   // primer acceso: la historia de Eme
 }
 
 // Espera a la fuente manuscrita (sin bloquear si no llega)

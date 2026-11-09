@@ -20,6 +20,7 @@
   <link rel="modulepreload" href="js/pista.js">
   <link rel="modulepreload" href="js/dibujo.js">
   <link rel="modulepreload" href="js/arrastre.js">
+  <link rel="modulepreload" href="js/historia.js">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -121,7 +122,24 @@
     <p>Eme es <i>el</i> bloque de los problemas de física: «un bloque de masa <i>m</i> desliza por un plano inclinado…». Está harto, y quiere escapar del libro.</p>
     <p>Coloca las piezas que faltan para que llegue a la bandera con la energía justa. Cada cuadrito de altura es un <b>julito</b> de energía potencial; cada material se come unos cuantos en forma de calor.</p>
     <p class="nota">Boceto v0.1 · solo el nivel 1. Un juego de <a href="https://elprofedelabata.es/" target="_blank" rel="noopener">El profe de la bata</a>.</p>
-    <form method="dialog"><button class="btn principal">¡Vamos!</button></form>
+    <form method="dialog" class="acerca-botones">
+      <button class="btn" id="btn-ver-historia" value="historia">Ver la historia</button>
+      <button class="btn principal">¡Vamos!</button>
+    </form>
   </dialog>
+
+  <!-- Historia de primer acceso: quién es Eme y cuál es su plan -->
+  <div class="historia" id="historia" role="dialog" aria-modal="true" aria-label="La historia de Eme" hidden>
+    <button class="btn saltar" id="historia-saltar">Saltar
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg>
+    </button>
+    <canvas id="historia-lienzo" aria-hidden="true"></canvas>
+    <p class="historia-texto" id="historia-texto" aria-live="polite"></p>
+    <div class="historia-pie">
+      <div class="historia-puntos" id="historia-puntos" aria-hidden="true"></div>
+      <button class="btn principal grande" id="historia-vamos" hidden>¡Vamos!</button>
+      <p class="historia-ayuda">Toca para avanzar</p>
+    </div>
+  </div>
 </body>
 </html>

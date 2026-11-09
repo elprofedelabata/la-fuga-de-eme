@@ -318,6 +318,46 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .acerca a { color: var(--naranja-o); }
 .acerca form { text-align: right; }
 
+.acerca-botones { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.acerca-botones .btn { min-height: 46px; font-size: 18px; }
+
+/* ---------- historia de primer acceso ---------- */
+.historia {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background-color: var(--papel);
+  background-image:
+    linear-gradient(var(--cuadri) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: aparece 0.35s ease-out;
+}
+.historia.saliendo { animation: desaparece 0.35s ease-in forwards; }
+@keyframes aparece { from { opacity: 0; } }
+@keyframes desaparece { to { opacity: 0; } }
+.historia canvas {
+  width: min(92vw, 520px, calc((100dvh - 250px) * 4 / 3)); aspect-ratio: 4 / 3;
+  background: var(--tarjeta); border: 2.5px solid var(--lapiz);
+  border-radius: 8px 6px 9px 5px / 6px 9px 5px 8px; box-shadow: 4px 5px 0 rgba(80, 70, 60, 0.12);
+}
+.historia-texto {
+  margin: 0; max-width: 520px; min-height: 2.6em;
+  font-size: clamp(18px, 4.6vw, 23px); line-height: 1.25; text-align: center;
+}
+.historia-pie { display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 92px; }
+.historia-pie .btn.grande { min-width: 220px; }
+.historia-puntos { display: flex; gap: 7px; }
+.historia-puntos i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--lapiz); background: transparent; transition: background-color 0.2s; }
+.historia-puntos i.activo { background: var(--naranja); }
+.historia-ayuda { margin: 0; font-size: 14px; color: var(--suave); }
+.historia-pie .btn:not([hidden]) ~ .historia-ayuda { display: none; }
+.btn.saltar {
+  position: absolute; top: max(12px, env(safe-area-inset-top)); right: 14px;
+  min-height: 42px; padding: 4px 14px; font-size: 18px; gap: 4px;
+}
+.btn.saltar svg { width: 18px; height: 18px; }
+
 @media (prefers-reduced-motion: reduce) {
   .hoja { animation: none; }
   .pieza, .btn { transition: none; }
