@@ -13,6 +13,7 @@ const app = $('app');
 const lienzo = $('lienzo');
 const ctx = lienzo.getContext('2d');
 const marcador = $('regla-eme');
+const CUADRITOS = 9;   // cuadritos de alto del tablero (el tablero aún está hecho para 9)
 
 const estado = {
   modo: 'montaje',            // montaje | directo | resultado
@@ -642,7 +643,7 @@ function pintar() {
   if (estado.modo === 'montaje') dibujarResaltes(ctx, w, estadosHuecos(), reloj);
 
   const pose = poseEme(w);
-  marcador.style.setProperty('--h', Math.max(-0.4, Math.min(9.4, pose.h)).toFixed(3));
+  marcador.style.setProperty('--h', Math.max(-0.4, Math.min(CUADRITOS + 0.4, pose.h)).toFixed(3));
   if (!pose.o.bandera) dibujarBandera(ctx, w, NIVEL);
 
   // líneas de velocidad
@@ -736,12 +737,16 @@ function iniciar() {
   $('bocadillo').textContent = NIVEL.frase;
   $('bocadillo').addEventListener('click', ocultarBocadillo);
   crearFichas();
-  for (let h = 0; h <= 9; h++) {
+  // Regla de alturas: un número por cuadrito, todos iguales
+  const regla = $('regla');
+  regla.style.setProperty('--n', CUADRITOS);
+  regla.setAttribute('aria-label', `Regla de alturas en julitos, de 0 a ${CUADRITOS}`);
+  for (let h = 0; h <= CUADRITOS; h++) {
     const n = document.createElement('span');
-    n.className = `regla-n${h % 3 === 0 ? ' mayor' : ''}`;
+    n.className = 'regla-n';
     n.style.setProperty('--h', h);
     n.textContent = h;
-    $('regla').append(n);
+    regla.append(n);
   }
   actualizarEnergia({ ep: NIVEL.energia, ec: 0, calor: 0 });
   for (const b of document.querySelectorAll('.hueco')) {
