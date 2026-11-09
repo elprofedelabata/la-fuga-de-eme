@@ -73,7 +73,9 @@ Referencias en `arte/`: hoja de personaje, animación *idle*, boceto de interfaz
 
 De arriba abajo: barra superior (nivel, estrellas) · barra de julitos · tablero cuadrado a todo el ancho · bandeja de piezas deslizable · botones grandes al alcance del pulgar.
 
-- **Tocar y tocar:** tocas una pieza (se levanta, los huecos donde encaja laten y los demás se apagan) y luego el hueco. También al revés: tocas un hueco y la bandeja filtra las piezas que encajan. Tocar una pieza colocada la devuelve a la bandeja.
+- **Arrastrar:** la pieza sale de la bandeja (queda su silueta discontinua) y flota con sombra, con inercia y una ligera inclinación según la velocidad; en móvil va por encima del dedo. Cerca de un hueco compatible se **engancha** (imán, borde naranja); los huecos que no la admiten se apagan. Al soltar encaja con rebote, polvo y una vibración corta; si se suelta fuera, vuelve volando a su sitio. Las piezas del tablero también se pueden sacar arrastrando. Eme sigue la pieza con la mirada.
+- En la bandeja táctil, deslizar en horizontal la desplaza; tirar de una pieza hacia arriba la arrastra.
+- **Tocar y tocar** (también animado: la pieza vuela al hueco): tocas una pieza y luego el hueco, o al revés (el hueco filtra la bandeja). Tocar una pieza colocada, o su silueta, la devuelve. Soltar sobre un hueco ocupado devuelve la anterior.
 - **Lanzamiento:** la bandeja se cambia por la energía en directo; cámara lenta ×0,5, pausa y parar.
 - **Resultado:** panel inferior con estrellas, balance agrupado (8 = 4 + 3 + 1) y la frase de Eme.
 - Rejilla 3 × 3 en gris claro sobre el terreno; cuadritos de altura en azul muy suave.
@@ -81,6 +83,5 @@ De arriba abajo: barra superior (nivel, estrellas) · barra de julitos · tabler
 ## Pendiente
 
 - Más niveles del Mundo I (más huecos y piezas, muelles que *dan* julitos).
-- Arrastrar piezas, además de tocar.
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, imagen para compartir, dominio propio.

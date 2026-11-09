@@ -156,7 +156,33 @@ button { font: inherit; color: inherit; }
   box-shadow: 0 0 0 4px rgba(242, 163, 58, 0.35), 3px 10px 0 rgba(80, 70, 60, 0.15);
 }
 .pieza.no-encaja { opacity: 0.35; }
-.pieza.colocada { display: none; }
+/* silueta que queda en la bandeja cuando la pieza está fuera (en la mano o en el tablero) */
+.pieza.fuera {
+  background: transparent; border-style: dashed; border-color: #b4ada5; box-shadow: none; transform: none;
+}
+.pieza.fuera > * { opacity: 0.18; }
+
+/* pieza flotante que se arrastra o vuela */
+.fantasma {
+  position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none;
+  transform-origin: center; will-change: transform; --alto: 0;
+}
+.fantasma canvas {
+  display: block; width: 100%; height: 100%;
+  background: var(--tarjeta); border: 2px solid var(--lapiz); border-radius: 6px;
+  box-shadow: calc(var(--alto) * 0.35px) calc(var(--alto) * 1px) calc(var(--alto) * 1.1px) rgba(60, 50, 40, 0.3);
+}
+
+.fantasma.enganchada canvas {
+  border-color: var(--naranja-o); border-width: 3px;
+  box-shadow: 0 0 0 4px rgba(242, 163, 58, 0.45), calc(var(--alto) * 0.35px) calc(var(--alto) * 1px) calc(var(--alto) * 1.1px) rgba(60, 50, 40, 0.3);
+}
+
+/* gestos: la bandeja se desliza en horizontal; tirar hacia arriba de una pieza la arrastra */
+.app { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.piezas, .pieza { touch-action: pan-x; }
+.hueco { touch-action: none; }
+.pieza canvas, .tablero canvas { -webkit-user-drag: none; }
 
 /* ---------- energía en directo ---------- */
 .directo {

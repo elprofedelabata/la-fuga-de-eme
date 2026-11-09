@@ -4,8 +4,9 @@ import { NIVEL, MATERIALES } from './nivel.js';
 import { prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX } from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
-  vistaTablero, cuadradito,
+  vistaTablero, cuadradito, rectCelda,
 } from './dibujo.js';
+import { Fantasma } from './arrastre.js';
 
 const $ = (id) => document.getElementById(id);
 const app = $('app');
@@ -25,6 +26,8 @@ const estado = {
   pausado: false,
   sim: null, rec: null, analisis: null,
   espera: 0, calorVisto: 0, metaVista: false,
+  fuera: new Set(),           // piezas que no están en la bandeja (en la mano, volando o colocadas)
+  arrastre: null, iman: null, vuelos: 0, mirada: null,
 };
 
 const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
@@ -56,6 +59,17 @@ function rehacerTablero() {
 }
 
 // ---------- bandeja ----------
+const celdaDeForma = (forma) => Number(Object.keys(NIVEL.huecos).find((k) => NIVEL.huecos[k] === forma));
+const tarjeta = (id) => document.querySelector(`.pieza[data-id="${id}"]`);
+const botonHueco = (c) => document.querySelector(`.hueco[data-celda="${c}"]`);
+const rectHueco = (c) => botonHueco(c).getBoundingClientRect();
+const rectMini = (id) => tarjeta(id).querySelector('canvas').getBoundingClientRect();
+const centro = (r) => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+const celdaDePieza = (id) => Number(Object.keys(estado.colocadas).find((c) => estado.colocadas[c]?.id === id));
+// Vibración corta en móviles que la admiten (solo tras un gesto real, si no Chrome la bloquea)
+const vibrar = (ms) => { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(ms); };
+let suprimirClick = false;
+
 function crearBandeja() {
   const cont = $('piezas');
   cont.innerHTML = '';
@@ -70,23 +84,22 @@ function crearBandeja() {
     cv.width = cv.height = lado * dpr;
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);
-    const celda = Number(Object.keys(NIVEL.huecos).find((k) => NIVEL.huecos[k] === p.forma));
-    dibujarMiniatura(c, lado, celda, p);
+    dibujarMiniatura(c, lado, celdaDeForma(p.forma), p);
     b.append(cv);
     b.insertAdjacentHTML('beforeend',
       `<span class="n1">${p.nombre[0]}</span><span class="n2">${p.nombre[1]}</span>` +
       `<span class="pegatina${pierde ? '' : ' cero'}">−${pierde}</span>`);
-    b.addEventListener('click', () => tocarPieza(p.id));
+    b.addEventListener('pointerdown', (e) => posibleArrastre(e, { pieza: p, desde: 'bandeja' }));
+    b.addEventListener('click', () => { if (!suprimirClick) tocarPieza(p.id); });
     cont.append(b);
   }
 }
 
 function refrescar() {
-  const colocadasIds = new Set(Object.values(estado.colocadas).filter(Boolean).map((p) => p.id));
   const formaFiltro = estado.huecoElegido ? NIVEL.huecos[estado.huecoElegido] : null;
   for (const b of document.querySelectorAll('.pieza')) {
     const p = pieza(b.dataset.id);
-    b.classList.toggle('colocada', colocadasIds.has(p.id));
+    b.classList.toggle('fuera', estado.fuera.has(p.id));
     b.classList.toggle('seleccionada', estado.seleccion === p.id);
     b.classList.toggle('no-encaja', !!formaFiltro && p.forma !== formaFiltro);
   }
@@ -95,7 +108,10 @@ function refrescar() {
 
   const ayuda = $('ayuda');
   ayuda.className = 'ayuda';
-  if (estado.seleccion) {
+  if (estado.arrastre) {
+    ayuda.innerHTML = `<b>${estado.arrastre.pieza.nombre.join(' ')}</b> · suéltala en su hueco`;
+    ayuda.classList.add('destaca');
+  } else if (estado.seleccion) {
     const p = pieza(estado.seleccion);
     ayuda.innerHTML = `<b>${p.nombre.join(' ')}</b> · ahora toca su hueco`;
     ayuda.classList.add('destaca');
@@ -103,26 +119,28 @@ function refrescar() {
     ayuda.innerHTML = `<b>Hueco de ${NIVEL.huecos[estado.huecoElegido]}</b> · elige una pieza`;
     ayuda.classList.add('destaca');
   } else if (completo) {
-    ayuda.innerHTML = '<b>¡Listo!</b> · pulsa LANZAR (toca una pieza del tablero para quitarla)';
+    ayuda.innerHTML = '<b>¡Listo!</b> · pulsa LANZAR (o saca una pieza del tablero)';
   } else {
-    ayuda.innerHTML = '<b>Piezas</b> · toca una y luego su hueco';
+    ayuda.innerHTML = '<b>Piezas</b> · arrástralas a su hueco o tócalas';
   }
   rehacerTablero();
 }
 
 function ocultarBocadillo() { $('bocadillo').classList.add('oculto'); }
 
+const ocupado = () => estado.modo !== 'montaje' || estado.arrastre || estado.vuelos > 0;
+
 function tocarPieza(id) {
-  if (estado.modo !== 'montaje') return;
+  if (ocupado()) return;
   ocultarBocadillo();
   const p = pieza(id);
+  if (estado.fuera.has(id)) {          // la silueta de una pieza colocada: devolverla
+    const c = celdaDePieza(id);
+    if (c) quitar(c);
+    return;
+  }
   if (estado.huecoElegido) {
-    if (NIVEL.huecos[estado.huecoElegido] === p.forma) {
-      estado.colocadas[estado.huecoElegido] = p;
-      estado.huecoElegido = null;
-      estado.seleccion = null;
-    }
-    refrescar();
+    if (NIVEL.huecos[estado.huecoElegido] === p.forma) colocar(estado.huecoElegido, p);
     return;
   }
   estado.seleccion = estado.seleccion === id ? null : id;
@@ -130,42 +148,225 @@ function tocarPieza(id) {
 }
 
 function tocarHueco(celda) {
-  if (estado.modo !== 'montaje') return;
+  if (ocupado()) return;
   ocultarBocadillo();
   const forma = NIVEL.huecos[celda];
   if (estado.seleccion) {
     const p = pieza(estado.seleccion);
     if (p.forma === forma) {
-      estado.colocadas[celda] = p;    // si había otra, vuelve a la bandeja sola
-      estado.seleccion = null;
+      colocar(celda, p);
     } else {
       const a = $('ayuda');
       a.innerHTML = `<b>No encaja</b> · ese hueco es de ${forma}`;
       a.className = 'ayuda error';
-      return;
     }
-  } else if (estado.colocadas[celda]) {
-    estado.colocadas[celda] = null;  // quitar
-  } else {
-    estado.huecoElegido = estado.huecoElegido === celda ? null : celda;
+    return;
   }
+  if (estado.colocadas[celda]) {
+    quitar(celda);
+    return;
+  }
+  estado.huecoElegido = estado.huecoElegido === celda ? null : celda;
   refrescar();
+}
+
+// ---------- vuelos animados entre bandeja y tablero ----------
+const nuevoFantasma = (p, rect) => new Fantasma(p, celdaDeForma(p.forma), rectHueco(celdaDeForma(p.forma)).width, rect);
+
+/** Lleva la pieza a un hueco (volando desde la bandeja o desde donde esté el fantasma). */
+async function colocar(celda, p, f = null) {
+  estado.vuelos++;
+  estado.fuera.add(p.id);
+  estado.seleccion = null;
+  estado.huecoElegido = null;
+  f ??= nuevoFantasma(p, rectMini(p.id));
+  refrescar();
+  f.decaerGiro = true;
+  f.arco = true;
+  f.ir(() => ({ ...centro(rectHueco(celda)), s: 1, r: 0, alto: 0 }), 18);
+  await f.llegar();
+
+  const previa = estado.colocadas[celda];
+  if (previa && previa.id !== p.id) devolver(previa, nuevoFantasma(previa, rectHueco(celda)));
+  estado.colocadas[celda] = p;
+  refrescar();
+  polvo(celda);
+  vibrar(12);
+  await f.rebote();
+  f.quitar();
+  estado.vuelos--;
+  refrescar();
+}
+
+/** Devuelve la pieza a su sitio en la bandeja. */
+async function devolver(p, f) {
+  estado.vuelos++;
+  const t = tarjeta(p.id);
+  t.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  f.decaerGiro = true;
+  f.arco = true;
+  f.ir(() => {
+    const r = rectMini(p.id);
+    return { ...centro(r), s: r.width / f.lado, r: 0, alto: 0 };
+  }, 15);
+  await f.llegar();
+  estado.fuera.delete(p.id);
+  refrescar();
+  t.animate([{ transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: 220, easing: 'ease-out' });
+  f.quitar(false);
+  estado.vuelos--;
+  refrescar();
+}
+
+function quitar(celda) {
+  const p = estado.colocadas[celda];
+  if (!p) return;
+  const f = nuevoFantasma(p, rectHueco(celda));
+  estado.colocadas[celda] = null;
+  refrescar();
+  devolver(p, f);
+}
+
+function vaciar() {
+  if (ocupado()) return;
+  estado.seleccion = null;
+  estado.huecoElegido = null;
+  Object.keys(estado.colocadas)
+    .filter((c) => estado.colocadas[c])
+    .forEach((c, i) => setTimeout(() => quitar(Number(c)), i * 110));
+  refrescar();
+}
+
+// ---------- arrastrar ----------
+function posibleArrastre(e, info) {
+  if (ocupado() || e.button > 0) return;
+  if (info.desde === 'bandeja' && estado.fuera.has(info.pieza.id)) return;
+  const x0 = e.clientX, y0 = e.clientY, id = e.pointerId, tactil = e.pointerType === 'touch';
+  const mover = (ev) => {
+    if (ev.pointerId !== id) return;
+    const dx = ev.clientX - x0, dy = ev.clientY - y0;
+    // En la bandeja táctil, el gesto horizontal es para deslizarla: solo arrastra un tirón vertical
+    const arranca = info.desde === 'bandeja' && tactil
+      ? Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)
+      : Math.hypot(dx, dy) > 6;
+    if (arranca) {
+      limpiar();
+      iniciarArrastre(ev, info, tactil);
+    }
+  };
+  const limpiar = () => {
+    removeEventListener('pointermove', mover);
+    removeEventListener('pointerup', limpiar);
+    removeEventListener('pointercancel', limpiar);
+  };
+  addEventListener('pointermove', mover);
+  addEventListener('pointerup', limpiar);
+  addEventListener('pointercancel', limpiar);
+}
+
+function iniciarArrastre(ev, info, tactil) {
+  ocultarBocadillo();
+  suprimirClick = true;
+  const p = info.pieza;
+  let f;
+  if (info.desde === 'bandeja') {
+    f = nuevoFantasma(p, rectMini(p.id));
+    estado.fuera.add(p.id);
+  } else {
+    f = nuevoFantasma(p, rectHueco(info.desde));
+    estado.colocadas[info.desde] = null;
+  }
+  f.decaerGiro = true;
+  estado.seleccion = null;
+  estado.huecoElegido = null;
+  estado.arrastre = { pieza: p, f, tactil, id: ev.pointerId, vx: 0, lx: ev.clientX, lt: performance.now() };
+  refrescar();
+  vibrar(8);
+  seguir(ev);
+  addEventListener('pointermove', seguir);
+  addEventListener('pointerup', soltar);
+  addEventListener('pointercancel', soltar);
+}
+
+function seguir(ev) {
+  const a = estado.arrastre;
+  if (!a || ev.pointerId !== a.id) return;
+  ev.preventDefault?.();
+  const ahora = performance.now();
+  const dt = Math.max(8, ahora - a.lt);
+  a.vx = 0.6 * a.vx + 0.4 * (((ev.clientX - a.lx) / dt) * 1000);
+  a.lx = ev.clientX;
+  a.lt = ahora;
+
+  // imán: si el dedo está cerca de un hueco compatible, la pieza se engancha a él
+  let iman = null;
+  for (const [cs, forma] of Object.entries(NIVEL.huecos)) {
+    if (forma !== a.pieza.forma) continue;
+    const r = rectHueco(cs);
+    const m = r.width * 0.3;
+    if (ev.clientX > r.left - m && ev.clientX < r.right + m && ev.clientY > r.top - m && ev.clientY < r.bottom + m) {
+      iman = Number(cs);
+    }
+  }
+  if (iman !== estado.iman && iman) vibrar(5);
+  estado.iman = iman;
+  a.f.enganchar(!!iman);
+  if (iman) {
+    a.f.ir({ ...centro(rectHueco(iman)), s: 1.04, r: 0, alto: 8 }, 24);
+  } else {
+    const s = 0.84;
+    const encima = a.tactil ? (a.f.lado * s) / 2 + 14 : 0;   // en móvil, por encima del dedo
+    a.f.ir({ x: ev.clientX, y: ev.clientY - encima, s, r: Math.max(-14, Math.min(14, a.vx * 0.012)), alto: 18 }, 28);
+  }
+  estado.mirada = { x: ev.clientX, y: ev.clientY };
+}
+
+function soltar(ev) {
+  const a = estado.arrastre;
+  if (!a || ev.pointerId !== a.id) return;
+  removeEventListener('pointermove', seguir);
+  removeEventListener('pointerup', soltar);
+  removeEventListener('pointercancel', soltar);
+  const iman = ev.type === 'pointerup' ? estado.iman : null;
+  estado.arrastre = null;
+  estado.iman = null;
+  estado.mirada = null;
+  a.f.enganchar(false);
+  refrescar();
+  if (iman) colocar(iman, a.pieza, a.f);
+  else devolver(a.pieza, a.f);
+  setTimeout(() => { suprimirClick = false; }, 0);
 }
 
 function estadosHuecos() {
   const out = {};
-  for (const [cs, forma] of Object.entries(NIVEL.huecos)) {
+  const forma = estado.arrastre?.pieza.forma ?? (estado.seleccion ? pieza(estado.seleccion).forma : null);
+  for (const [cs, f] of Object.entries(NIVEL.huecos)) {
     const c = Number(cs);
     if (estado.aviso > 0 && !estado.colocadas[c]) out[c] = 'aviso';
-    else if (estado.seleccion) out[c] = pieza(estado.seleccion).forma === forma ? 'activo' : 'apagado';
+    else if (forma) out[c] = f !== forma ? 'apagado' : estado.iman === c ? 'iman' : 'activo';
     else if (estado.huecoElegido) out[c] = estado.huecoElegido === c ? 'activo' : null;
   }
   return out;
 }
 
+/** Nubecilla de polvo al encajar una pieza. */
+function polvo(celda) {
+  const [x, y, L] = rectCelda(W(), celda);
+  for (let i = 0; i < 12; i++) {
+    const lado = i % 4;
+    const u = Math.random();
+    const px = lado === 0 ? x + u * L : lado === 1 ? x + L : lado === 2 ? x + u * L : x;
+    const py = lado === 0 ? y : lado === 1 ? y + u * L : lado === 2 ? y + L : y + u * L;
+    const ang = Math.atan2(py - (y + L / 2), px - (x + L / 2));
+    const v = 40 + Math.random() * 50;
+    particula(px, py, '#E8DFCB', { vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, vida: 0.55, lado: 7 + Math.random() * 7, forma: 'polvo' });
+  }
+}
+
 // ---------- lanzamiento ----------
 function lanzar() {
-  if (estado.modo !== 'montaje') return;
+  if (ocupado()) return;
   ocultarBocadillo();
   const faltan = Object.keys(NIVEL.huecos).filter((c) => !estado.colocadas[c]);
   if (faltan.length) {
@@ -345,8 +546,8 @@ function comprobarResultado(dt) {
 }
 
 // ---------- partículas ----------
-function particula(x, y, color, { vx = 0, vy = -30, vida = 1.2, lado = 8 } = {}) {
-  particulas.push({ x, y, vx, vy, vida, t: 0, color, lado, ang: Math.random() * 1.2 - 0.6, va: (Math.random() - 0.5) * 6 });
+function particula(x, y, color, { vx = 0, vy = -30, vida = 1.2, lado = 8, forma = 'cuadro' } = {}) {
+  particulas.push({ x, y, vx, vy, vida, t: 0, color, lado, forma, ang: Math.random() * 1.2 - 0.6, va: (Math.random() - 0.5) * 6 });
 }
 
 function moverParticulas(dt) {
@@ -355,7 +556,14 @@ function moverParticulas(dt) {
     p.t += dt;
     p.x += p.vx * dt;
     p.y += p.vy * dt;
-    p.vy += (p.color === C.julito ? 90 : -10) * dt;
+    if (p.forma === 'polvo') {          // el polvo frena enseguida y se hincha
+      const f = Math.exp(-5 * dt);
+      p.vx *= f;
+      p.vy *= f;
+      p.lado *= 1 + 0.9 * dt;
+    } else {
+      p.vy += (p.color === C.julito ? 90 : -10) * dt;
+    }
     p.ang += p.va * dt;
     if (p.t > p.vida) particulas.splice(i, 1);
   }
@@ -373,8 +581,20 @@ function poseEme(w) {
     const m = muestra(rec, sDeX(rec, NIVEL.salidaX));
     ({ x, h, tx, th } = m);
     const completo = Object.keys(NIVEL.huecos).every((c) => estado.colocadas[c]);
-    if (completo) o.expr = 'gulp';
-    else {
+    if (estado.mirada) {
+      // Eme sigue con la mirada la pieza que arrastras
+      const r = lienzo.getBoundingClientRect();
+      const [ex, ey] = v.px(x, h + 0.6);
+      const dx = estado.mirada.x - r.left - ex, dy = estado.mirada.y - r.top - ey;
+      const d = Math.hypot(dx, dy) || 1;
+      o.px = (dx / d) * 0.95;
+      o.py = (dy / d) * 0.95;
+      o.lid = 0;
+    } else if (completo) o.expr = 'gulp';
+    else if (estado.seleccion) {
+      o.px = 0.2;
+      o.py = 0.95;      // mira hacia la bandeja
+    } else {
       const ciclo = reloj % 4.2;
       o.lid = ciclo > 3.9 && ciclo < 4.05 ? 1 : 0.12;
       o.px = Math.sin(reloj * 0.7) > 0.85 ? 0.8 : 0.3;
@@ -446,7 +666,17 @@ function pintar() {
 
   for (const p of particulas) {
     ctx.globalAlpha = Math.max(0, 1 - p.t / p.vida);
-    cuadradito(ctx, p.x, p.y, p.lado, p.color, p.ang);
+    if (p.forma === 'polvo') {
+      ctx.fillStyle = p.color;
+      ctx.strokeStyle = 'rgba(110,104,98,0.6)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.lado / 2, 0, 6.29);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      cuadradito(ctx, p.x, p.y, p.lado, p.color, p.ang);
+    }
   }
   ctx.globalAlpha = 1;
 
@@ -505,15 +735,16 @@ function iniciar() {
   $('bocadillo').addEventListener('click', ocultarBocadillo);
   crearFichas();
   actualizarEnergia({ ep: NIVEL.energia, ec: 0, calor: 0 });
-  for (const b of document.querySelectorAll('.hueco')) b.addEventListener('click', () => tocarHueco(Number(b.dataset.celda)));
+  for (const b of document.querySelectorAll('.hueco')) {
+    const celda = Number(b.dataset.celda);
+    b.addEventListener('click', () => { if (!suprimirClick) tocarHueco(celda); });
+    b.addEventListener('pointerdown', (e) => {
+      const p = estado.colocadas[celda];
+      if (p) posibleArrastre(e, { pieza: p, desde: celda });
+    });
+  }
   $('btn-lanzar').addEventListener('click', lanzar);
-  $('btn-vaciar').addEventListener('click', () => {
-    if (estado.modo !== 'montaje') return;
-    estado.colocadas = { 4: null, 8: null };
-    estado.seleccion = null;
-    estado.huecoElegido = null;
-    refrescar();
-  });
+  $('btn-vaciar').addEventListener('click', vaciar);
   $('btn-pausa').addEventListener('click', () => {
     estado.pausado = !estado.pausado;
     $('btn-pausa').classList.toggle('pausado', estado.pausado);

@@ -314,7 +314,14 @@ export function dibujarResaltes(ctx, W, estados, t) {
     const [x, y, L] = rectCelda(W, Number(cs));
     const m = L * 0.06;
     ctx.save();
-    if (est === 'activo' || est === 'aviso') {
+    if (est === 'iman') {   // la pieza está enganchada a este hueco: resalte fijo e intenso
+      ctx.fillStyle = 'rgba(242,163,58,0.32)';
+      trazar(ctx, rrectPts(x + m * 0.3, y + m * 0.3, x + L - m * 0.3, y + L - m * 0.3, L * 0.1), true);
+      ctx.fill();
+      ctx.strokeStyle = C.naranjaO;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    } else if (est === 'activo' || est === 'aviso') {
       const pulso = 0.5 + 0.5 * Math.sin(t * 6);
       const col = est === 'aviso' ? '229,83,61' : '242,163,58';
       ctx.fillStyle = `rgba(${col},${0.12 + 0.14 * pulso})`;
