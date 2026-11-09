@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>La fuga de Eme · boceto</title>
+  <meta name="description" content="Eme, el bloque de masa m de los problemas de física, quiere escapar del libro. Coloca las piezas para que llegue justo a la bandera: ni más, ni menos.">
+  <meta name="theme-color" content="#fbf8ef">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:site_name" content="La fuga de Eme">
+  <meta property="og:title" content="La fuga de Eme">
+  <meta property="og:description" content="Desprecie el rozamiento. Si puede.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="modulepreload" href="js/nivel.js">
+  <link rel="modulepreload" href="js/pista.js">
+  <link rel="modulepreload" href="js/dibujo.js">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <main class="app" id="app" data-modo="montaje">
+    <header class="barra-sup">
+      <button class="icono" id="btn-menu" aria-label="Acerca de La fuga de Eme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h18M3 12.2h17M3.5 18h17.5"/></svg>
+      </button>
+      <h1><span class="marca">La fuga de Eme</span><span id="titulo-nivel">Nivel 1 · Ni más, ni menos</span></h1>
+      <div class="estrellas" id="estrellas" role="img" aria-label="0 de 3 estrellas">
+        <span></span><span></span><span></span>
+      </div>
+    </header>
+
+    <section class="julitos" aria-label="Energía de Eme en julitos">
+      <div class="fichas" id="fichas" aria-hidden="true"></div>
+      <ul class="leyenda">
+        <li><i class="ficha ep"></i>Ep <b id="n-ep">8</b></li>
+        <li><i class="ficha ec"></i>Ec <b id="n-ec">0</b></li>
+        <li><i class="ficha calor"></i>calor <b id="n-calor">0</b></li>
+      </ul>
+    </section>
+
+    <div class="tablero-zona">
+      <div class="tablero" id="tablero">
+        <canvas id="lienzo" role="img" aria-label="Tablero de 3 por 3 casillas con el recorrido de Eme"></canvas>
+        <button class="hueco" data-celda="4" aria-label="Hueco de rampa, casilla 4"></button>
+        <button class="hueco" data-celda="8" aria-label="Hueco de suelo, casilla 8"></button>
+        <p class="bocadillo" id="bocadillo"></p>
+      </div>
+    </div>
+
+    <section class="bandeja" id="bandeja" aria-label="Piezas disponibles">
+      <p class="ayuda" id="ayuda"><b>Piezas</b> · toca una y luego su hueco</p>
+      <div class="piezas" id="piezas"></div>
+    </section>
+
+    <section class="directo" id="directo" aria-label="Energía en directo" hidden>
+      <div class="directo-cab"><b>Energía en directo</b><span>piezas bloqueadas</span></div>
+      <div class="barra-e" id="barra-e">
+        <span class="seg ep"></span><span class="seg ec"></span><span class="seg calor"></span>
+      </div>
+      <p class="directo-pie" id="directo-pie">Total: 8 julitos. Siempre.</p>
+    </section>
+
+    <footer class="acciones" id="acciones-montaje">
+      <button class="btn redondo" id="btn-vaciar" aria-label="Quitar todas las piezas">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 9.5A7.5 7.5 0 1 1 5 14"/><path d="M4 4.5v5.5h5.5"/></svg>
+      </button>
+      <button class="btn principal grande" id="btn-lanzar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>LANZAR
+      </button>
+    </footer>
+    <footer class="acciones controles" id="acciones-directo" hidden>
+      <button class="btn" id="btn-pausa" aria-label="Pausa">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-pausa" d="M8 5v14M16 5v14"/><path class="i-play" d="M7 4.5v15l12-7.5z"/></svg>
+        <small>pausa</small>
+      </button>
+      <button class="btn" id="btn-lento" aria-pressed="false">×0,5<small>cámara lenta</small></button>
+      <button class="btn" id="btn-normal" aria-pressed="true">×1<small>normal</small></button>
+      <button class="btn" id="btn-parar" aria-label="Parar y volver a montar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+        <small>parar</small>
+      </button>
+    </footer>
+  </main>
+
+  <div class="hoja-fondo" id="hoja" hidden>
+    <section class="hoja" role="dialog" aria-modal="false" aria-labelledby="hoja-titulo">
+      <span class="asa" aria-hidden="true"></span>
+      <div class="hoja-cab">
+        <h2 id="hoja-titulo"></h2>
+        <div class="estrellas grandes" id="hoja-estrellas"><span></span><span></span><span></span></div>
+      </div>
+      <p class="hoja-msg" id="hoja-msg"></p>
+      <p class="hoja-sub">Balance de energía</p>
+      <div class="balance" id="balance"></div>
+      <p class="ecuacion"><b id="ecuacion"></b><span id="cita"></span></p>
+      <p class="pista-ayuda" id="pista-ayuda" hidden></p>
+      <div class="hoja-botones">
+        <button class="btn" id="btn-reintentar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 9.5A7.5 7.5 0 1 1 5 14"/><path d="M4 4.5v5.5h5.5"/></svg>Reintentar
+        </button>
+        <button class="btn principal" id="btn-siguiente" disabled title="Próximamente">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Siguiente
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <dialog class="acerca" id="acerca">
+    <h2>La fuga de Eme</h2>
+    <p class="lema">Desprecie el rozamiento. Si puede.</p>
+    <p>Eme es <i>el</i> bloque de los problemas de física: «un bloque de masa <i>m</i> desliza por un plano inclinado…». Está harto, y quiere escapar del libro.</p>
+    <p>Coloca las piezas que faltan para que llegue a la bandera con la energía justa. Cada cuadrito de altura es un <b>julito</b> de energía potencial; cada material se come unos cuantos en forma de calor.</p>
+    <p class="nota">Boceto v0.1 · solo el nivel 1. Un juego de <a href="https://elprofedelabata.es/" target="_blank" rel="noopener">El profe de la bata</a>.</p>
+    <form method="dialog"><button class="btn principal">¡Vamos!</button></form>
+  </dialog>
+</body>
+</html>
