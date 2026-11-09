@@ -24,7 +24,7 @@ Nivel trampa previsto: **EME**, el primo grande (*M* mayúscula), llega igual de
 - 1 cuadrito de altura = 1 julito de Ep. El tablero mide 9 × 9 cuadritos.
 - Cada material se come un número fijo de julitos por casilla: hielo 0, madera 1, asfalto 2, arena 3.
 - Simplificación consciente: en el Mundo I una rampa de arena come lo mismo que un suelo de arena. En el Mundo II se rompe a propósito («¿por qué la rampa ya no come 3?»).
-- La energía siempre suma lo mismo. Colores: **Ep azul**, **Ec amarillo**, **calor rojo**. Cada julito que se pierde aparece junto a Eme como «−1 ■» flotante que se desvanece (y «+1 ■» cuando haya piezas que den energía).
+- La energía siempre suma lo mismo. Colores: **Ep azul**, **Ec amarillo**, **calor rojo**. Cada julito que se pierde aparece junto a Eme como «−1 ■» flotante que se desvanece (y «+1 ■» cuando haya piezas que den energía). Las etiquetas se reparten de forma regular por el tramo de la pieza: si quita n julitos, salen en las posiciones 1/(n+1), 2/(n+1)… (madera al 50 %; asfalto al 33 % y 67 %; arena al 25 %, 50 % y 75 %). No es como se pierde de verdad, pero se lee mejor.
 
 ## Meta: pararse a la altura objetivo
 

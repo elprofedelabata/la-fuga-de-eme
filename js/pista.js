@@ -116,6 +116,7 @@ export function analizar(nivel, colocadas) {
 export function nuevaSimulacion(rec, nivel) {
   return {
     s: sDeX(rec, nivel.salidaX), dir: 1, perdido: 0, t: 0, v: 0,
+    perdidoCelda: {},     // julitos perdidos en cada casilla (para repartir las etiquetas −1)
     estado: 'rodando',    // rodando | cayendo | meta | parado
     vueltas: 0, gracia: 1.0, caida: null,   // gracia: el empujoncito inicial
     E0: nivel.energia,
@@ -169,7 +170,11 @@ export function avanzar(sim, rec, nivel, dt) {
       return;
     }
     sim.s = Math.max(ns, 0);
-    sim.perdido += Math.max(dl, 0);
+    if (dl > 0) {
+      sim.perdido += dl;
+      const c = rec.celdas[i];
+      sim.perdidoCelda[c] = (sim.perdidoCelda[c] ?? 0) + dl;
+    }
   }
 }
 
@@ -185,4 +190,17 @@ function detener(sim, nivel, m) {
   sim.dir = -sim.dir;           // en cuesta: se da la vuelta
   sim.vueltas++;
   if (sim.vueltas > 400) sim.estado = 'parado';
+}
+
+/**
+ * Cuántas etiquetas «−1» deben haber salido en una pieza que quita n julitos por pasada
+ * cuando Eme ya ha perdido L julitos en ella. Se reparten de forma regular: en una
+ * pasada completa salen n, en las posiciones 1/(n+1), 2/(n+1)… del tramo. No es como
+ * se pierde de verdad (el rozamiento es continuo), pero se lee mejor.
+ */
+export function etiquetasPerdida(L, n) {
+  if (n <= 0 || L <= 0) return 0;
+  const pasadas = Math.floor(L / n + 1e-9);
+  const resto = L - pasadas * n;
+  return pasadas * n + Math.min(n, Math.floor((resto * (n + 1)) / n + 1e-9));
 }

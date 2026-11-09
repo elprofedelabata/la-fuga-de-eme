@@ -1,7 +1,7 @@
 // La fuga de Eme · boceto jugable del nivel 1.
 
 import { NIVEL, MATERIALES } from './nivel.js';
-import { prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX } from './pista.js';
+import { prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida } from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
   vistaTablero, cuadradito, rectCelda,
@@ -28,7 +28,7 @@ const estado = {
   velocidad: 1,
   pausado: false,
   sim: null, rec: null, analisis: null,
-  espera: 0, calorVisto: 0, metaVista: false,
+  espera: 0, etiquetas: {}, metaVista: false,
   fiesta: null,               // celebración al llegar a la meta: { t, x0, x1 }
   fuera: new Set(),           // piezas que no están en la bandeja (en la mano, volando o colocadas)
   arrastre: null, iman: null, vuelos: 0, mirada: null,
@@ -175,13 +175,14 @@ async function colocar(celda, p, f = null) {
   const previa = estado.colocadas[celda];
   if (previa && previa.id !== p.id) devolver(previa, nuevoFantasma(previa, rectHueco(celda)));
   estado.colocadas[celda] = p;
+  // La pieza ya está en su sitio: se libera la interacción sin esperar al rebote, para que
+  // una animación congelada (pestaña en segundo plano) nunca deje el tablero bloqueado.
+  estado.vuelos--;
   refrescar();
   polvo(celda);
   vibrar(12);
   await f.rebote();
   f.quitar();
-  estado.vuelos--;
-  refrescar();
 }
 
 /** Devuelve la pieza a su sitio en la bandeja. */
@@ -371,7 +372,7 @@ function lanzar() {
   estado.sim = nuevaSimulacion(estado.rec, NIVEL);
   estado.analisis = analizar(NIVEL, estado.colocadas);
   estado.espera = 0;
-  estado.calorVisto = 0;
+  estado.etiquetas = {};
   estado.metaVista = false;
   estado.fiesta = null;
   estado.pausado = false;
@@ -765,11 +766,14 @@ function fotograma(ahora) {
   if (s) {
     const e = energias(s, estado.rec);
     actualizarEnergia(e);
-    // cada julito entero que se pierde (o se gana) aparece como «−1 ■» (o «+1 ■») junto a Eme
-    const calor = Math.floor(s.perdido + 1e-6);
-    while (pose && estado.calorVisto < calor) {
-      estado.calorVisto++;
-      cambioJulitos(-1, pose, s.dir);
+    // cada julito perdido aparece como «−1 ■» junto a Eme, repartidos a lo largo de la pieza
+    for (const [c, L] of Object.entries(s.perdidoCelda)) {
+      const n = MATERIALES[estado.colocadas[c]?.material ?? 'fijo'].pierde;
+      const deben = etiquetasPerdida(L, n);
+      while (pose && (estado.etiquetas[c] ?? 0) < deben) {
+        estado.etiquetas[c] = (estado.etiquetas[c] ?? 0) + 1;
+        cambioJulitos(-1, pose, s.dir);
+      }
     }
     if (pose && estado.fiesta?.t >= DURACION_FIESTA && !estado.metaVista) {
       estado.metaVista = true;
