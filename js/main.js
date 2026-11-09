@@ -105,6 +105,7 @@ function refrescar() {
     b.classList.toggle('seleccionada', estado.seleccion === p.id);
     b.classList.toggle('no-encaja', !!formaFiltro && p.forma !== formaFiltro);
   }
+  for (const c of Object.keys(NIVEL.huecos)) botonHueco(c).classList.toggle('lleno', !!estado.colocadas[c]);
   const completo = Object.keys(NIVEL.huecos).every((c) => estado.colocadas[c]);
   $('btn-lanzar').classList.toggle('atenuado', !completo);
 
@@ -263,6 +264,7 @@ function iniciarArrastre(ev, info, tactil) {
   estado.seleccion = null;
   estado.huecoElegido = null;
   estado.arrastre = { pieza: p, f, tactil, id: ev.pointerId, vx: 0, lx: ev.clientX, lt: performance.now() };
+  document.documentElement.classList.add('arrastrando');
   refrescar();
   vibrar(8);
   seguir(ev);
@@ -314,6 +316,7 @@ function soltar(ev) {
   estado.arrastre = null;
   estado.iman = null;
   estado.mirada = null;
+  document.documentElement.classList.remove('arrastrando');
   a.f.enganchar(false);
   refrescar();
   if (iman) colocar(iman, a.pieza, a.f);

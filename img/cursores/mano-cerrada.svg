@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Mano cerrada: arrastrando una pieza. Punto de clic en (16, 16) -->
+  <g fill="#FFFEF9" stroke="#3A3530" stroke-width="1.5" stroke-linejoin="round">
+    <rect x="8.4" y="9" width="4" height="7" rx="2"/>
+    <rect x="12.5" y="8" width="4" height="7.5" rx="2"/>
+    <rect x="16.6" y="8.4" width="4" height="7.2" rx="2"/>
+    <rect x="20.7" y="9.6" width="3.7" height="6.6" rx="1.85"/>
+    <path d="M8.4 13 L24.4 13 L24.4 21 Q24.4 27.4 18 27.4 L14.8 27.4 Q8.4 27.4 8.4 21 Z" stroke="none"/>
+    <path d="M8.4 12.2 L8.4 21 Q8.4 27.4 14.8 27.4 L18 27.4 Q24.4 27.4 24.4 21 L24.4 12.6" fill="none"/>
+    <rect x="6.6" y="15.4" width="11" height="4.2" rx="2.1" transform="rotate(-8 12 17.5)"/>
+  </g>
+</svg>

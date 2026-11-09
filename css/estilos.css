@@ -295,3 +295,18 @@ button { font: inherit; color: inherit; }
   .hoja { animation: none; }
   .pieza, .btn { transition: none; }
 }
+
+/* ---------- cursores propios (solo con ratón) ----------
+   Lápiz por defecto; mano abierta sobre lo que se puede coger; mano cerrada al arrastrar. */
+@media (pointer: fine) {
+  html, button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a {
+    cursor: url("../img/cursores/lapiz.svg") 2 2, default;
+  }
+  .app[data-modo="montaje"] .pieza:not(.fuera), .hueco.lleno {
+    cursor: url("../img/cursores/mano.svg") 16 16, grab;
+  }
+  html.arrastrando, html.arrastrando * {
+    cursor: url("../img/cursores/mano-cerrada.svg") 16 16, grabbing !important;
+  }
+  .btn[disabled] { cursor: not-allowed; }
+}

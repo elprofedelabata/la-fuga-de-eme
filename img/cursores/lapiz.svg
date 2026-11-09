@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Lápiz en diagonal: la punta (punto de clic) está en (2, 2) -->
+  <g transform="translate(2 2) rotate(45) scale(0.92)" stroke="#3A3530" stroke-width="1.6" stroke-linejoin="round">
+    <path d="M10 -4.2 L33 -4.2 L33 4.2 L10 4.2 Z" fill="#F7D046"/>
+    <path d="M10 -1.4 L33 -1.4" stroke="#D9A21B" stroke-width="1.2"/>
+    <path d="M10 1.6 L33 1.6" stroke="#FBE48A" stroke-width="1.2"/>
+    <path d="M33 -4.2 L36.5 -4.2 L36.5 4.2 L33 4.2 Z" fill="#B9B4AD"/>
+    <path d="M36.5 -4.2 L38.5 -4.2 Q41 -4.2 41 -1.5 L41 1.5 Q41 4.2 38.5 4.2 L36.5 4.2 Z" fill="#F29BA8"/>
+    <path d="M0 0 L10 -4.2 L10 4.2 Z" fill="#F1C89A"/>
+    <path d="M0 0 L3.6 -1.5 L3.6 1.5 Z" fill="#3A3530" stroke-width="1"/>
+  </g>
+</svg>
