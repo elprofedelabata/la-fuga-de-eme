@@ -530,7 +530,11 @@ function moverParticulas(dt) {
     p.t += dt;
     p.x += p.vx * dt;
     p.y += p.vy * dt;
-    if (p.forma === 'polvo') {          // el polvo frena enseguida y se hincha
+    if (p.forma === 'cambio') {         // la etiqueta ±1 sube despacio y frena
+      const f = Math.exp(-1.6 * dt);
+      p.vx *= f;
+      p.vy *= f;
+    } else if (p.forma === 'polvo') {   // el polvo frena enseguida y se hincha
       const f = Math.exp(-5 * dt);
       p.vx *= f;
       p.vy *= f;
@@ -654,6 +658,10 @@ function pintar() {
 
   for (const p of particulas) {
     ctx.globalAlpha = Math.max(0, 1 - p.t / p.vida);
+    if (p.forma === 'cambio') {
+      dibujarCambio(p);
+      continue;
+    }
     if (p.forma === 'polvo') {
       ctx.fillStyle = p.color;
       ctx.strokeStyle = 'rgba(110,104,98,0.6)';
@@ -670,6 +678,41 @@ function pintar() {
 
   if (s && s.estado === 'cayendo') gritar(w, s, pose);
   return pose;
+}
+
+/** Etiqueta flotante «−1 ■» / «+1 ■» junto a Eme. */
+function cambioJulitos(n, pose, dir = 1) {
+  particulas.push({
+    forma: 'cambio', n,
+    x: pose.cx + dir * pose.B * 0.15, y: pose.cy - pose.B * 0.95,
+    vx: -dir * 6, vy: -26, t: 0, vida: 1.5, lado: pose.B * 0.38, color: n < 0 ? C.calor : C.julito, ang: 0, va: 0,
+  });
+}
+
+function dibujarCambio(p) {
+  // aparece con un «pop», se mantiene y se desvanece suavemente
+  const entrada = Math.min(1, p.t / 0.18);
+  const pop = 0.6 + 0.4 * (1 - (1 - entrada) ** 3) + 0.12 * Math.sin(Math.min(1, p.t / 0.3) * Math.PI);
+  const salida = p.t < 0.55 ? 1 : Math.max(0, 1 - (p.t - 0.55) / (p.vida - 0.55));
+  ctx.save();
+  ctx.globalAlpha = Math.min(entrada * 1.5, 1) * salida * salida * (3 - 2 * salida);
+  ctx.translate(p.x, p.y);
+  ctx.scale(pop, pop);
+  const tam = p.lado * 1.25;
+  const texto = (p.n < 0 ? '−' : '+') + Math.abs(p.n);
+  ctx.font = `${tam}px ${FUENTE}`;
+  ctx.textBaseline = 'middle';
+  const ancho = ctx.measureText(texto).width;
+  const total = ancho + 4 + p.lado;
+  const x0 = -total / 2;
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(255,254,249,0.95)';
+  ctx.strokeText(texto, x0, 0);
+  ctx.fillStyle = p.n < 0 ? C.calor : '#3C8D3C';
+  ctx.fillText(texto, x0, 0);
+  cuadradito(ctx, x0 + ancho + 4 + p.lado / 2, 0, p.lado, p.color, 0);
+  ctx.restore();
 }
 
 /** «¡Aaaaah!» que se alarga mientras cae, tiembla, se aleja y se desvanece. */
@@ -722,11 +765,11 @@ function fotograma(ahora) {
   if (s) {
     const e = energias(s, estado.rec);
     actualizarEnergia(e);
-    // un julito rojo sale volando cada vez que se pierde uno entero
+    // cada julito entero que se pierde (o se gana) aparece como «−1 ■» (o «+1 ■») junto a Eme
     const calor = Math.floor(s.perdido + 1e-6);
     while (pose && estado.calorVisto < calor) {
       estado.calorVisto++;
-      particula(pose.cx, pose.cy - pose.B * 0.3, C.calor, { vx: -s.dir * 20, vy: -45, lado: pose.B * 0.28 });
+      cambioJulitos(-1, pose, s.dir);
     }
     if (pose && estado.fiesta?.t >= DURACION_FIESTA && !estado.metaVista) {
       estado.metaVista = true;
