@@ -81,7 +81,7 @@ Al entrar por primera vez se reproduce sola una historia de ~30 s en 7 escenas d
 6. El problema: cada pista le roba energía; los julitos que pierde se van en calor.
 7. La misión: elegir las piezas para que llegue justo a la bandera. Ni más, ni menos. Botón «¡Vamos!».
 
-El texto se escribe solo y cada escena avanza cuando ha dado tiempo a leerla. Tocar adelanta (completa el texto o pasa de escena); «Saltar» (o Esc) la cierra en cualquier momento. Se recuerda en `localStorage` y se puede volver a ver desde el menú.
+Los textos van **dentro del dibujo**, no en una franja aparte, para leer y ver la acción a la vez: el enunciado del libro, impreso en la página (con «Desprecie el rozamiento» resaltado con rotulador), y la voz del narrador como notas a mano en naranja, en los huecos libres de cada escena. Se escriben letra a letra y cada escena avanza cuando ha dado tiempo a leerla. Tocar adelanta (completa el texto o pasa de escena); «Saltar» (o Esc) la cierra en cualquier momento. Se recuerda en `localStorage` y se puede volver a ver desde el menú.
 
 ## Interfaz (móvil en vertical primero)
 

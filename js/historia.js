@@ -1,6 +1,7 @@
 // Historia de primer acceso: quién es Eme y cuál es su plan.
 //
-// Se reproduce sola, escena a escena, con el texto escribiéndose. Tocar la pantalla
+// Se reproduce sola, escena a escena, con los textos escribiéndose dentro del propio
+// dibujo (el enunciado en la página, las notas del narrador en los huecos). Tocar la pantalla
 // adelanta (completa el texto o pasa a la siguiente escena) y «Saltar» la cierra.
 // Se recuerda en localStorage para no volver a mostrarla salvo que se pida desde el menú.
 
@@ -8,7 +9,7 @@ import { C, FUENTE, dibujarEme, lapiz, trazar, cuadradito } from './dibujo.js';
 
 const CLAVE = 'fuga-eme-historia-vista';
 const AW = 400, AH = 300;            // tamaño lógico del dibujo
-const LETRAS_POR_SEGUNDO = 38;
+const LETRAS_POR_SEGUNDO = 34;
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function historiaVista() {
@@ -29,18 +30,20 @@ function texto(ctx, s, x, y, { tam = 12, color = C.suave, alin = 'left', negrita
   ctx.fillText(s, x, y);
 }
 
-/** Página del libro de física. */
-function pagina(ctx, x0 = 24, x1 = 376, problema = 3) {
+/** Página del libro de física. Con «lineas», relleno gris donde iría el enunciado. */
+function pagina(ctx, x0 = 24, x1 = 376, problema = 3, lineas = true) {
   ctx.save();
   ctx.fillStyle = 'rgba(80,70,60,0.12)';
   ctx.fillRect(x0 + 4, 20, x1 - x0, 268);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(x0, 16, x1 - x0, 268);
   lapiz(ctx, [[x0, 16], [x1, 16], [x1, 284], [x0, 284]], { ancho: 1.4, cerrado: true, doble: false, amp: 0.4 });
-  texto(ctx, 'Tema 7 · Energía mecánica', x0 + 14, 32, { tam: 10 });
-  ctx.fillStyle = '#e4e0d8';
-  for (let i = 0; i < 4; i++) ctx.fillRect(x0 + 14, 46 + i * 9, (x1 - x0) * (i === 3 ? 0.4 : 0.82), 3);
-  texto(ctx, `Problema ${problema}`, x0 + 14, 92, { tam: 13, color: C.lapiz, negrita: true });
+  texto(ctx, 'Tema 7 · Energía mecánica', x0 + 14, 29, { tam: 10 });
+  texto(ctx, `Problema ${problema}`, x0 + 14, 46, { tam: 13, color: C.lapiz, negrita: true });
+  if (lineas) {
+    ctx.fillStyle = '#e4e0d8';
+    for (let i = 0; i < 3; i++) ctx.fillRect(x0 + 14, 60 + i * 9, (x1 - x0) * (i === 2 ? 0.4 : 0.82), 3);
+  }
   ctx.restore();
 }
 
@@ -114,15 +117,83 @@ function estrella(ctx, x, y, r, color) {
   ctx.stroke();
 }
 
+// ---------- textos dentro de la escena ----------
+// Cada escena lleva una lista de textos que se escriben letra a letra, uno tras otro, en su
+// sitio del dibujo: «imprenta» es el enunciado del libro; «mano», las notas del narrador.
+const IMPRENTA = 'Georgia, "Times New Roman", serif';
+
+function lineasDe(ctx, item) {
+  if (item._lineas) return item._lineas;
+  ctx.font = fuenteDe(item);
+  const palabras = item.s.split(' ');
+  const lineas = [];
+  let actual = '';
+  for (const p of palabras) {
+    const prueba = actual ? `${actual} ${p}` : p;
+    if (item.w && ctx.measureText(prueba).width > item.w && actual) { lineas.push(actual); actual = p; }
+    else actual = prueba;
+  }
+  if (actual) lineas.push(actual);
+  item._lineas = lineas;
+  return lineas;
+}
+const fuenteDe = (item) => `${item.tam}px ${item.estilo === 'imprenta' ? IMPRENTA : FUENTE}`;
+
+/** Programa cuándo empieza y acaba de escribirse cada texto de la escena. */
+function programar(escena) {
+  let fin = 0;
+  escena.textos.forEach((item, i) => {
+    item.inicio = item.desde ?? fin + (i ? 0.35 : 0.3);
+    item.fin = item.inicio + item.s.length / LETRAS_POR_SEGUNDO;
+    fin = item.fin;
+  });
+  escena.finTextos = fin;
+}
+
+function escribirTextos(ctx, escena, t, completo) {
+  for (const item of escena.textos) {
+    const n = completo ? item.s.length : Math.floor((t - item.inicio) * LETRAS_POR_SEGUNDO);
+    if (n <= 0) continue;
+    const lineas = lineasDe(ctx, item);
+    const alto = item.tam * 1.22;
+    ctx.save();
+    ctx.translate(item.x, item.y);
+    if (item.rot) ctx.rotate(item.rot);
+    ctx.font = fuenteDe(item);
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = item.alin ?? 'left';
+    let quedan = n;
+    lineas.forEach((linea, k) => {
+      if (quedan <= 0) return;
+      const trozo = linea.slice(0, quedan);
+      quedan -= linea.length + 1;
+      const y = k * alto;
+      if (item.marca) {          // rotulador fosforito
+        const w = ctx.measureText(trozo).width;
+        const x0 = item.alin === 'center' ? -w / 2 : 0;
+        ctx.fillStyle = 'rgba(247,208,70,0.6)';
+        ctx.fillRect(x0 - 3, y - item.tam * 0.55, w + 6, item.tam * 1.1);
+      }
+      ctx.fillStyle = item.color ?? (item.estilo === 'imprenta' ? '#4a4540' : C.naranjaO);
+      ctx.fillText(trozo, 0, y);
+    });
+    ctx.restore();
+  }
+}
+
 // ---------- escenas ----------
 const A = [70, 130], Bp = [300, 250];   // extremos del plano inclinado
 
 const ESCENAS = [
   {
-    texto: '«Un bloque de masa m se desliza por un plano inclinado…» Así empezaban todos sus días.',
+    textos: [
+      { s: 'Un bloque de masa m se desliza por un plano inclinado de ángulo θ. Calcule su velocidad al llegar abajo.',
+        x: 38, y: 64, w: 326, tam: 12.5, estilo: 'imprenta' },
+      { s: 'Así empezaban todos sus días.', x: 205, y: 128, w: 160, tam: 17, estilo: 'mano', rot: -0.05 },
+    ],
     dur: 5.2,
     dibujar(ctx, t) {
-      pagina(ctx, 24, 376, 3);
+      pagina(ctx, 24, 376, 3, false);
       plano(ctx, A, Bp);
       const p = sobrePlano(A, Bp, 0.17, 34);
       dibujarEme(ctx, p.x, p.y, 34, { sinCara: true, ang: p.ang, seed: 2 });
@@ -135,13 +206,18 @@ const ESCENAS = [
     },
   },
   {
-    texto: 'Problema tras problema. Siempre el mismo plano. Siempre «desprecie el rozamiento».',
+    textos: [
+      { s: 'Un bloque de masa m se desliza por un plano inclinado…', x: 38, y: 64, w: 326, tam: 12.5, estilo: 'imprenta', desde: 0 },
+      { s: 'Desprecie el rozamiento.', x: 38, y: 82, w: 326, tam: 12.5, estilo: 'imprenta', marca: true, desde: 0.6 },
+      { s: 'Problema tras problema. Siempre el mismo plano. Siempre «desprecie el rozamiento».',
+        x: 214, y: 112, w: 160, tam: 14.5, estilo: 'mano', rot: -0.04 },
+    ],
     dur: 5.4,
     dibujar(ctx, t) {
       const ciclo = 1.35;
       const n = Math.floor(t / ciclo);
       const u = (t % ciclo) / ciclo;
-      pagina(ctx, 24, 376, 4 + n);
+      pagina(ctx, 24, 376, 4 + n, false);
       plano(ctx, A, Bp);
       const pr = reducido ? 0.5 : Math.min(1, (u / 0.85) ** 2) * 0.8 + 0.12;
       const p = sobrePlano(A, Bp, pr, 34);
@@ -160,10 +236,10 @@ const ESCENAS = [
     },
   },
   {
-    texto: 'Hasta que un día, el bloque abrió los ojos.',
+    textos: [{ s: 'Hasta que un día, el bloque abrió los ojos.', x: 38, y: 70, w: 330, tam: 19, estilo: 'mano', rot: -0.02, desde: 0.9 }],
     dur: 4.6,
     dibujar(ctx, t) {
-      pagina(ctx, 24, 376, 9);
+      pagina(ctx, 24, 376, 9, false);
       plano(ctx, A, Bp);
       const B = 34 + 46 * suave(0, 0.8, t);
       const p0 = sobrePlano(A, Bp, 0.17, 34);
@@ -180,10 +256,10 @@ const ESCENAS = [
     },
   },
   {
-    texto: 'Y decidió escaparse del libro.',
+    textos: [{ s: 'Y decidió escaparse del libro.', x: 38, y: 70, w: 250, tam: 19, estilo: 'mano', rot: -0.03 }],
     dur: 4.2,
     dibujar(ctx, t) {
-      pagina(ctx, 24, 300, 9);
+      pagina(ctx, 24, 300, 9, false);
       plano(ctx, A, [250, 250]);
       // Eme mira al borde de la página y sale a saltitos
       const salida = suave(1.0, 3.6, t);
@@ -197,10 +273,14 @@ const ESCENAS = [
     },
   },
   {
-    texto: 'Su plan: atravesar el cuaderno, el libro de texto y la pizarra… hasta salir al mundo real.',
+    textos: [
+      { s: 'Su plan:', x: 22, y: 24, tam: 21, estilo: 'mano' },
+      { s: 'atravesar el cuaderno, el libro de texto y la pizarra… hasta salir al mundo real.',
+        x: 22, y: 47, w: 360, tam: 15.5, estilo: 'mano', color: C.lapiz },
+    ],
     dur: 6.2,
     dibujar(ctx, t) {
-      const paradas = [[60, 190], [150, 120], [250, 185], [342, 110]];
+      const paradas = [[60, 210], [150, 140], [250, 205], [342, 132]];
       // camino discontinuo
       ctx.save();
       ctx.setLineDash([6, 6]);
@@ -258,7 +338,8 @@ const ESCENAS = [
     },
   },
   {
-    texto: 'Pero cada pista le roba energía: los julitos que pierde se le escapan en forma de calor.',
+    textos: [{ s: 'Pero cada pista le roba energía: los julitos que pierde se le escapan en forma de calor.',
+      x: 214, y: 94, w: 172, tam: 15, estilo: 'mano', rot: -0.03 }],
     dur: 6.0,
     dibujar(ctx, t) {
       const pista = [[30, 120], [60, 120]];
@@ -298,40 +379,48 @@ const ESCENAS = [
     },
   },
   {
-    texto: 'Tu misión: elegir las piezas para que llegue justo a la bandera. Ni más, ni menos.',
+    textos: [
+      { s: 'Tu misión: elegir las piezas para que llegue justo a la bandera.', x: 200, y: 26, w: 340, tam: 17, estilo: 'mano', color: C.lapiz, alin: 'center' },
+      { s: 'Ni más, ni menos.', x: 200, y: 72, tam: 23, estilo: 'mano', alin: 'center', rot: -0.03 },
+    ],
     dur: Infinity,
     dibujar(ctx, t) {
       ctx.fillStyle = '#efe8d8';
-      trazar(ctx, [[120, 200], [280, 200], [280, 290], [120, 290]], true);
+      trazar(ctx, [[120, 240], [280, 240], [280, 300], [120, 300]], true);
       ctx.fill();
-      lapiz(ctx, [[120, 290], [120, 200], [280, 200], [280, 290]], { ancho: 2.2 });
+      lapiz(ctx, [[120, 300], [120, 240], [280, 240], [280, 300]], { ancho: 2.2 });
       const salto = reducido ? 0 : Math.abs(Math.sin(t * 3.2)) * 12;
-      dibujarEme(ctx, 200, 200 - 40 - salto, 80, { expr: 'win', bandera: true, seed: 6, sy: 1 + salto * 0.004 });
+      dibujarEme(ctx, 200, 240 - 40 - salto, 80, { expr: 'win', bandera: true, seed: 6, sy: 1 + salto * 0.004 });
       const r = (n) => ((Math.sin(n * 91.7) + 1) / 2);
       for (let i = 0; i < 14; i++) {
         const x = 40 + r(i) * 320, y = ((r(i + 9) * 300 + t * (30 + r(i + 3) * 30)) % 320) - 20;
         cuadradito(ctx, x, y, 8, C.julito, t * (r(i + 5) - 0.5) * 4);
       }
-      estrella(ctx, 92, 120, 9, C.julito);
-      estrella(ctx, 318, 96, 7, C.julito);
+      estrella(ctx, 86, 150, 9, C.julito);
+      estrella(ctx, 322, 132, 7, C.julito);
     },
   },
 ];
 
 // ---------- reproductor ----------
+let cierrePendiente = null;   // fundido de salida de la vez anterior
+
 export function mostrarHistoria({ alTerminar } = {}) {
+  clearTimeout(cierrePendiente);
   const $ = (id) => document.getElementById(id);
   const raiz = $('historia');
   const lienzo = $('historia-lienzo');
-  const parrafo = $('historia-texto');
+  const parrafo = $('historia-texto');      // solo para lectores de pantalla
   const puntos = $('historia-puntos');
   const vamos = $('historia-vamos');
   const ctx = lienzo.getContext('2d');
 
-  let escena = 0, t = 0, letras = 0, vivo = true, ultimo = performance.now();
+  let escena = 0, t = 0, completo = false, vivo = true, ultimo = performance.now();
+  raiz.classList.remove('saliendo');
   raiz.hidden = false;
   vamos.hidden = true;
   puntos.innerHTML = ESCENAS.map(() => '<i></i>').join('');
+  ESCENAS.forEach(programar);
 
   const ajustar = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
@@ -345,9 +434,10 @@ export function mostrarHistoria({ alTerminar } = {}) {
   const ir = (n) => {
     escena = n;
     t = 0;
-    letras = 0;
+    completo = false;
     [...puntos.children].forEach((p, i) => p.classList.toggle('activo', i <= n));
     vamos.hidden = true;
+    parrafo.textContent = ESCENAS[n].textos.map((x) => x.s).join(' ');
   };
 
   const terminar = () => {
@@ -357,16 +447,16 @@ export function mostrarHistoria({ alTerminar } = {}) {
     window.removeEventListener('resize', ajustar);
     document.removeEventListener('keydown', teclas);
     raiz.classList.add('saliendo');
-    setTimeout(() => {
+    cierrePendiente = setTimeout(() => {
       raiz.hidden = true;
       raiz.classList.remove('saliendo');
       alTerminar?.();
     }, reducido ? 0 : 350);
   };
 
+  const escrita = () => completo || t >= ESCENAS[escena].finTextos;
   const adelantar = () => {
-    const total = ESCENAS[escena].texto.length;
-    if (letras < total) letras = total;               // primero, completar el texto
+    if (!escrita()) completo = true;                  // primero, completar los textos
     else if (escena < ESCENAS.length - 1) ir(escena + 1);
   };
 
@@ -387,20 +477,18 @@ export function mostrarHistoria({ alTerminar } = {}) {
     ultimo = ahora;
     t += dt;
     const e = ESCENAS[escena];
-    letras = Math.min(e.texto.length, letras + dt * LETRAS_POR_SEGUNDO);
-    parrafo.textContent = e.texto.slice(0, Math.floor(letras));
 
     const w = lienzo.width, s = w / AW;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, w, lienzo.height);
     ctx.setTransform(s, 0, 0, s, 0, 0);
     e.dibujar(ctx, t);
+    escribirTextos(ctx, e, t, completo);
 
-    const escrita = letras >= e.texto.length;
-    if (escena === ESCENAS.length - 1 && escrita) vamos.hidden = false;
-    // avanza sola cuando ha pasado su tiempo y el texto ya se ha podido leer
-    const lectura = e.texto.length / LETRAS_POR_SEGUNDO + 1.8;
-    if (escrita && t > Math.max(e.dur, lectura) && escena < ESCENAS.length - 1) ir(escena + 1);
+    if (escena === ESCENAS.length - 1 && escrita()) vamos.hidden = false;
+    // avanza sola cuando ha pasado su tiempo y ha dado tiempo a leer los textos
+    const lectura = e.finTextos + 1.8;
+    if (escrita() && t > Math.max(e.dur, completo ? 0 : lectura) && escena < ESCENAS.length - 1) ir(escena + 1);
     requestAnimationFrame(fotograma);
   };
   requestAnimationFrame(fotograma);
