@@ -368,7 +368,6 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
     linear-gradient(var(--cuadri) 1px, transparent 1px),
     linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
   background-size: 20px 20px;
-  animation: aparece 0.45s ease-out;
 }
 .inicio::before {   /* margen rojo de cuaderno */
   content: ""; position: absolute; left: max(18px, calc(50% - 240px)); top: 0; bottom: 0; width: 2px; background: #ec9f9f;

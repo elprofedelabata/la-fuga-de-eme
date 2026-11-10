@@ -862,21 +862,22 @@ function iniciar() {
   requestAnimationFrame(fotograma);
   // carga → inicio → (JUGAR) → historia, solo la primera vez → nivel 1
   // (mientras no exista la selección de niveles, JUGAR lleva directamente al nivel 1)
-  quitarCarga().then(() => mostrarInicio({
+  // La portada se coloca debajo de la pantalla de carga antes del fundido, para que al
+  // desvanecerse la carga se vea directamente la portada (y no el nivel).
+  quitarCarga(() => mostrarInicio({
     alJugar: () => { if (!historiaVista()) mostrarHistoria(); },
   }));
 }
 
 // La pantalla de carga se queda al menos 2 s (contados desde que empezó a cargar la página)
 const CARGA_MINIMA = 2000;
-function quitarCarga() {
+function quitarCarga(antesDelFundido) {
   const pantalla = $('cargando');
-  return new Promise((listo) => {
-    setTimeout(() => {
-      pantalla.classList.add('saliendo');
-      setTimeout(() => { pantalla.remove(); listo(); }, 450);
-    }, Math.max(0, CARGA_MINIMA - performance.now()));
-  });
+  setTimeout(() => {
+    antesDelFundido?.();
+    pantalla.classList.add('saliendo');
+    setTimeout(() => pantalla.remove(), 450);
+  }, Math.max(0, CARGA_MINIMA - performance.now()));
 }
 
 // Espera a la fuente manuscrita (sin bloquear si no llega)
