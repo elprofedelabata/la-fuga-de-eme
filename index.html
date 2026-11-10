@@ -16,6 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilos.css">
+  <link rel="preload" as="image" href="img/logo.svg">
   <link rel="modulepreload" href="js/nivel.js">
   <link rel="modulepreload" href="js/pista.js">
   <link rel="modulepreload" href="js/dibujo.js">
@@ -24,6 +25,13 @@
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
+  <!-- Pantalla de carga: tapa el juego al menos 2 s, mientras se cargan fuentes y módulos -->
+  <div class="cargando" id="cargando" role="status" aria-live="polite">
+    <img class="cargando-logo" src="img/logo.svg" alt="La fuga de Eme" width="373" height="168">
+    <div class="cargando-julitos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="cargando-texto">Cargando julitos…</p>
+  </div>
+
   <main class="app" id="app" data-modo="montaje">
     <header class="barra-sup">
       <button class="icono" id="btn-menu" aria-label="Acerca de La fuga de Eme">
@@ -117,7 +125,7 @@
   </div>
 
   <dialog class="acerca" id="acerca">
-    <h2>La fuga de Eme</h2>
+    <h2><img class="acerca-logo" src="img/logo.svg" alt="La fuga de Eme" width="373" height="168"></h2>
     <p class="lema">Desprecie el rozamiento. Si puede.</p>
     <p>Eme es <i>el</i> bloque de los problemas de física: «un bloque de masa <i>m</i> desliza por un plano inclinado…». Está harto, y quiere escapar del libro.</p>
     <p>Coloca las piezas que faltan para que llegue a la bandera con la energía justa. Cada cuadrito de altura es un <b>julito</b> de energía potencial; cada material se come unos cuantos en forma de calor.</p>

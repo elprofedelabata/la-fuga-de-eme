@@ -69,6 +69,11 @@ Cubo naranja (`#F2A33A`, sombra `#D9822B`) con trazo de lápiz, ojos grandes y u
 
 Referencias en `arte/`: hoja de personaje, animación *idle*, boceto de interfaz.
 
+## Logo y pantalla de carga
+
+- **Logo** (`img/logo.svg`, generado por `arte/logo.py`): Eme saliendo disparado de un trozo de hoja de cuaderno rasgada, con líneas de velocidad, y el nombre «La fuga de / **Eme**». Las letras son trazos propios a mano (no texto con fuente), así que se ve igual en cualquier sitio y antes de que cargue la tipografía. «Eme» va en naranja con contorno de lápiz.
+- **Pantalla de carga:** el logo flotando y 8 julitos que se llenan de azul uno a uno («Cargando julitos…»). Dura al menos 2 s desde que empieza a cargar la página y se desvanece; en el primer acceso, la historia empieza justo después.
+
 ## Historia de primer acceso
 
 Al entrar por primera vez se reproduce sola una historia de ~30 s en 7 escenas dibujadas con el estilo del juego (`js/historia.js`):

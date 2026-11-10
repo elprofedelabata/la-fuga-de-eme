@@ -1,4 +1,6 @@
-# La fuga de Eme 🟧
+<p align="center"><img src="img/logo.svg" alt="La fuga de Eme" width="420"></p>
+
+# La fuga de Eme
 
 *Desprecie el rozamiento. Si puede.*
 
@@ -18,7 +20,7 @@ Cada cuadrito de altura es un **julito** de energía potencial; cada material se
 | `js/pista.js` | Geometría de la pista y simulación de Eme por energía |
 | `js/dibujo.js` | Estilo de cuaderno: trazo de lápiz, texturas y Eme |
 | `herramientas/validar-nivel.mjs` | Prueba todas las combinaciones de piezas de un nivel |
-| `arte/` | Hoja de personaje, animación *idle* y boceto de interfaz (scripts de Python + Pillow) |
+| `arte/` | Hoja de personaje, animación *idle*, boceto de interfaz y generador del logo (scripts de Python) |
 
 Para probarlo en local hace falta un servidor (los módulos no cargan con `file://`):
 

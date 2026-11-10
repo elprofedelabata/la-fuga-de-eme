@@ -859,7 +859,21 @@ function iniciar() {
   refrescar();
   new ResizeObserver(() => ajustar()).observe($('tablero'));
   requestAnimationFrame(fotograma);
-  if (!historiaVista()) mostrarHistoria();   // primer acceso: la historia de Eme
+  quitarCarga().then(() => {
+    if (!historiaVista()) mostrarHistoria();   // primer acceso: la historia de Eme
+  });
+}
+
+// La pantalla de carga se queda al menos 2 s (contados desde que empezó a cargar la página)
+const CARGA_MINIMA = 2000;
+function quitarCarga() {
+  const pantalla = $('cargando');
+  return new Promise((listo) => {
+    setTimeout(() => {
+      pantalla.classList.add('saliendo');
+      setTimeout(() => { pantalla.remove(); listo(); }, 450);
+    }, Math.max(0, CARGA_MINIMA - performance.now()));
+  });
 }
 
 // Espera a la fuente manuscrita (sin bloquear si no llega)
