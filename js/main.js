@@ -869,7 +869,7 @@ function iniciar() {
   refrescar();
   new ResizeObserver(() => ajustar()).observe($('tablero'));
   requestAnimationFrame(fotograma);
-  // carga → inicio → (JUGAR) → historia, solo la primera vez → nivel 1
+  // carga → inicio → (JUGAR) → historia, solo la primera vez → elige nivel → nivel
   // (mientras no exista la selección de niveles, JUGAR lleva directamente al nivel 1)
   // La portada se coloca debajo de la pantalla de carga y la hoja de la carga se arranca.
   quitarCarga(abrirInicio);
@@ -877,17 +877,17 @@ function iniciar() {
 
 // ---------- pantallas: inicio → niveles → nivel ----------
 function abrirInicio() {
-  mostrarInicio({ alJugar: abrirNiveles });
+  // JUGAR: la primera vez, la historia (que termina contando el plan) y luego el mapa de niveles
+  mostrarInicio({ alJugar: () => (historiaVista() ? abrirNiveles() : mostrarHistoria({ alTerminar: abrirNiveles })) });
 }
 
 function abrirNiveles() {
   mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio });
 }
 
-/** Entra en un nivel (de momento solo existe el 1); la primera vez, antes, la historia. */
+/** Entra en un nivel (de momento solo existe el 1). */
 function entrarNivel() {
   if (estado.modo !== 'montaje') volverAMontar();
-  if (!historiaVista()) mostrarHistoria();
 }
 
 // La pantalla de carga se queda al menos 2 s (contados desde que empezó a cargar la página)
