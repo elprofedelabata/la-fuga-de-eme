@@ -9,6 +9,7 @@ import {
 import { Fantasma } from './arrastre.js';
 import { mostrarHistoria, historiaVista } from './historia.js';
 import { mostrarInicio } from './inicio.js';
+import { arrancar } from './transicion.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
 
@@ -868,8 +869,7 @@ function iniciar() {
   requestAnimationFrame(fotograma);
   // carga → inicio → (JUGAR) → historia, solo la primera vez → nivel 1
   // (mientras no exista la selección de niveles, JUGAR lleva directamente al nivel 1)
-  // La portada se coloca debajo de la pantalla de carga antes del fundido, para que al
-  // desvanecerse la carga se vea directamente la portada (y no el nivel).
+  // La portada se coloca debajo de la pantalla de carga y la hoja de la carga se arranca.
   quitarCarga(abrirInicio);
 }
 
@@ -890,12 +890,10 @@ function entrarNivel() {
 
 // La pantalla de carga se queda al menos 2 s (contados desde que empezó a cargar la página)
 const CARGA_MINIMA = 2000;
-function quitarCarga(antesDelFundido) {
+function quitarCarga(antes) {
   const pantalla = $('cargando');
   setTimeout(() => {
-    antesDelFundido?.();
-    pantalla.classList.add('saliendo');
-    setTimeout(() => pantalla.remove(), 450);
+    arrancar(pantalla, { antes }).then(() => pantalla.remove());
   }, Math.max(0, CARGA_MINIMA - performance.now()));
 }
 

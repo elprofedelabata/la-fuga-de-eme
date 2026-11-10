@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Prueba: arrancar la hoja</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <style>
+    .pantalla { position: fixed; inset: 0; display: grid; place-items: center; font-size: 40px;
+      background-color: var(--papel);
+      background-image: linear-gradient(var(--cuadri) 1px, transparent 1px), linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
+      background-size: 20px 20px; }
+    #a { z-index: 45; } #b { z-index: 40; }
+    #b span { color: var(--naranja-o); }
+  </style>
+</head>
+<body>
+  <!-- Herramienta de prueba: congela la transición en ?t=milisegundos para fotografiarla -->
+  <div class="pantalla" id="b"><span>Pantalla siguiente</span></div>
+  <div class="pantalla" id="a"><img src="../img/logo.svg" alt="" style="width:80%"></div>
+  <script type="module">
+    import { arrancar } from '../js/transicion.js';
+    const t = Number(new URLSearchParams(location.search).get('t') ?? 300);
+    arrancar(document.getElementById('a'));
+    for (const el of [document.getElementById('a'), ...document.querySelectorAll('body > svg')]) {
+      for (const an of el.getAnimations()) { an.pause(); an.currentTime = Math.max(0, t - (an.effect.getTiming().delay || 0)); }
+    }
+  </script>
+</body>
+</html>

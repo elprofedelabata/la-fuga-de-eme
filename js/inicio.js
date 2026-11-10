@@ -1,6 +1,7 @@
 // Pantalla de inicio: logo, Eme esperando y los botones JUGAR y OPCIONES.
 
 import { C, dibujarEme, lapiz, trazar } from './dibujo.js';
+import { arrancar, restaurar } from './transicion.js';
 
 const AW = 240, AH = 200;   // tamaño lógico del dibujo de Eme
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -50,7 +51,7 @@ export function mostrarInicio({ alJugar } = {}) {
   const ctx = lienzo.getContext('2d');
   let vivo = true, t = 0, ultimo = performance.now(), tPronto = null;
 
-  raiz.classList.remove('saliendo');
+  restaurar(raiz);
   raiz.hidden = false;
 
   const ajustar = () => {
@@ -76,12 +77,7 @@ export function mostrarInicio({ alJugar } = {}) {
     if (!vivo) return;
     vivo = false;
     window.removeEventListener('resize', ajustar);
-    alJugar?.();                       // la siguiente pantalla queda debajo…
-    raiz.classList.add('saliendo');    // …y esta se desvanece encima
-    setTimeout(() => {
-      raiz.hidden = true;
-      raiz.classList.remove('saliendo');
-    }, reducido ? 0 : 350);
+    arrancar(raiz, { antes: alJugar });   // la siguiente queda debajo y esta hoja se arranca
   };
 
   const fotograma = (ahora) => {

@@ -330,9 +330,8 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
     linear-gradient(var(--cuadri) 1px, transparent 1px),
     linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
   background-size: 20px 20px;
-  transition: opacity 0.45s ease;
+
 }
-.cargando.saliendo { opacity: 0; pointer-events: none; }
 .cargando-logo { width: min(82vw, 420px); height: auto; animation: flota 2.4s ease-in-out infinite; }
 @keyframes flota { 50% { transform: translateY(-6px) rotate(-0.6deg); } }
 /* 8 julitos que se llenan de energía uno a uno (y vuelven a empezar si la carga tarda) */
@@ -372,7 +371,6 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .inicio::before {   /* margen rojo de cuaderno */
   content: ""; position: absolute; left: max(18px, calc(50% - 240px)); top: 0; bottom: 0; width: 2px; background: #ec9f9f;
 }
-.inicio.saliendo { animation: desaparece 0.35s ease-in forwards; }
 .inicio-logo { width: min(86vw, 440px); height: auto; position: relative; animation: flota 2.6s ease-in-out infinite; }
 .inicio-eme { width: min(66vw, 280px, 34dvh); aspect-ratio: 6 / 5; position: relative; }
 .inicio-botones { display: flex; flex-direction: column; align-items: center; gap: 14px; position: relative; }
@@ -402,9 +400,6 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
     linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
   background-size: 20px 20px;
 }
-/* la pantalla que se va queda por encima mientras se desvanece y deja ver la siguiente */
-.inicio.saliendo, .niveles.saliendo, .historia.saliendo { z-index: 55; }
-.niveles.saliendo { animation: desaparece 0.35s ease-in forwards; }
 .niveles-cab {
   position: sticky; top: -10px; z-index: 2; max-width: 520px; margin: 0 auto;
   display: flex; align-items: center; gap: 12px; padding: 8px 0 10px;
@@ -517,9 +512,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
   background-size: 20px 20px;
   animation: aparece 0.35s ease-out;
 }
-.historia.saliendo { animation: desaparece 0.35s ease-in forwards; }
 @keyframes aparece { from { opacity: 0; } }
-@keyframes desaparece { to { opacity: 0; } }
 .historia canvas {
   width: min(94vw, 640px, calc((100dvh - 190px) * 4 / 3)); aspect-ratio: 4 / 3;
   background: var(--tarjeta); border: 2.5px solid var(--lapiz);

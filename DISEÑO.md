@@ -93,7 +93,11 @@ Tras la carga: el logo flotando, Eme de pie sobre una tira de papel rasgada (res
 
 Los niveles de cada mundo (6, y 1 el final; numerados de forma correlativa) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con sus estrellas debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior. Los mundos bloqueados se ven apagados con «Termina el mundo anterior». De momento solo se puede jugar el nivel 1.
 
-Las mejores estrellas de cada nivel se guardan en `localStorage` (`js/progreso.js`). Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → niveles → (historia, la primera vez) → nivel. Al cambiar de pantalla, la siguiente se coloca debajo antes del fundido de la anterior, para que nunca asome otra.
+Las mejores estrellas de cada nivel se guardan en `localStorage` (`js/progreso.js`). Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → niveles → (historia, la primera vez) → nivel. Al cambiar de pantalla, la siguiente se coloca debajo y la anterior se **arranca** (ver «Transiciones»).
+
+## Transiciones: arrancar la hoja
+
+Todos los cambios de pantalla (carga → portada, portada ↔ niveles, niveles → nivel, final de la historia) usan la misma transición, transgresora y de la casa (`js/transicion.js`): la pantalla se tensa, se rasga por una línea irregular junto al borde izquierdo, como una hoja arrancada de un cuaderno de espiral, y sale volando girando mientras debajo ya está la siguiente. A la izquierda queda un momento la tira rota con los agujeros de la espiral. El borde roto se genera al azar cada vez y lleva trazo de lápiz. Dura ~0,7 s; con «reducir movimiento», el cambio es directo. `herramientas/prueba-arrancar.html?t=ms` congela el efecto en un instante para revisarlo.
 
 ## Historia de primer acceso
 

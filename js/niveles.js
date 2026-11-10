@@ -2,6 +2,7 @@
 
 import { MUNDOS, NIVELES_JUGABLES } from './nivel.js';
 import { leerProgreso } from './progreso.js';
+import { arrancar, restaurar } from './transicion.js';
 
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -65,18 +66,16 @@ export function mostrarNiveles({ alElegir, alVolver } = {}) {
   const conseguidas = Object.values(progreso).reduce((a, b) => a + b, 0);
   $('niveles-total').innerHTML = `<i class="estrella-mini"></i>${conseguidas} / ${total}`;
   $('mundos').innerHTML = construir(progreso);
-  raiz.classList.remove('saliendo');
+  restaurar(raiz);
   raiz.hidden = false;
   raiz.scrollTop = 0;
 
-  // Salir: la pantalla siguiente se coloca debajo antes del fundido, para que no asome nada
+  // Salir: la pantalla siguiente se coloca debajo y esta hoja se arranca
   let vivo = true;
   const salir = (siguiente) => {
     if (!vivo) return;
     vivo = false;
-    siguiente?.();
-    raiz.classList.add('saliendo');
-    setTimeout(() => { raiz.hidden = true; raiz.classList.remove('saliendo'); }, reducido ? 0 : 350);
+    arrancar(raiz, { antes: siguiente });
   };
 
   $('btn-niveles-volver').onclick = () => salir(alVolver);

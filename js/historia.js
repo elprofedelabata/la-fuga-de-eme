@@ -6,6 +6,7 @@
 // Se recuerda en localStorage para no volver a mostrarla salvo que se pida desde el menú.
 
 import { C, FUENTE, dibujarEme, lapiz, trazar, cuadradito } from './dibujo.js';
+import { arrancar, restaurar } from './transicion.js';
 
 const CLAVE = 'fuga-eme-historia-vista';
 const AW = 400, AH = 300;            // tamaño lógico del dibujo
@@ -403,10 +404,8 @@ const ESCENAS = [
 ];
 
 // ---------- reproductor ----------
-let cierrePendiente = null;   // fundido de salida de la vez anterior
 
 export function mostrarHistoria({ alTerminar } = {}) {
-  clearTimeout(cierrePendiente);
   const $ = (id) => document.getElementById(id);
   const raiz = $('historia');
   const lienzo = $('historia-lienzo');
@@ -416,7 +415,7 @@ export function mostrarHistoria({ alTerminar } = {}) {
   const ctx = lienzo.getContext('2d');
 
   let escena = 0, t = 0, completo = false, vivo = true, ultimo = performance.now();
-  raiz.classList.remove('saliendo');
+  restaurar(raiz);
   raiz.hidden = false;
   vamos.hidden = true;
   puntos.innerHTML = ESCENAS.map(() => '<i></i>').join('');
@@ -446,12 +445,7 @@ export function mostrarHistoria({ alTerminar } = {}) {
     marcarVista();
     window.removeEventListener('resize', ajustar);
     document.removeEventListener('keydown', teclas);
-    alTerminar?.();
-    raiz.classList.add('saliendo');
-    cierrePendiente = setTimeout(() => {
-      raiz.hidden = true;
-      raiz.classList.remove('saliendo');
-    }, reducido ? 0 : 350);
+    arrancar(raiz, { antes: alTerminar });
   };
 
   const escrita = () => completo || t >= ESCENAS[escena].finTextos;
