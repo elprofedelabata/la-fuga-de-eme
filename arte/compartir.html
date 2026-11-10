@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Imagen para compartir · La fuga de Eme</title>
+  <!--
+    Composición de la imagen para compartir (1200 × 630). Se convierte en img/compartir.png con:
+      chrome --headless --screenshot=img/compartir.png --window-size=1200,630 --virtual-time-budget=5000 http://localhost:8765/arte/compartir.html
+    El tablero lo dibuja el propio código del juego.
+  -->
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+  <style>
+    :root { --papel: #fbf8ef; --cuadri: #d9e6f3; --lapiz: #3a3530; --suave: #6e6862; --naranja-o: #d9822b; }
+    html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+    body {
+      position: relative; font-family: "Patrick Hand", cursive; color: var(--lapiz);
+      background-color: var(--papel);
+      background-image: linear-gradient(var(--cuadri) 1.5px, transparent 1.5px), linear-gradient(90deg, var(--cuadri) 1.5px, transparent 1.5px);
+      background-size: 30px 30px;
+    }
+    body::before { content: ""; position: absolute; left: 66px; top: 0; bottom: 0; width: 3px; background: #ec9f9f; }
+    .logo { position: absolute; left: 96px; top: 70px; width: 610px; }
+    .lema { position: absolute; left: 112px; top: 372px; margin: 0; font-size: 50px; line-height: 1; }
+    .lema b { font-weight: normal; color: var(--naranja-o); }
+    .sub { position: absolute; left: 114px; top: 448px; margin: 0; font-size: 29px; color: var(--suave); }
+    .julitos { position: absolute; left: 114px; top: 512px; display: flex; gap: 9px; }
+    .julitos i { width: 32px; height: 32px; border: 3px solid var(--lapiz); border-radius: 4px; box-sizing: border-box; }
+    .ep { background: #5c8ee6; } .ec { background: #f7d046; } .calor { background: #e5533d; }
+    .tarjeta {
+      position: absolute; left: 760px; top: 92px; width: 380px; height: 380px;
+      border: 4px solid var(--lapiz); border-radius: 10px 8px 11px 7px / 8px 11px 7px 10px;
+      background: #fffef9; box-shadow: 9px 11px 0 rgba(80, 70, 60, 0.14);
+      transform: rotate(2.2deg); overflow: hidden;
+    }
+    .tarjeta canvas { display: block; width: 100%; height: 100%; }
+    .cinta { position: absolute; width: 110px; height: 34px; background: rgba(236, 226, 196, 0.85); }
+    .c1 { left: 720px; top: 74px; transform: rotate(-24deg); }
+    .c2 { left: 1080px; top: 78px; transform: rotate(22deg); }
+    .pie { position: absolute; left: 790px; top: 512px; margin: 0; font-size: 27px; color: var(--suave); transform: rotate(1.5deg); }
+    .pie b { font-weight: normal; color: var(--lapiz); }
+  </style>
+</head>
+<body>
+  <img class="logo" src="../img/logo.svg" alt="">
+  <p class="lema">Desprecie el rozamiento. <b>Si puede.</b></p>
+  <p class="sub">Un puzzle de física sobre la energía mecánica</p>
+  <div class="julitos"><i class="ep"></i><i class="ep"></i><i class="ep"></i><i class="ep"></i><i class="ep"></i><i class="calor"></i><i class="calor"></i><i class="calor"></i></div>
+  <div class="tarjeta"><canvas id="tablero"></canvas></div>
+  <div class="cinta c1"></div><div class="cinta c2"></div>
+  <p class="pie"><b>8 = 5 + 3</b> · ni más, ni menos</p>
+
+  <script type="module">
+    import { NIVEL } from '../js/nivel.js';
+    import { dibujarTablero, dibujarEme, vistaTablero } from '../js/dibujo.js';
+
+    await document.fonts.load('20px "Patrick Hand"');
+    const cv = document.getElementById('tablero');
+    const W = 372, dpr = 2;
+    cv.width = cv.height = W * dpr;
+    const ctx = cv.getContext('2d');
+    ctx.scale(dpr, dpr);
+    const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
+    dibujarTablero(ctx, W, NIVEL, { 4: pieza('rampa-arena'), 8: pieza('hondonada-hielo') });
+    // Eme en la meta, con la bandera de sombrero
+    const v = vistaTablero(W);
+    const [x, y] = v.px(NIVEL.meta.bandera - 0.25, NIVEL.meta.altura);
+    dibujarEme(ctx, x, y - v.k * 0.55, v.k * 1.08, { expr: 'win', bandera: true, seed: 6, sy: 1.04, sx: 0.96 });
+    document.body.dataset.listo = '1';
+  </script>
+</body>
+</html>
