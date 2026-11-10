@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Flecha clásica, con el estilo de las manos: relleno de papel y contorno de lápiz.
+       Punto de clic en la punta (4, 3) -->
+  <path d="M5.4 4.6 V24.6 L10.4 20 L14 28 L17.6 26.4 L14 18.6 H20.8 Z" fill="#3A3530" opacity="0.18"/>
+  <path d="M4 3 V23 L9 18.4 L12.6 26.4 L16.2 24.8 L12.6 17 H19.4 Z"
+        fill="#FFFEF9" stroke="#3A3530" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

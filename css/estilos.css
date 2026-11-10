@@ -618,10 +618,10 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 }
 
 /* ---------- cursores propios (solo con ratón) ----------
-   Lápiz por defecto; dedo sobre lo que se pulsa; mano abierta sobre lo que se puede coger;
+   Flecha por defecto; dedo sobre lo que se pulsa; mano abierta sobre lo que se puede coger;
    mano cerrada al pulsar sobre una pieza y mientras se arrastra. */
 @media (pointer: fine) {
-  html { cursor: url("../img/cursores/lapiz.svg") 2 2, default; }
+  html { cursor: url("../img/cursores/flecha.svg") 4 3, default; }
   button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a, .inicio-pie a, .nivel-btn, .segmentos input, .deslizador input, .app:not([data-modo="montaje"]) .pieza {
     cursor: url("../img/cursores/dedo.svg") 11 4, pointer;
   }
