@@ -379,13 +379,6 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 #btn-opciones { min-height: 56px; font-size: 22px; letter-spacing: 0.05em; }
 #btn-opciones svg { fill: none; stroke: var(--lapiz); stroke-width: 2; }
 .inicio-opciones { position: relative; }
-.pronto {   /* pegatina «¡Próximamente!» en la esquina del botón */
-  position: absolute; right: -14px; top: -16px; margin: 0; transform: rotate(7deg);
-  white-space: nowrap; padding: 2px 10px; font-size: 16px; color: #fff;
-  background: var(--calor); border: 2px solid var(--lapiz); border-radius: 9px;
-  box-shadow: 2px 3px 0 rgba(80, 70, 60, 0.2); pointer-events: none;
-  animation: pop 0.25s ease-out;
-}
 @keyframes pop { from { opacity: 0; scale: 0.6; } }
 .inicio-pie { margin: 0; font-size: 15px; color: var(--suave); position: relative; }
 .inicio-pie a { color: var(--naranja-o); }
@@ -500,6 +493,87 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 }
 .mundo.fuera .nivel-btn { width: 64px; height: 64px; font-size: 30px; }
 
+/* ---------- opciones ---------- */
+.opciones {
+  width: min(94vw, 440px); max-height: min(92dvh, 760px); padding: 0; overflow: auto;
+  color: var(--lapiz); font-size: 17px;
+  background-color: var(--tarjeta);
+  background-image:
+    linear-gradient(90deg, transparent 26px, #ec9f9f 26px, #ec9f9f 28px, transparent 28px),
+    linear-gradient(var(--cuadri) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
+  background-size: 100% 100%, 18px 18px, 18px 18px;
+  border: 2.5px solid var(--lapiz); border-radius: 14px 11px 15px 10px / 11px 15px 10px 14px;
+  box-shadow: 6px 8px 0 rgba(80, 70, 60, 0.18);
+}
+.opciones[open] { animation: pop 0.22s ease-out; }
+.opciones::backdrop { background: rgba(58, 53, 48, 0.4); }
+.opciones-cab {
+  position: sticky; top: 0; z-index: 1; display: flex; align-items: center;
+  padding: 12px 10px 6px 40px; background: linear-gradient(var(--tarjeta) 80%, transparent);
+}
+.opciones-cab h2 { flex: 1; margin: 0; font-weight: normal; font-size: 32px; }
+.opciones .cerrar svg { stroke-width: 2.6; }
+.opciones-bloque { padding: 4px 18px 10px 40px; }
+.opciones-bloque h3 {
+  margin: 8px 0 6px; font-weight: normal; font-size: 15px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--naranja-o); border-bottom: 1.5px dashed rgba(217, 130, 43, 0.5); padding-bottom: 2px;
+}
+.opcion { margin: 0 0 12px; padding: 0; border: 0; min-inline-size: 0; }
+.opcion legend, .deslizador > span { padding: 0; margin-bottom: 5px; font-size: 18px; }
+
+/* selector segmentado */
+.segmentos { display: flex; border: 2px solid var(--lapiz); border-radius: 999px; overflow: hidden; background: #fff; }
+.segmentos label { flex: 1; position: relative; }
+.segmentos input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.segmentos span {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 42px; padding: 0 8px; font-size: 18px; transition: background-color 0.12s;
+}
+.segmentos label + label span { border-left: 2px solid var(--lapiz); }
+.segmentos input:checked + span { background: var(--naranja); }
+.segmentos input:focus-visible + span { outline: 3px solid var(--naranja-o); outline-offset: -5px; }
+.segmentos svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* deslizadores: pista de lápiz y mando como Eme */
+.deslizador { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px; }
+.deslizador > span { grid-column: 1 / -1; }
+.deslizador output { min-width: 3.2em; text-align: right; font-size: 18px; color: var(--suave); }
+.deslizador input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 34px; margin: 0; background: transparent; cursor: pointer;
+  --lleno: 50%;
+}
+.deslizador input[type="range"]::-webkit-slider-runnable-track {
+  height: 10px; border: 2px solid var(--lapiz); border-radius: 6px;
+  background: linear-gradient(90deg, var(--ep) var(--lleno), #fff var(--lleno));
+}
+.deslizador input[type="range"]::-moz-range-track {
+  height: 6px; border: 2px solid var(--lapiz); border-radius: 6px;
+  background: linear-gradient(90deg, var(--ep) var(--lleno), #fff var(--lleno));
+}
+.deslizador input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 26px; height: 26px; margin-top: -10px;
+  background: var(--naranja); border: 2.5px solid var(--lapiz); border-radius: 6px; box-shadow: 1px 2px 0 rgba(80, 70, 60, 0.25);
+}
+.deslizador input[type="range"]::-moz-range-thumb {
+  width: 22px; height: 22px; background: var(--naranja); border: 2.5px solid var(--lapiz); border-radius: 6px;
+}
+.deslizador input[type="range"]:focus-visible { outline: 3px solid var(--naranja-o); outline-offset: 2px; border-radius: 6px; }
+
+/* borrar progreso */
+.borrar-texto { margin: 0 0 8px; font-size: 15px; color: var(--suave); line-height: 1.25; }
+.btn.peligro { background: #fff; color: var(--calor); border-color: var(--calor); }
+.btn.peligro svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.borrar-confirmar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.borrar-confirmar p { flex-basis: 100%; margin: 0; }
+.borrar-confirmar .btn { min-height: 46px; font-size: 18px; flex: 1; }
+.borrar-confirmar .btn.peligro { background: var(--calor); color: #fff; border-color: var(--lapiz); }
+.borrar-hecho { margin: 4px 0 0; color: var(--calor); }
+.opciones-nota { margin: 0; padding: 4px 18px 16px 40px; font-size: 13px; color: var(--suave); }
+@media (hover: hover) and (pointer: fine) {
+  .segmentos label:hover input:not(:checked) + span { background: #fff4e3; }
+}
+
 /* ---------- historia de primer acceso ---------- */
 .historia {
   position: fixed; inset: 0; z-index: 40;
@@ -548,7 +622,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
    mano cerrada al pulsar sobre una pieza y mientras se arrastra. */
 @media (pointer: fine) {
   html { cursor: url("../img/cursores/lapiz.svg") 2 2, default; }
-  button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a, .inicio-pie a, .nivel-btn, .app:not([data-modo="montaje"]) .pieza {
+  button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a, .inicio-pie a, .nivel-btn, .segmentos input, .deslizador input, .app:not([data-modo="montaje"]) .pieza {
     cursor: url("../img/cursores/dedo.svg") 11 4, pointer;
   }
   .app[data-modo="montaje"] .pieza:not(.fuera), .hueco.lleno {

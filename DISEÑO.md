@@ -80,7 +80,17 @@ Referencias en `arte/`: hoja de personaje, animación *idle*, boceto de interfaz
 Tras la carga: el logo flotando, Eme de pie sobre una tira de papel rasgada (respira, parpadea, mira a los botones y a veces se aburre) y dos botones, **JUGAR** y **OPCIONES**, con el pie «Un juego de El profe de la bata · boceto v0.1» (`js/inicio.js`).
 
 - **JUGAR** → selección de niveles.
-- **OPCIONES** → de momento solo muestra una pegatina de «¡Próximamente!».
+- **OPCIONES** → ventana de opciones (ver abajo).
+
+## Opciones
+
+Ventana modal (`js/opciones.js`) que se abre desde OPCIONES en la portada o desde ☰ en el juego, con aspecto de hoja de cuaderno:
+
+- **Apariencia:** Calidad (Baja · Media · Alta) y Modo (Claro · Oscuro).
+- **Sonido:** volumen General, Música y Efectos (deslizadores con el mando como Eme).
+- **Datos:** «Borrar progreso», con confirmación en dos pasos. Borra todo lo que el juego guarda (claves `fuga-eme-*`: estrellas, historia vista y opciones) y recarga el juego como la primera vez.
+
+De momento solo «Borrar progreso» tiene efecto; el resto se recuerda en `localStorage` (`fuga-eme-opciones`) pero aún no se aplica.
 
 ## Selección de niveles
 

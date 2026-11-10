@@ -2,6 +2,7 @@
 
 import { C, dibujarEme, lapiz, trazar } from './dibujo.js';
 import { arrancar, restaurar } from './transicion.js';
+import { abrirOpciones } from './opciones.js';
 
 const AW = 240, AH = 200;   // tamaño lógico del dibujo de Eme
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -49,7 +50,7 @@ export function mostrarInicio({ alJugar } = {}) {
   const raiz = $('inicio');
   const lienzo = $('inicio-eme');
   const ctx = lienzo.getContext('2d');
-  let vivo = true, t = 0, ultimo = performance.now(), tPronto = null;
+  let vivo = true, t = 0, ultimo = performance.now();
 
   restaurar(raiz);
   raiz.hidden = false;
@@ -63,15 +64,7 @@ export function mostrarInicio({ alJugar } = {}) {
   ajustar();
   window.addEventListener('resize', ajustar);
 
-  $('btn-opciones').onclick = () => {
-    const p = $('pronto');
-    p.hidden = false;
-    p.style.animation = 'none';
-    void p.offsetWidth;          // reinicia la animación
-    p.style.animation = '';
-    clearTimeout(tPronto);
-    tPronto = setTimeout(() => { p.hidden = true; }, 1600);
-  };
+  $('btn-opciones').onclick = abrirOpciones;
 
   $('btn-jugar').onclick = () => {
     if (!vivo) return;

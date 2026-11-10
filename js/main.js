@@ -10,6 +10,7 @@ import { Fantasma } from './arrastre.js';
 import { mostrarHistoria, historiaVista } from './historia.js';
 import { mostrarInicio } from './inicio.js';
 import { arrancar } from './transicion.js';
+import { abrirOpciones } from './opciones.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
 
@@ -858,6 +859,7 @@ function iniciar() {
   $('acerca').addEventListener('close', () => {
     if ($('acerca').returnValue === 'historia') mostrarHistoria();
     if ($('acerca').returnValue === 'niveles') abrirNiveles();
+    if ($('acerca').returnValue === 'opciones') abrirOpciones();
   });
 
   ajustar();
