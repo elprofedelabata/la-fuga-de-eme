@@ -8,6 +8,7 @@ import {
 } from './dibujo.js';
 import { Fantasma } from './arrastre.js';
 import { mostrarHistoria, historiaVista } from './historia.js';
+import { mostrarInicio } from './inicio.js';
 
 const $ = (id) => document.getElementById(id);
 const app = $('app');
@@ -859,9 +860,11 @@ function iniciar() {
   refrescar();
   new ResizeObserver(() => ajustar()).observe($('tablero'));
   requestAnimationFrame(fotograma);
-  quitarCarga().then(() => {
-    if (!historiaVista()) mostrarHistoria();   // primer acceso: la historia de Eme
-  });
+  // carga → inicio → (JUGAR) → historia, solo la primera vez → nivel 1
+  // (mientras no exista la selección de niveles, JUGAR lleva directamente al nivel 1)
+  quitarCarga().then(() => mostrarInicio({
+    alJugar: () => { if (!historiaVista()) mostrarHistoria(); },
+  }));
 }
 
 // La pantalla de carga se queda al menos 2 s (contados desde que empezó a cargar la página)

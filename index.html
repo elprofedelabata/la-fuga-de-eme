@@ -28,6 +28,7 @@
   <link rel="modulepreload" href="js/dibujo.js">
   <link rel="modulepreload" href="js/arrastre.js">
   <link rel="modulepreload" href="js/historia.js">
+  <link rel="modulepreload" href="js/inicio.js">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -37,6 +38,24 @@
     <div class="cargando-julitos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <p class="cargando-texto">Cargando julitos…</p>
   </div>
+
+  <!-- Pantalla de inicio -->
+  <section class="inicio" id="inicio" aria-label="La fuga de Eme" hidden>
+    <img class="inicio-logo" src="img/logo.svg" alt="La fuga de Eme" width="373" height="168">
+    <canvas class="inicio-eme" id="inicio-eme" aria-hidden="true"></canvas>
+    <div class="inicio-botones">
+      <button class="btn principal grande" id="btn-jugar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>JUGAR
+      </button>
+      <div class="inicio-opciones">
+        <button class="btn" id="btn-opciones">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3L5.5 5.5"/></svg>OPCIONES
+        </button>
+        <p class="pronto" id="pronto" role="status" hidden>¡Próximamente!</p>
+      </div>
+    </div>
+    <p class="inicio-pie">Un juego de <a href="https://elprofedelabata.es/" target="_blank" rel="noopener">El profe de la bata</a> · boceto v0.1</p>
+  </section>
 
   <main class="app" id="app" data-modo="montaje">
     <header class="barra-sup">

@@ -358,6 +358,41 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .acerca h2 { margin: 0 0 6px; }
 .acerca-logo { display: block; width: 100%; max-width: 300px; height: auto; }
 
+/* ---------- pantalla de inicio ---------- */
+.inicio {
+  position: fixed; inset: 0; z-index: 45;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(10px, 2.5dvh, 22px);
+  padding: max(20px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
+  background-color: var(--papel);
+  background-image:
+    linear-gradient(var(--cuadri) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: aparece 0.45s ease-out;
+}
+.inicio::before {   /* margen rojo de cuaderno */
+  content: ""; position: absolute; left: max(18px, calc(50% - 240px)); top: 0; bottom: 0; width: 2px; background: #ec9f9f;
+}
+.inicio.saliendo { animation: desaparece 0.35s ease-in forwards; }
+.inicio-logo { width: min(86vw, 440px); height: auto; position: relative; animation: flota 2.6s ease-in-out infinite; }
+.inicio-eme { width: min(66vw, 280px, 34dvh); aspect-ratio: 6 / 5; position: relative; }
+.inicio-botones { display: flex; flex-direction: column; align-items: center; gap: 14px; position: relative; }
+.inicio-botones .btn { width: min(78vw, 300px); }
+.inicio-botones .btn.grande { min-height: 70px; font-size: 30px; }
+#btn-opciones { min-height: 56px; font-size: 22px; letter-spacing: 0.05em; }
+#btn-opciones svg { fill: none; stroke: var(--lapiz); stroke-width: 2; }
+.inicio-opciones { position: relative; }
+.pronto {   /* pegatina «¡Próximamente!» en la esquina del botón */
+  position: absolute; right: -14px; top: -16px; margin: 0; transform: rotate(7deg);
+  white-space: nowrap; padding: 2px 10px; font-size: 16px; color: #fff;
+  background: var(--calor); border: 2px solid var(--lapiz); border-radius: 9px;
+  box-shadow: 2px 3px 0 rgba(80, 70, 60, 0.2); pointer-events: none;
+  animation: pop 0.25s ease-out;
+}
+@keyframes pop { from { opacity: 0; scale: 0.6; } }
+.inicio-pie { margin: 0; font-size: 15px; color: var(--suave); position: relative; }
+.inicio-pie a { color: var(--naranja-o); }
+
 /* ---------- historia de primer acceso ---------- */
 .historia {
   position: fixed; inset: 0; z-index: 40;
@@ -397,7 +432,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn.saltar svg { width: 18px; height: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cargando-logo, .cargando-julitos i { animation: none; }
+  .cargando-logo, .cargando-julitos i, .inicio-logo { animation: none; }
   .cargando-julitos i { background: var(--ep); }
   .hoja { animation: none; }
   .pieza, .btn { transition: none; }
@@ -408,7 +443,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
    mano cerrada al pulsar sobre una pieza y mientras se arrastra. */
 @media (pointer: fine) {
   html { cursor: url("../img/cursores/lapiz.svg") 2 2, default; }
-  button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a, .app:not([data-modo="montaje"]) .pieza {
+  button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a, .inicio-pie a, .app:not([data-modo="montaje"]) .pieza {
     cursor: url("../img/cursores/dedo.svg") 11 4, pointer;
   }
   .app[data-modo="montaje"] .pieza:not(.fuera), .hueco.lleno {

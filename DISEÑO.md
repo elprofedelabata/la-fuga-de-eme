@@ -73,11 +73,19 @@ Referencias en `arte/`: hoja de personaje, animación *idle*, boceto de interfaz
 
 - **Logo** (`img/logo.svg`, generado por `arte/logo.py`): Eme saliendo disparado de un trozo de hoja de cuaderno rasgada, con líneas de velocidad, y el nombre «La fuga de / **Eme**». Las letras son trazos propios a mano (no texto con fuente), así que se ve igual en cualquier sitio y antes de que cargue la tipografía. «Eme» va en naranja con contorno de lápiz.
 - **Imagen para compartir** (`img/compartir.png`, 1200 × 630): logo, lema, julitos y el tablero real del nivel 1 con Eme en la meta. Se compone en `arte/compartir.html` (que dibuja el tablero con el código del juego) y se captura con Chrome sin ventana (el comando está en el propio archivo).
-- **Pantalla de carga:** el logo flotando y 8 julitos que se llenan de azul uno a uno («Cargando julitos…»). Dura al menos 2 s desde que empieza a cargar la página y se desvanece; en el primer acceso, la historia empieza justo después.
+- **Pantalla de carga:** el logo flotando y 8 julitos que se llenan de azul uno a uno («Cargando julitos…»). Dura al menos 2 s desde que empieza a cargar la página y se desvanece para dar paso a la pantalla de inicio.
+
+## Pantalla de inicio
+
+Tras la carga: el logo flotando, Eme de pie sobre una tira de papel rasgada (respira, parpadea, mira a los botones y a veces se aburre) y dos botones, **JUGAR** y **OPCIONES**, con el pie «Un juego de El profe de la bata · boceto v0.1» (`js/inicio.js`).
+
+- **JUGAR** → la primera vez, la historia → nivel. Mientras no exista la selección de niveles, lleva directamente al nivel 1.
+- **OPCIONES** → de momento solo muestra una pegatina de «¡Próximamente!».
+- Pendiente: selección de niveles agrupados por mundos (cuaderno → libro de texto → pizarra → fuera).
 
 ## Historia de primer acceso
 
-Al entrar por primera vez se reproduce sola una historia de ~30 s en 7 escenas dibujadas con el estilo del juego (`js/historia.js`):
+La primera vez que se pulsa JUGAR se reproduce sola una historia de ~30 s en 7 escenas dibujadas con el estilo del juego (`js/historia.js`):
 
 1. Una página del libro de física: «Un bloque de masa *m* se desliza por un plano inclinado…» (el bloque aún no tiene cara).
 2. Problema tras problema, siempre el mismo plano y «desprecie el rozamiento».
