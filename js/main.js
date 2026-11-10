@@ -12,6 +12,7 @@ import { mostrarInicio } from './inicio.js';
 import { arrancar } from './transicion.js';
 import { abrirOpciones } from './opciones.js';
 import { iniciarTutorial } from './tutorial.js';
+import { mostrarFoco, quitarFoco } from './foco.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
 
@@ -39,6 +40,8 @@ const estado = {
   fiesta: null,               // celebración al llegar a la meta: { t, x0, x1 }
   fuera: new Set(),           // piezas que no están en la bandeja (en la mano, volando o colocadas)
   arrastre: null, iman: null, vuelos: 0, mirada: null,
+  guia: null,                 // guía del primer movimiento: { pieza, celda }
+  pose: null,                 // última pose de Eme (para iluminarlo en la guía)
 };
 
 const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
@@ -81,10 +84,24 @@ const celdaDePieza = (id) => Number(Object.keys(estado.colocadas).find((c) => es
 const vibrar = (ms) => { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(ms); };
 let suprimirClick = false;
 
+/** Baraja las piezas (nunca en el orden en que están definidas, que es el de los huecos). */
+function barajar(lista) {
+  if (lista.length < 2) return [...lista];
+  let r;
+  do {
+    r = [...lista];
+    for (let i = r.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [r[i], r[j]] = [r[j], r[i]];
+    }
+  } while (r.every((p, i) => p === lista[i]));
+  return r;
+}
+
 function crearBandeja() {
   const cont = $('piezas');
   cont.innerHTML = '';
-  for (const p of NIVEL.piezas) {
+  for (const p of barajar(NIVEL.piezas)) {
     const b = document.createElement('button');
     b.className = 'pieza';
     b.dataset.id = p.id;
@@ -113,7 +130,11 @@ function refrescar() {
     b.classList.toggle('fuera', estado.fuera.has(p.id));
     b.classList.toggle('seleccionada', estado.seleccion === p.id);
     b.classList.toggle('no-encaja', !!formaFiltro && p.forma !== formaFiltro);
+    b.classList.toggle('bloqueada', !!estado.guia && p.id !== estado.guia.pieza);
+    b.classList.toggle('guiada', !!estado.guia && p.id === estado.guia.pieza);
   }
+  $('btn-lanzar').disabled = !!estado.guia;
+  $('btn-vaciar').disabled = !!estado.guia;
   for (const c of Object.keys(NIVEL.huecos)) botonHueco(c).classList.toggle('lleno', !!estado.colocadas[c]);
   const completo = Object.keys(NIVEL.huecos).every((c) => estado.colocadas[c]);
   $('btn-lanzar').classList.toggle('atenuado', !completo);
@@ -121,12 +142,21 @@ function refrescar() {
   rehacerTablero();
 }
 
-function ocultarBocadillo() { $('bocadillo').classList.add('oculto'); }
+function ocultarBocadillo() { if (!estado.guia) $('bocadillo').classList.add('oculto'); }
+
+/** Durante la guía, lo que no toca tiembla y no responde. */
+function temblar(el) {
+  el.classList.remove('tiembla');
+  void el.offsetWidth;
+  el.classList.add('tiembla');
+}
+const bloqueadaPorGuia = (id) => estado.guia && id !== estado.guia.pieza;
 
 const ocupado = () => estado.modo !== 'montaje' || estado.arrastre || estado.vuelos > 0;
 
 function tocarPieza(id) {
   if (ocupado()) return;
+  if (bloqueadaPorGuia(id)) { temblar(tarjeta(id)); return; }
   ocultarBocadillo();
   const p = pieza(id);
   if (estado.fuera.has(id)) {          // la silueta de una pieza colocada: devolverla
@@ -144,6 +174,7 @@ function tocarPieza(id) {
 
 function tocarHueco(celda) {
   if (ocupado()) return;
+  if (estado.guia && celda !== estado.guia.celda) { estado.avisos[celda] = 0.6; return; }
   ocultarBocadillo();
   const forma = NIVEL.huecos[celda];
   if (estado.seleccion) {
@@ -182,6 +213,7 @@ async function colocar(celda, p, f = null) {
   const previa = estado.colocadas[celda];
   if (previa && previa.id !== p.id) devolver(previa, nuevoFantasma(previa, rectHueco(celda)));
   estado.colocadas[celda] = p;
+  if (estado.guia && p.id === estado.guia.pieza) terminarGuia();   // primer movimiento aprendido
   // La pieza ya está en su sitio: se libera la interacción sin esperar al rebote, para que
   // una animación congelada (pestaña en segundo plano) nunca deje el tablero bloqueado.
   estado.vuelos--;
@@ -222,7 +254,7 @@ function quitar(celda) {
 }
 
 function vaciar() {
-  if (ocupado()) return;
+  if (ocupado() || estado.guia) return;
   estado.seleccion = null;
   estado.huecoElegido = null;
   Object.keys(estado.colocadas)
@@ -234,6 +266,7 @@ function vaciar() {
 // ---------- arrastrar ----------
 function posibleArrastre(e, info) {
   if (ocupado() || e.button > 0) return;
+  if (bloqueadaPorGuia(info.pieza.id)) { if (info.desde === 'bandeja') temblar(tarjeta(info.pieza.id)); return; }
   if (info.desde === 'bandeja' && estado.fuera.has(info.pieza.id)) return;
   const x0 = e.clientX, y0 = e.clientY, id = e.pointerId, tactil = e.pointerType === 'touch';
   const mover = (ev) => {
@@ -339,6 +372,10 @@ function soltar(ev) {
 
 function estadosHuecos() {
   const out = {};
+  if (estado.guia && !estado.arrastre) {
+    for (const c of Object.keys(NIVEL.huecos)) out[c] = Number(c) === estado.guia.celda ? 'activo' : 'apagado';
+    return out;
+  }
   const forma = estado.arrastre?.pieza.forma ?? (estado.seleccion ? pieza(estado.seleccion).forma : null);
   for (const [cs, f] of Object.entries(NIVEL.huecos)) {
     const c = Number(cs);
@@ -365,7 +402,7 @@ function polvo(celda) {
 
 // ---------- lanzamiento ----------
 function lanzar() {
-  if (ocupado()) return;
+  if (ocupado() || estado.guia) return;
   ocultarBocadillo();
   const faltan = Object.keys(NIVEL.huecos).filter((c) => !estado.colocadas[c]);
   if (faltan.length) {
@@ -794,6 +831,7 @@ function fotograma(ahora) {
   moverParticulas(paso || (estado.sim ? 0 : dt));
 
   const pose = pintar();
+  estado.pose = pose;
 
   if (s) {
     const e = energias(s, estado.rec);
@@ -819,6 +857,47 @@ function fotograma(ahora) {
 }
 
 // ---------- arranque ----------
+// ---------- guía del primer movimiento ----------
+let temporizadorGuia = null;
+let manoTutorial = null;     // la mano fantasma (se aparta al terminar la guía)
+
+/** Rectángulo de pantalla de Eme (y un poco alrededor) en el tablero. */
+function rectEme() {
+  const p = estado.pose;
+  if (!p) return null;
+  const r = lienzo.getBoundingClientRect();
+  const m = p.B * 0.75;
+  return { left: r.left + p.cx - m, top: r.top + p.cy - m, width: 2 * m, height: 2 * m };
+}
+
+function empezarGuia() {
+  const tapado = ['inicio', 'niveles', 'historia'].some((id) => !$(id).hidden) || $('cargando') || document.querySelector('dialog[open]');
+  if (estado.modo !== 'montaje' || estado.arrastre || estado.vuelos || tapado) {
+    temporizadorGuia = setTimeout(empezarGuia, 500);   // aún no se ve el nivel: esperar
+    return;
+  }
+  if (Object.values(estado.colocadas).some(Boolean)) return;   // ya ha empezado solo: no hace falta
+  const p = pieza(NIVEL.guia.pieza);
+  estado.guia = { pieza: p.id, celda: celdaDeForma(p.forma) };
+  estado.seleccion = null;
+  estado.huecoElegido = null;
+  tarjeta(p.id).scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  $('bocadillo').textContent = NIVEL.guia.texto;
+  $('bocadillo').classList.remove('oculto');
+  refrescar();
+  mostrarFoco(() => [rectEme(), $('bocadillo').getBoundingClientRect(),
+    rectHueco(estado.guia?.celda ?? 4), estado.guia ? tarjeta(estado.guia.pieza).getBoundingClientRect() : null]);
+}
+
+function terminarGuia() {
+  if (!estado.guia) return;
+  estado.guia = null;
+  manoTutorial?.parar();
+  quitarFoco();
+  $('bocadillo').classList.add('oculto');
+  refrescar();
+}
+
 /** Prepara todo lo que depende del nivel: textos, huecos, bandeja, estrellas… */
 function cargarNivel(n) {
   usarNivel(n);
@@ -832,8 +911,13 @@ function cargarNivel(n) {
   estado.mejor = estrellasDe(n);
   estado.recMontaje = prepararRecorrido(NIVEL, estado.colocadas);
   $('titulo-nivel').textContent = `Nivel ${NIVEL.numero} · ${NIVEL.titulo}`;
+  terminarGuia();
+  clearTimeout(temporizadorGuia);
   $('bocadillo').textContent = NIVEL.frase;
-  $('bocadillo').classList.remove('oculto');
+  // Con guía, el nivel arranca limpio (sin bocadillo) y la guía llega a los 2 s
+  const conGuia = NIVEL.guia && !estrellasDe(n);
+  $('bocadillo').classList.toggle('oculto', !!conGuia);
+  if (conGuia) temporizadorGuia = setTimeout(empezarGuia, 2000);
   $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b> julitos`;
   $('objetivo-meta').innerHTML = `Meta: pararse a altura <b class="meta">${NIVEL.meta.altura}</b>`;
   $('directo-pie').textContent = `Total: ${NIVEL.energia} julitos. Siempre.`;
@@ -910,16 +994,10 @@ function iniciar() {
   new ResizeObserver(() => ajustar()).observe($('tablero'));
   requestAnimationFrame(fotograma);
   // Tutorial: una mano fantasma enseña a colocar las piezas y a lanzar
-  iniciarTutorial({
-    activo: () => NIVEL.tutorial && estado.modo === 'montaje' && !estado.arrastre && !estado.vuelos
-      && !document.querySelector('dialog[open]')
-      && ['inicio', 'niveles', 'historia'].every((id) => $(id).hidden) && !$('cargando'),
-    siguiente: () => {
-      const libre = NIVEL.piezas.find((p) => !estado.fuera.has(p.id) && !estado.colocadas[celdaDeForma(p.forma)]);
-      if (libre) return { desde: rectMini(libre.id), hasta: rectHueco(celdaDeForma(libre.forma)) };
-      if (Object.keys(NIVEL.huecos).every((c) => estado.colocadas[c])) return { pulsar: $('btn-lanzar').getBoundingClientRect() };
-      return null;
-    },
+  manoTutorial = iniciarTutorial({
+    activo: () => !!estado.guia && estado.modo === 'montaje' && !estado.arrastre && !estado.vuelos
+      && !estado.fuera.has(estado.guia.pieza),
+    siguiente: () => (estado.guia ? { desde: rectMini(estado.guia.pieza), hasta: rectHueco(estado.guia.celda) } : null),
   });
   // carga → inicio → (JUGAR) → historia, solo la primera vez → elige nivel → nivel
   // La portada se coloca debajo de la pantalla de carga y la hoja de la carga se arranca.

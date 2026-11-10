@@ -21,8 +21,10 @@ export const NIVELES = {
   1: {
     numero: 1,
     titulo: 'Lo que baja, sube',
-    frase: 'Arrastra cada pieza a su hueco y pulsa LANZAR. ¿Sin rozamiento? ¡Qué lujo!',
+    frase: '¿Sin rozamiento? ¡Qué lujo!',
     tutorial: true,
+    // Guía del primer movimiento: a los 2 s se oscurece todo salvo Eme, este hueco y esta pieza
+    guia: { pieza: 'rampa-hielo', texto: '¡Empecemos! Arrastra la rampa de hielo hasta su hueco.' },
     energia: 7,            // sale desde altura 7 y en reposo: 7 julitos
     salidaX: 1.0,
     meta: { altura: 7, bandera: 8.55 },

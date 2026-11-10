@@ -87,8 +87,9 @@ El cuaderno tiene **10 niveles**. Todos usan la misma pista en «U»: plataforma
 
 Enseña los controles básicos sin física que calcular. Sale a altura 7 y la meta está a altura 7. Tres huecos (rampa, suelo y subida) y tres piezas de hielo, cada una con una forma que solo encaja en su hueco. Sin rozamiento, **Eme sube justo hasta la altura de la que salió**: la conservación de la energía en estado puro (balance 7 = 7).
 
-- El bocadillo de Eme da la instrucción: «Arrastra cada pieza a su hueco y pulsa LANZAR».
-- **Mano fantasma** (`js/tutorial.js`): coge una pieza de la bandeja y la lleva a su hueco, en bucle, mientras falten piezas; cuando están todas, señala LANZAR. Se aparta en cuanto el jugador toca la pantalla y vuelve si sigue haciendo falta.
+- **Guía del primer movimiento.** El nivel arranca limpio, sin consejos. A los 2 s se **oscurece la pantalla** (`js/foco.js`) y solo quedan iluminados Eme con su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco»), el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
+- Mientras dura, **todo lo demás está bloqueado**: las otras piezas tiemblan si se tocan, los otros huecos no responden y LANZAR y Vaciar están desactivados.
+- Al colocar la rampa se va el foco y se libera todo: el resto lo hace el jugador solo. La guía solo aparece mientras el nivel 1 no está superado.
 
 ### Nivel 2
 
@@ -188,6 +189,7 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 
 - **Arrastrar:** la pieza sale de la bandeja (queda su silueta discontinua) y flota con sombra, con inercia y una ligera inclinación según la velocidad; en móvil va por encima del dedo. Cerca de un hueco compatible se **engancha** (imán, borde naranja); los huecos que no la admiten se apagan. Al soltar encaja con rebote, polvo y una vibración corta; si se suelta fuera, vuelve volando a su sitio. Las piezas del tablero también se pueden sacar arrastrando. Eme sigue la pieza con la mirada.
 - En la bandeja táctil, deslizar en horizontal la desplaza; tirar de una pieza hacia arriba la arrastra.
+- **Bandeja desordenada:** las piezas salen barajadas (nunca en el orden de los huecos), para que su posición no delate la solución.
 - **Tocar y tocar** (también animado: la pieza vuela al hueco): tocas una pieza y luego el hueco, o al revés (el hueco filtra la bandeja). Tocar una pieza colocada, o su silueta, la devuelve. Soltar sobre un hueco ocupado devuelve la anterior.
 - **Cursores propios con ratón:** flecha clásica por defecto (con el mismo trazo que las manos; un lápiz invitaba a pensar que se podía escribir); dedo índice sobre lo que se pulsa (botones, huecos vacíos, la silueta de una pieza, el bocadillo); mano abierta sobre las piezas que se pueden coger; mano cerrada (la misma mano con los dedos recogidos) en cuanto se pulsa sobre una pieza y mientras se arrastra. En pantallas táctiles no se usan.
 - **Hover de los botones (ratón):** se levantan un poco con una ligera inclinación, como un papel, con más sombra y color más claro.

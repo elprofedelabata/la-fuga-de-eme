@@ -68,5 +68,6 @@ export function iniciarTutorial({ activo, siguiente }) {
   // si el jugador se pone a hacer cosas, la mano se aparta enseguida
   addEventListener('pointerdown', () => { if (!mano.hidden) parar(); }, true);
   setTimeout(ciclo, 1200);
+  return { parar };
 }
 

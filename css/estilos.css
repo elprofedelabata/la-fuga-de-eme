@@ -573,6 +573,18 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
   .segmentos label:hover input:not(:checked) + span { background: #fff4e3; }
 }
 
+/* ---------- foco de la guía: oscurece todo salvo lo que hay que mirar ---------- */
+.foco {
+  position: fixed; inset: 0; width: 100%; height: 100%; z-index: 30; pointer-events: none;
+  opacity: 0; transition: opacity 0.45s ease;
+}
+.foco.visible { opacity: 0.62; }
+.pieza.guiada { border-color: var(--naranja-o); border-width: 3px; animation: late-pieza 1.4s ease-in-out infinite; }
+@keyframes late-pieza { 50% { box-shadow: 0 0 0 6px rgba(242, 163, 58, 0.35); } }
+.pieza.bloqueada { cursor: not-allowed; }
+.pieza.tiembla { animation: tiembla-pieza 0.35s; }
+@keyframes tiembla-pieza { 25% { transform: translateX(-5px) rotate(-3deg); } 50% { transform: translateX(4px) rotate(2deg); } 75% { transform: translateX(-2px); } }
+
 /* ---------- mano fantasma del tutorial ---------- */
 .tutorial-mano {
   position: fixed; left: 0; top: 0; z-index: 35; width: 46px; height: 46px;
@@ -616,7 +628,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn.saltar svg { width: 18px; height: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente { animation: none; }
+  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada { animation: none; }
   .cargando-julitos i { background: var(--ep); }
   .hoja { animation: none; }
   .pieza, .btn { transition: none; }
