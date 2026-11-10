@@ -589,6 +589,57 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .pieza.tiembla { animation: tiembla-pieza 0.35s; }
 @keyframes tiembla-pieza { 25% { transform: translateX(-5px) rotate(-3deg); } 50% { transform: translateX(4px) rotate(2deg); } 75% { transform: translateX(-2px); } }
 
+/* ---------- bienvenida: Eme en primer plano ---------- */
+.bienvenida {
+  position: fixed; inset: 0; z-index: 32;
+  /* anclada abajo: Eme no se mueve y el bocadillo crece hacia arriba */
+  display: grid; place-items: end center; padding: 16px 16px max(10vh, 24px);
+}
+.bienvenida-escena {
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  width: min(100%, 380px);
+}
+.bienvenida-bocadillo {
+  position: relative; width: 100%;
+  padding: 16px 18px 10px; text-align: left;
+  font: inherit; font-size: clamp(18px, 5vw, 22px); line-height: 1.25; color: var(--lapiz);
+  background: #fff; border: 2.5px solid var(--lapiz); border-radius: var(--mano);
+  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  opacity: 0; transform: translateY(10px) scale(0.92); transform-origin: 50% 100%;
+  transition: opacity 0.35s ease 0.75s, transform 0.45s cubic-bezier(.3, 1.6, .5, 1) 0.75s;
+}
+.bienvenida-bocadillo:focus-visible { outline: 3px solid var(--naranja-o); outline-offset: 4px; }
+/* el pico del bocadillo, hacia Eme */
+.bienvenida-bocadillo::before, .bienvenida-bocadillo::after {
+  content: ""; position: absolute; left: 50%; border-style: solid; border-color: transparent;
+}
+.bienvenida-bocadillo::before { bottom: -17px; margin-left: -12px; border-width: 17px 12px 0; border-top-color: var(--lapiz); }
+.bienvenida-bocadillo::after { bottom: -12px; margin-left: -9px; border-width: 13px 9px 0; border-top-color: #fff; }
+/* el texto se escribe sobre un molde invisible con el texto entero: el bocadillo no da saltos */
+.bienvenida-textos { display: grid; }
+.bienvenida-molde, .bienvenida-texto { grid-area: 1 / 1; }
+.bienvenida-molde { visibility: hidden; }
+.bienvenida-seguir {
+  display: block; margin-top: 8px; text-align: right;
+  font-size: 14px; color: var(--suave);
+  opacity: 0; transition: opacity 0.3s;
+}
+.bienvenida.escrita .bienvenida-seguir { opacity: 1; animation: seguir 1.2s ease-in-out infinite; }
+@keyframes seguir { 50% { transform: translateX(4px); } }
+.con-dedo { display: none; }
+@media (pointer: coarse) { .con-raton { display: none; } .con-dedo { display: inline; } }
+.bienvenida-eme {
+  width: min(70vw, 36vh, 300px); aspect-ratio: 240 / 210;
+  transform: translateY(70vh);
+  transition: transform 0.7s cubic-bezier(.25, 1.35, .45, 1) 0.15s;
+}
+.bienvenida.dentro .bienvenida-eme { transform: none; }
+.bienvenida.dentro .bienvenida-bocadillo { opacity: 1; transform: none; }
+/* salida: el bocadillo se va y Eme baja del primer plano */
+.bienvenida.fuera .bienvenida-bocadillo { opacity: 0; transform: scale(0.95); transition: opacity 0.2s, transform 0.2s; }
+.bienvenida.fuera .bienvenida-eme { transform: translateY(70vh); transition: transform 0.45s cubic-bezier(.5, 0, .9, .5); }
+
 /* ---------- mano fantasma del tutorial ---------- */
 .tutorial-mano {
   position: fixed; left: 0; top: 0; z-index: 35; width: 46px; height: 46px;
@@ -632,7 +683,8 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn.saltar svg { width: 18px; height: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada { animation: none; }
+  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada, .bienvenida.escrita .bienvenida-seguir { animation: none; }
+  .bienvenida-eme, .bienvenida-bocadillo { transition: none !important; }
   .cargando-julitos i { background: var(--ep); }
   .hoja { animation: none; }
   .pieza, .btn { transition: none; }

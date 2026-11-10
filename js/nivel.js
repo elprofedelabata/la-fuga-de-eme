@@ -23,6 +23,14 @@ export const NIVELES = {
     titulo: 'Lo que baja, sube',
     frase: '¿Sin rozamiento? ¡Qué lujo!',
     tutorial: true,
+    // Bienvenida (solo la primera vez): Eme, en primer plano, se presenta
+    bienvenida: [
+      { texto: '¡Hola! Soy Eme.', expr: 'win' },
+      { texto: 'Sí, el bloque de masa m de los problemas de física. El que siempre se desliza «sin rozamiento».' },
+      { texto: 'Hoy me escapo del libro… ¡y tú vas a ayudarme!', expr: 'win' },
+      { texto: 'Tú construyes la pista con las piezas y yo me deslizo por ella.' },
+      { texto: 'Ven, que te enseño cómo se hace.', py: 0.9 },
+    ],
     // Guía del primer movimiento: a los 2 s se oscurece todo salvo Eme, este hueco y esta pieza
     guia: { pieza: 'rampa-hielo', texto: '¡Empecemos! Arrastra la rampa de hielo hasta su hueco.' },
     energia: 7,            // sale desde altura 7 y en reposo: 7 julitos

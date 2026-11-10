@@ -28,6 +28,7 @@
   <link rel="modulepreload" href="js/dibujo.js">
   <link rel="modulepreload" href="js/arrastre.js">
   <link rel="modulepreload" href="js/historia.js">
+  <link rel="modulepreload" href="js/bienvenida.js">
   <link rel="modulepreload" href="js/inicio.js">
   <link rel="modulepreload" href="js/niveles.js">
   <link rel="modulepreload" href="js/progreso.js">
@@ -235,6 +236,20 @@
   </dialog>
 
   <!-- Historia de primer acceso: quién es Eme y cuál es su plan -->
+  <!-- Bienvenida del primer nivel: Eme en primer plano se presenta -->
+  <div class="bienvenida" id="bienvenida" role="dialog" aria-modal="true" aria-label="Eme te da la bienvenida" hidden>
+    <div class="bienvenida-escena">
+      <button class="bienvenida-bocadillo" id="bienvenida-bocadillo">
+        <span class="bienvenida-textos">
+          <span class="bienvenida-molde" id="bienvenida-molde" aria-hidden="true"></span>
+          <span class="bienvenida-texto" id="bienvenida-texto" aria-hidden="true"></span>
+        </span>
+        <span class="bienvenida-seguir" aria-hidden="true"><span class="con-raton">Haz clic para continuar</span><span class="con-dedo">Toca para continuar</span> ▸</span>
+      </button>
+      <canvas class="bienvenida-eme" id="bienvenida-eme" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
   <div class="historia" id="historia" role="dialog" aria-modal="true" aria-label="La historia de Eme" hidden>
     <button class="btn saltar" id="historia-saltar">Saltar
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg>

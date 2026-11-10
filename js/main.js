@@ -13,6 +13,7 @@ import { arrancar } from './transicion.js';
 import { abrirOpciones } from './opciones.js';
 import { iniciarTutorial } from './tutorial.js';
 import { mostrarFoco, quitarFoco } from './foco.js';
+import { mostrarBienvenida, bienvenidaVista } from './bienvenida.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
 
@@ -886,6 +887,16 @@ function empezarGuia() {
     return;
   }
   if (Object.values(estado.colocadas).some(Boolean)) return;   // ya ha empezado solo: no hace falta
+  // La primera vez, antes de nada, Eme se presenta en primer plano
+  if (NIVEL.bienvenida && !bienvenidaVista()) {
+    mostrarBienvenida({ frases: NIVEL.bienvenida, alTerminar: guiarPrimerMovimiento });
+    return;
+  }
+  guiarPrimerMovimiento();
+}
+
+/** Oscurece todo salvo Eme, su bocadillo, el primer hueco y su pieza, y bloquea lo demás. */
+function guiarPrimerMovimiento() {
   const p = pieza(NIVEL.guia.pieza);
   estado.guia = { pieza: p.id, celda: celdaDeForma(p.forma) };
   estado.seleccion = null;
@@ -926,7 +937,8 @@ function cargarNivel(n) {
   terminarGuia();
   clearTimeout(temporizadorGuia);
   $('bocadillo').textContent = NIVEL.frase;
-  // Con guía, el nivel arranca limpio (sin bocadillo) y la guía llega al segundo
+  // Con guía, el nivel arranca limpio (sin bocadillo) y al segundo llega la bienvenida
+  // (la primera vez) y la guía
   const conGuia = NIVEL.guia && !estrellasDe(n);
   $('bocadillo').classList.toggle('oculto', !!conGuia);
   if (conGuia) temporizadorGuia = setTimeout(empezarGuia, 1000);

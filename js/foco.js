@@ -4,7 +4,7 @@
 // bloquea en la lógica del juego.
 
 const SVG = 'http://www.w3.org/2000/svg';
-let capa = null, mascara = null, vivo = false;
+let capa = null, mascara = null, vivo = false, zonasActuales = () => [];
 
 function crear() {
   capa = document.createElementNS(SVG, 'svg');
@@ -26,11 +26,13 @@ function crear() {
  */
 export function mostrarFoco(zonas) {
   if (!capa) crear();
-  vivo = true;
+  zonasActuales = zonas;
   capa.classList.add('visible');
+  if (vivo) return;          // ya está a la vista: solo cambian las zonas
+  vivo = true;
   const pintar = () => {
     if (!vivo) return;
-    mascara.innerHTML = zonas().filter(Boolean).map((r) => {
+    mascara.innerHTML = zonasActuales().filter(Boolean).map((r) => {
       const m = 8;
       return `<rect x="${r.left - m}" y="${r.top - m}" width="${r.width + 2 * m}" height="${r.height + 2 * m}" rx="16" fill="#000"/>`;
     }).join('');

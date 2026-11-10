@@ -87,7 +87,15 @@ El cuaderno tiene **10 niveles**. Todos usan la misma pista en «U»: plataforma
 
 Enseña los controles básicos sin física que calcular. Sale a altura 7 y la meta está a altura 7. Tres huecos (rampa, suelo y subida) y tres piezas de hielo, cada una con una forma que solo encaja en su hueco. Sin rozamiento, **Eme sube justo hasta la altura de la que salió**: la conservación de la energía en estado puro (balance 7 = 7).
 
-- **Guía del primer movimiento.** El nivel arranca limpio, sin consejos. Al segundo, la pantalla se **oscurece con un fundido suave** (`js/foco.js`). Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco») quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
+- **Bienvenida** (`js/bienvenida.js`, solo la primera vez). El nivel arranca limpio, sin consejos. Al segundo, la pantalla se **oscurece con un fundido suave** (`js/foco.js`) y Eme sube desde abajo en **primer plano** para presentarse. Habla con bocadillos que se escriben letra a letra mientras mueve la boca; debajo de cada uno, «Haz clic para continuar» («Toca para continuar» en pantallas táctiles). Al tocar el bocadillo se completa el texto o se pasa al siguiente. Las frases están en los datos del nivel (`bienvenida`):
+  1. «¡Hola! Soy Eme.»
+  2. «Sí, el bloque de masa m de los problemas de física. El que siempre se desliza "sin rozamiento".»
+  3. «Hoy me escapo del libro… ¡y tú vas a ayudarme!»
+  4. «Tú construyes la pista con las piezas y yo me deslizo por ella.»
+  5. «Ven, que te enseño cómo se hace.»
+
+  Al terminar, Eme baja del primer plano y, con la pantalla aún oscura, empieza la guía. Se recuerda en `fuga-eme-bienvenida-vista` (Restablecer datos la borra).
+- **Guía del primer movimiento.** Con la pantalla oscurecida (tras la bienvenida o, si ya se vio, al segundo de empezar el nivel, con un fundido suave), Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco») quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
 - Mientras dura, **todo lo demás está bloqueado**: las otras piezas tiemblan si se tocan, los otros huecos no responden y LANZAR y Vaciar están desactivados.
 - Al colocar la rampa se va el foco y se libera todo: el resto lo hace el jugador solo. La guía solo aparece mientras el nivel 1 no está superado.
 

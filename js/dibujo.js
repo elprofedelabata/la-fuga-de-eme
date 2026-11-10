@@ -382,7 +382,7 @@ export function dibujarMiniatura(ctx, lado, celda, pieza) {
  * o.expr: idle | gulp | fast | effort | ice | edge | win | bored
  */
 export function dibujarEme(ctx, cx, cy, B, o = {}) {
-  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1, giro = 0, susto = false, sinCara = false } = o;
+  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1, giro = 0, susto = false, sinCara = false, habla = 0 } = o;
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(ang);
@@ -423,7 +423,7 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.textBaseline = 'middle';
   ctx.fillText('m', 0.27 * bw, 0.25 * bh);
 
-  if (!sinCara) cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto });   // sinCara: el bloque anónimo de los problemas
+  if (!sinCara) cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, habla });   // sinCara: el bloque anónimo de los problemas
 
   ctx.strokeStyle = C.lapiz;
   ctx.lineWidth = lw * 1.3;
@@ -468,7 +468,7 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.restore();
 }
 
-function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto }) {
+function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, habla }) {
   const ey = -0.1 * bh, rx = 0.12 * bw, ry = 0.15 * bh;
   const lx = -0.2 * bw, rxx = 0.2 * bw;
   const mx = 0, my = 0.18 * bh;
@@ -543,6 +543,12 @@ function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto }
       ctx.beginPath(); ctx.moveTo(x, y + h / 2); ctx.lineTo(x + w, y + h / 2);
       for (const i of [-1, 0, 1]) { ctx.moveTo(mx + i * 0.07 * bw, y); ctx.lineTo(mx + i * 0.07 * bw, y + h); }
       ctx.stroke();
+    } else if (tipo === 'habla') {
+      // boca abierta hablando: `habla` (0-1) es cuánto se abre
+      const h = (0.025 + 0.06 * habla) * bh;
+      ctx.beginPath(); ctx.ellipse(mx, my, 0.085 * bw, h, 0, 0, 6.29); ctx.fill();
+      ctx.fillStyle = C.calor;
+      ctx.beginPath(); ctx.ellipse(mx, my + h * 0.55, 0.05 * bw, h * 0.4, 0, 0, 6.29); ctx.fill();
     } else if (tipo === 'sonrisa') {
       ctx.lineWidth = lw * 1.3;
       ctx.beginPath(); ctx.ellipse(mx, my - 0.025 * bh, 0.12 * bw, 0.075 * bh, 0, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
@@ -622,6 +628,6 @@ function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto }
     case 'win':
       feliz(lx); feliz(rxx); boca('grande'); rubor(); break;
     default: // idle
-      ojo(lx, 1, px, py, 0.45, lid); ojo(rxx, 1, px, py, 0.45, lid); boca('plana');
+      ojo(lx, 1, px, py, 0.45, lid); ojo(rxx, 1, px, py, 0.45, lid); boca(habla ? 'habla' : 'plana');
   }
 }
