@@ -46,6 +46,7 @@ const estado = {
   arrastre: null, iman: null, vuelos: 0, mirada: null,
   guia: null,                 // guía del primer movimiento: { pieza, celda }
   encima: false,              // Eme y su bocadillo, por encima del oscurecimiento
+  cara: null,                 // cara de Eme mientras habla en el tablero: { expr, px, py }
 };
 
 const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
@@ -150,6 +151,39 @@ function refrescar() {
 
 function ocultarBocadillo() { if (!estado.guia) $('bocadillo').classList.add('oculto'); }
 
+// ---------- Eme habla en el tablero: el bocadillo se escribe letra a letra ----------
+const LETRAS_POR_SEGUNDO = 38;
+const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let dicho = null;   // { texto, letras, alTocar }
+
+/** Eme dice algo en su bocadillo. Con `alTocar`, sale «Haz clic para continuar» y tocarlo lo llama. */
+function decir(texto, { alTocar = null } = {}) {
+  const b = $('bocadillo');
+  b.innerHTML = '<span class="boc-textos"><span class="boc-molde"></span><span class="boc-texto"></span></span>'
+    + (alTocar ? '<span class="boc-seguir"><span class="con-raton">Haz clic para continuar</span><span class="con-dedo">Toca para continuar</span> ▸</span>' : '');
+  b.querySelector('.boc-molde').textContent = texto;   // reserva el tamaño: el bocadillo no da saltos
+  dicho = { texto, letras: reducido ? texto.length : 0, alTocar };
+  b.classList.remove('oculto', 'escrito');
+}
+
+const escribiendo = () => !!dicho && dicho.letras < dicho.texto.length;
+
+function avanzarEscritura(dt) {
+  if (!dicho) return;
+  const b = $('bocadillo'), el = b.querySelector('.boc-texto');
+  if (!el) { dicho = null; return; }          // alguien ha cambiado el bocadillo
+  if (b.classList.contains('escrito')) return;
+  dicho.letras = Math.min(dicho.texto.length, dicho.letras + LETRAS_POR_SEGUNDO * dt);
+  el.textContent = dicho.texto.slice(0, Math.floor(dicho.letras));
+  if (!escribiendo()) b.classList.add('escrito');
+}
+
+function tocarBocadillo() {
+  if (escribiendo()) { dicho.letras = dicho.texto.length; return; }   // primero, completar
+  if (dicho?.alTocar) { dicho.alTocar(); return; }
+  ocultarBocadillo();
+}
+
 /** Durante la guía, lo que no toca tiembla y no responde. */
 function temblar(el) {
   el.classList.remove('tiembla');
@@ -180,7 +214,7 @@ function tocarPieza(id) {
 
 function tocarHueco(celda) {
   if (ocupado()) return;
-  if (estado.guia && celda !== estado.guia.celda) { estado.avisos[celda] = 0.6; return; }
+  if (estado.guia && celda !== estado.guia.celda) { if (estado.guia.celda) estado.avisos[celda] = 0.6; return; }
   ocultarBocadillo();
   const forma = NIVEL.huecos[celda];
   if (estado.seleccion) {
@@ -656,6 +690,15 @@ function poseEme(w) {
     }
     o.sy = 1 + 0.025 * Math.sin(reloj * 3.1);
     o.sx = 2 - o.sy;
+    // Mientras habla: la cara de lo que dice, y mueve la boca al escribirse el bocadillo
+    if (estado.cara && !estado.mirada) {
+      Object.assign(o, estado.cara);
+      if (o.expr === 'idle') {
+        const ciclo = reloj % 4.2;
+        o.lid = ciclo > 3.9 && ciclo < 4.05 ? 1 : 0.12;
+        if (escribiendo()) { o.habla = 0.35 + 0.65 * Math.abs(Math.sin(reloj * 15)); o.lid = 0.12; }
+      }
+    }
   } else {
     const s = estado.sim;
     if (s.estado === 'cayendo') {
@@ -828,6 +871,7 @@ function fotograma(ahora) {
   const dt = Math.min(0.05, (ahora - ultimo) / 1000);
   ultimo = ahora;
   reloj += dt;
+  avanzarEscritura(dt);
   for (const c in estado.avisos) estado.avisos[c] = Math.max(0, estado.avisos[c] - dt);
 
   const s = estado.sim;
@@ -887,12 +931,48 @@ function empezarGuia() {
     return;
   }
   if (Object.values(estado.colocadas).some(Boolean)) return;   // ya ha empezado solo: no hace falta
-  // La primera vez, antes de nada, Eme se presenta en primer plano
+  // La primera vez, Eme se presenta en primer plano y luego habla desde su sitio en el tablero
+  const charlaYGuia = () => (NIVEL.charla && !visto('charla') ? charlar(NIVEL.charla, guiarPrimerMovimiento) : guiarPrimerMovimiento());
   if (NIVEL.bienvenida && !bienvenidaVista()) {
-    mostrarBienvenida({ frases: NIVEL.bienvenida, alTerminar: guiarPrimerMovimiento });
+    mostrarBienvenida({ frases: NIVEL.bienvenida, alTerminar: charlaYGuia });
     return;
   }
-  guiarPrimerMovimiento();
+  charlaYGuia();
+}
+
+const visto = (k) => { try { return localStorage.getItem(`fuga-eme-${k}-vista`) === '1'; } catch { return false; } };
+const marcarVisto = (k) => { try { localStorage.setItem(`fuga-eme-${k}-vista`, '1'); } catch { /* da igual */ } };
+
+/** Lo que se puede iluminar mientras Eme habla. */
+function zona(nombre) {
+  const el = { regla: $('regla'), salida: $('objetivo-salida').parentElement }[nombre];
+  return el ? el.getBoundingClientRect() : null;
+}
+
+/**
+ * Eme habla desde su sitio en el tablero, por encima del oscurecimiento. Cada frase
+ * ({ texto, expr?, px?, py?, zonas? }) avanza al tocar el bocadillo; todo lo demás está bloqueado.
+ */
+function charlar(frases, alTerminar) {
+  estado.guia = { pieza: null, celda: null };
+  estado.seleccion = null;
+  estado.huecoElegido = null;
+  ponerEncima(true);
+  refrescar();
+  let n = -1;
+  const siguiente = () => {
+    n++;
+    if (n >= frases.length) {
+      marcarVisto('charla');
+      alTerminar();
+      return;
+    }
+    const f = frases[n];
+    estado.cara = { expr: f.expr ?? 'idle', px: f.px ?? 0.3, py: f.py ?? 0.3 };
+    mostrarFoco(() => (f.zonas ?? []).map(zona));
+    decir(f.texto, { alTocar: siguiente });
+  };
+  siguiente();
 }
 
 /** Oscurece todo salvo Eme, su bocadillo, el primer hueco y su pieza, y bloquea lo demás. */
@@ -902,8 +982,8 @@ function guiarPrimerMovimiento() {
   estado.seleccion = null;
   estado.huecoElegido = null;
   tarjeta(p.id).scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-  $('bocadillo').textContent = NIVEL.guia.texto;
-  $('bocadillo').classList.remove('oculto');
+  estado.cara = { expr: 'idle', px: 0.2, py: 0.95 };   // mira hacia la bandeja
+  decir(NIVEL.guia.texto);
   refrescar();
   ponerEncima(true);
   mostrarFoco(() => [rectHueco(estado.guia?.celda ?? 4),
@@ -913,6 +993,7 @@ function guiarPrimerMovimiento() {
 function terminarGuia() {
   if (!estado.guia) return;
   estado.guia = null;
+  estado.cara = null;
   manoTutorial?.parar();
   quitarFoco();
   $('bocadillo').classList.add('oculto');
@@ -981,7 +1062,7 @@ function siguienteNivel() {
 }
 
 function iniciar() {
-  $('bocadillo').addEventListener('click', ocultarBocadillo);
+  $('bocadillo').addEventListener('click', tocarBocadillo);
   // Regla de alturas: un número por cuadrito, todos iguales
   const regla = $('regla');
   regla.style.setProperty('--n', CUADRITOS);
@@ -1019,7 +1100,7 @@ function iniciar() {
   requestAnimationFrame(fotograma);
   // Tutorial: una mano fantasma enseña a colocar las piezas y a lanzar
   manoTutorial = iniciarTutorial({
-    activo: () => !!estado.guia && estado.modo === 'montaje' && !estado.arrastre && !estado.vuelos
+    activo: () => !!estado.guia?.pieza && estado.modo === 'montaje' && !estado.arrastre && !estado.vuelos
       && !estado.fuera.has(estado.guia.pieza),
     siguiente: () => (estado.guia ? { desde: rectMini(estado.guia.pieza), hasta: rectHueco(estado.guia.celda) } : null),
   });

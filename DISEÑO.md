@@ -94,8 +94,14 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
   4. «Tú construyes la pista con las piezas y yo me deslizo por ella.»
   5. «Ven, que te enseño cómo se hace.»
 
-  Al terminar, Eme baja del primer plano y, con la pantalla aún oscura, empieza la guía. Se recuerda en `fuga-eme-bienvenida-vista` (Restablecer datos la borra).
-- **Guía del primer movimiento.** Con la pantalla oscurecida (tras la bienvenida o, si ya se vio, al segundo de empezar el nivel, con un fundido suave), Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco») quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
+  Al terminar, Eme baja del primer plano y, con la pantalla aún oscura, sigue hablando desde el tablero. Se recuerda en `fuga-eme-bienvenida-vista` (Restablecer datos la borra).
+- **Charla en el tablero** (solo la primera vez, datos `charla` del nivel). Con todo oscurecido y bloqueado, Eme habla **desde su sitio en la salida**, con su bocadillo de siempre, ambos por encima del oscurecimiento. Mismo sistema: el texto se escribe letra a letra mientras mueve la boca, «Haz clic para continuar» y tocar el bocadillo para avanzar. Cada frase puede iluminar una zona de la interfaz y Eme la mira:
+  1. «¡Aquí estoy! Arriba del todo, en la salida.»
+  2. «Mira la regla: estoy a 7 cuadritos de altura.» (se ilumina la regla)
+  3. «Cada cuadrito de altura es 1 julito de energía potencial. Así que salgo con 7 julitos.» (se ilumina «Sale con 7 julitos»)
+
+  Se recuerda en `fuga-eme-charla-vista`. Después llega la guía del primer movimiento.
+- **Guía del primer movimiento.** Con la pantalla oscurecida (tras la charla o, si ya se vio, al segundo de empezar el nivel, con un fundido suave), Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco», escrito letra a letra mientras Eme mira la bandeja) quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
 - Mientras dura, **todo lo demás está bloqueado**: las otras piezas tiemblan si se tocan, los otros huecos no responden y LANZAR y Vaciar están desactivados.
 - Al colocar la rampa se va el foco y se libera todo: el resto lo hace el jugador solo. La guía solo aparece mientras el nivel 1 no está superado.
 

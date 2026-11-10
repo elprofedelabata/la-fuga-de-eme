@@ -156,6 +156,16 @@ button { font: inherit; color: inherit; }
   border: 6px solid transparent; border-right: 11px solid #fff; border-left: 0;
 }
 .bocadillo.oculto { opacity: 0; pointer-events: none; }
+/* cuando Eme habla: el texto se escribe sobre un molde invisible con el texto entero */
+.boc-textos { display: grid; }
+.boc-molde, .boc-texto { grid-area: 1 / 1; }
+.boc-molde { visibility: hidden; }
+.boc-seguir {
+  display: block; margin-top: 4px; text-align: right;
+  font-size: 0.72em; color: var(--suave);
+  opacity: 0; transition: opacity 0.3s;
+}
+.bocadillo.escrito .boc-seguir { opacity: 1; animation: seguir 1.2s ease-in-out infinite; }
 
 /* ---------- bandeja ---------- */
 .bandeja { min-height: 0; }
@@ -683,7 +693,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn.saltar svg { width: 18px; height: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada, .bienvenida.escrita .bienvenida-seguir { animation: none; }
+  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada, .bienvenida.escrita .bienvenida-seguir, .bocadillo.escrito .boc-seguir { animation: none; }
   .bienvenida-eme, .bienvenida-bocadillo { transition: none !important; }
   .cargando-julitos i { background: var(--ep); }
   .hoja { animation: none; }

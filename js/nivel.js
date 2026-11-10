@@ -31,6 +31,13 @@ export const NIVELES = {
       { texto: 'Tú construyes la pista con las piezas y yo me deslizo por ella.' },
       { texto: 'Ven, que te enseño cómo se hace.', py: 0.9 },
     ],
+    // Después, Eme habla desde su sitio en el tablero (solo la primera vez).
+    // zonas: lo que se ilumina mientras lo dice (regla, salida)
+    charla: [
+      { texto: '¡Aquí estoy! Arriba del todo, en la salida.', expr: 'win' },
+      { texto: 'Mira la regla: estoy a 7 cuadritos de altura.', zonas: ['regla'], px: -0.95, py: 0.2 },
+      { texto: 'Cada cuadrito de altura es 1 julito de energía potencial. Así que salgo con 7 julitos.', zonas: ['salida'], px: -0.3, py: -0.95 },
+    ],
     // Guía del primer movimiento: a los 2 s se oscurece todo salvo Eme, este hueco y esta pieza
     guia: { pieza: 'rampa-hielo', texto: '¡Empecemos! Arrastra la rampa de hielo hasta su hueco.' },
     energia: 7,            // sale desde altura 7 y en reposo: 7 julitos
