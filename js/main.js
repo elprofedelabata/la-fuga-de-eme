@@ -14,6 +14,7 @@ import { abrirOpciones } from './opciones.js';
 import { iniciarTutorial } from './tutorial.js';
 import { mostrarFoco, quitarFoco } from './foco.js';
 import { mostrarBienvenida, bienvenidaVista } from './bienvenida.js';
+import { sinCortes, prepararEscritura, mostrarLetras } from './escritura.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
 
@@ -159,9 +160,10 @@ let dicho = null;   // { texto, letras, alTocar }
 /** Eme dice algo en su bocadillo. Con `alTocar`, sale «Haz clic para continuar» y tocarlo lo llama. */
 function decir(texto, { alTocar = null } = {}) {
   const b = $('bocadillo');
-  b.innerHTML = '<span class="boc-textos"><span class="boc-molde"></span><span class="boc-texto"></span></span>'
-    + (alTocar ? '<span class="boc-seguir"><span class="con-raton">Haz clic para continuar</span><span class="con-dedo">Toca para continuar</span> ▸</span>' : '');
-  b.querySelector('.boc-molde').textContent = texto;   // reserva el tamaño: el bocadillo no da saltos
+  texto = sinCortes(texto);
+  b.innerHTML = '<span class="boc-texto"></span>'
+    + (alTocar ? '<span class="boc-seguir"><span class="con-raton">Haz clic para continuar</span><span class="con-dedo">Toca para continuar</span>&nbsp;▸</span>' : '');
+  prepararEscritura(b.querySelector('.boc-texto'), texto);   // el texto entero, invisible: ni saltos ni cortes nuevos
   dicho = { texto, letras: reducido ? texto.length : 0, alTocar };
   b.classList.remove('oculto', 'escrito');
 }
@@ -174,7 +176,7 @@ function avanzarEscritura(dt) {
   if (!el) { dicho = null; return; }          // alguien ha cambiado el bocadillo
   if (b.classList.contains('escrito')) return;
   dicho.letras = Math.min(dicho.texto.length, dicho.letras + LETRAS_POR_SEGUNDO * dt);
-  el.textContent = dicho.texto.slice(0, Math.floor(dicho.letras));
+  mostrarLetras(el, dicho.texto, Math.floor(dicho.letras));
   if (!escribiendo()) b.classList.add('escrito');
 }
 
@@ -742,6 +744,18 @@ function poseEme(w) {
   return { cx: px + nx * B / 2 * (o.sy ?? 1), cy: py + ny * B / 2 * (o.sy ?? 1), B, ang, o, h };
 }
 
+/** Coloca el bocadillo de modo que su pico salga de la boca de Eme. */
+function bocadilloEnLaBoca(pose) {
+  const b = $('bocadillo');
+  const x = pose.cx + pose.B / 2 + 17;     // a la derecha de Eme, lo que mide el pico y un poco más
+  const y = pose.cy + 0.18 * pose.B;       // a la altura de la boca
+  // (solo si se ha movido de verdad: la respiración de Eme no debe hacerlo temblar)
+  if (Math.abs(x - (b._x ?? -99)) < 2 && Math.abs(y - (b._y ?? -99)) < 2) return;
+  b._x = x; b._y = y;
+  b.style.setProperty('--bx', `${x.toFixed(1)}px`);
+  b.style.setProperty('--by', `${y.toFixed(1)}px`);
+}
+
 function pintar() {
   const w = W();
   if (!w || !cache) return;
@@ -751,6 +765,7 @@ function pintar() {
   if (estado.modo === 'montaje') dibujarResaltes(ctx, w, estadosHuecos(), reloj);
 
   const pose = poseEme(w);
+  if (!estado.sim) bocadilloEnLaBoca(pose);
   marcador.style.setProperty('--h', Math.max(-0.4, Math.min(CUADRITOS + 0.4, pose.h)).toFixed(3));
   if (!pose.o.bandera) dibujarBandera(ctx, w, NIVEL);
 
@@ -1023,8 +1038,8 @@ function cargarNivel(n) {
   const conGuia = NIVEL.guia && !estrellasDe(n);
   $('bocadillo').classList.toggle('oculto', !!conGuia);
   if (conGuia) temporizadorGuia = setTimeout(empezarGuia, 1000);
-  $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b> julitos`;
-  $('objetivo-meta').innerHTML = `Meta: pararse a altura <b class="meta">${NIVEL.meta.altura}</b>`;
+  $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b>&nbsp;julitos`;
+  $('objetivo-meta').innerHTML = `Meta: pararse a altura&nbsp;<b class="meta">${NIVEL.meta.altura}</b>`;
   $('directo-pie').textContent = `Total: ${NIVEL.energia} julitos. Siempre.`;
   $('objetivo').setAttribute('aria-label', `Eme sale con ${NIVEL.energia} julitos. Meta: que se pare en la bandera, a altura ${NIVEL.meta.altura}`);
   for (const r of $('regla').querySelectorAll('.regla-n')) {

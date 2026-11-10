@@ -26,7 +26,7 @@ export const NIVELES = {
     // Bienvenida (solo la primera vez): Eme, en primer plano, se presenta
     bienvenida: [
       { texto: '¡Hola! Soy Eme.', expr: 'win' },
-      { texto: 'Sí, el bloque de masa m de los problemas de física. El que siempre se desliza «sin rozamiento».' },
+      { texto: 'Sí, el bloque de masa\u00a0m de los problemas de física. El que siempre se desliza «sin rozamiento».' },
       { texto: 'Hoy me escapo del libro… ¡y tú vas a ayudarme!', expr: 'win' },
       { texto: 'Tú construyes la pista con las piezas y yo me deslizo por ella.' },
       { texto: 'Ven, que te enseño cómo se hace.', py: 0.9 },

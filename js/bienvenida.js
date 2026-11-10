@@ -6,6 +6,7 @@
 
 import { dibujarEme } from './dibujo.js';
 import { mostrarFoco } from './foco.js';
+import { sinCortes, prepararEscritura, mostrarLetras } from './escritura.js';
 
 const CLAVE = 'fuga-eme-bienvenida-vista';
 const LETRAS_POR_SEGUNDO = 38;
@@ -42,12 +43,12 @@ export function mostrarBienvenida({ frases, alTerminar }) {
   const lienzo = $('bienvenida-eme');
   const bocadillo = $('bienvenida-bocadillo');
   const visible = $('bienvenida-texto');
-  const molde = $('bienvenida-molde');
   const ctx = lienzo.getContext('2d');
   let n = 0, letras = 0, t = 0, ultimo = performance.now(), vivo = true, saliendo = false;
   let salto = 0;   // botecito al cambiar de frase
 
   const frase = () => frases[n];
+  const texto = () => sinCortes(frase().texto);
   const escrita = () => letras >= frase().texto.length;
 
   const ajustar = () => {
@@ -60,8 +61,7 @@ export function mostrarBienvenida({ frases, alTerminar }) {
   const ponerFrase = (i) => {
     n = i;
     letras = reducido ? frase().texto.length : 0;
-    molde.textContent = frase().texto;     // reserva el tamaño del bocadillo: no da saltos
-    visible.textContent = '';
+    prepararEscritura(visible, texto());   // el texto entero, invisible: ni saltos ni cortes nuevos
     bocadillo.setAttribute('aria-label', frase().texto);
     salto = 1;
     raiz.classList.remove('escrita');
@@ -107,11 +107,10 @@ export function mostrarBienvenida({ frases, alTerminar }) {
     t += dt;
     if (t > empiezaAEscribir && !escrita()) {
       letras = Math.min(frase().texto.length, letras + LETRAS_POR_SEGUNDO * dt);
-      visible.textContent = frase().texto.slice(0, Math.floor(letras));
-      if (escrita()) visible.textContent = frase().texto;
+      mostrarLetras(visible, texto(), Math.floor(letras));
     }
     if (escrita() && !raiz.classList.contains('escrita')) {
-      visible.textContent = frase().texto;
+      mostrarLetras(visible, texto(), texto().length);
       raiz.classList.add('escrita');      // aparece «Haz clic para continuar»
     }
     salto = Math.max(0, salto - dt * 3.5);

@@ -141,25 +141,29 @@ button { font: inherit; color: inherit; }
 .hueco:focus-visible { outline: 3px solid var(--naranja-o); outline-offset: -6px; }
 .app:not([data-modo="montaje"]) .hueco { pointer-events: none; }
 
+/* El bocadillo sale de la boca de Eme: --bx y --by (las pone el juego) son el punto donde
+   acaba el pico. El pico va a la altura de la primera línea; si Eme está muy arriba, el
+   bocadillo no se sale del tablero y el pico baja hasta la boca. */
 .bocadillo {
-  position: absolute; left: 37%; top: 4%; width: 48%;
+  --top: max(4px, calc(var(--by, 70px) - 21px));
+  position: absolute; left: var(--bx, 37%); top: var(--top);
+  width: min(54%, calc(100% - var(--bx, 37%) - 6px));
   margin: 0; padding: 8px 12px; font-size: clamp(14px, 4cqw, 18px); line-height: 1.2;
   background: #fff; border: 2px solid var(--lapiz); border-radius: var(--mano);
   cursor: pointer; transition: opacity 0.3s;
+  text-wrap: pretty;          /* sin palabras sueltas en la última línea */
 }
 .bocadillo::before {
-  content: ""; position: absolute; left: -14px; top: 40%;
+  content: ""; position: absolute; left: -14px; top: calc(var(--by, 70px) - var(--top) - 10px);
   border: 8px solid transparent; border-right: 14px solid var(--lapiz); border-left: 0;
 }
 .bocadillo::after {
-  content: ""; position: absolute; left: -10px; top: calc(40% + 2px);
+  content: ""; position: absolute; left: -10px; top: calc(var(--by, 70px) - var(--top) - 8px);
   border: 6px solid transparent; border-right: 11px solid #fff; border-left: 0;
 }
 .bocadillo.oculto { opacity: 0; pointer-events: none; }
-/* cuando Eme habla: el texto se escribe sobre un molde invisible con el texto entero */
-.boc-textos { display: grid; }
-.boc-molde, .boc-texto { grid-area: 1 / 1; }
-.boc-molde { visibility: hidden; }
+/* texto escribiéndose: lo que falta está puesto pero invisible (ni saltos ni cortes nuevos) */
+.escrito-falta { visibility: hidden; }
 .boc-seguir {
   display: block; margin-top: 4px; text-align: right;
   font-size: 0.72em; color: var(--suave);
@@ -627,9 +631,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .bienvenida-bocadillo::before { bottom: -17px; margin-left: -12px; border-width: 17px 12px 0; border-top-color: var(--lapiz); }
 .bienvenida-bocadillo::after { bottom: -12px; margin-left: -9px; border-width: 13px 9px 0; border-top-color: #fff; }
 /* el texto se escribe sobre un molde invisible con el texto entero: el bocadillo no da saltos */
-.bienvenida-textos { display: grid; }
-.bienvenida-molde, .bienvenida-texto { grid-area: 1 / 1; }
-.bienvenida-molde { visibility: hidden; }
+.bienvenida-texto { display: block; text-wrap: pretty; }
 .bienvenida-seguir {
   display: block; margin-top: 8px; text-align: right;
   font-size: 14px; color: var(--suave);
