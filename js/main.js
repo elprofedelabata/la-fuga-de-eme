@@ -20,6 +20,9 @@ const $ = (id) => document.getElementById(id);
 const app = $('app');
 const lienzo = $('lienzo');
 const ctx = lienzo.getContext('2d');
+// Capa solo para Eme, por encima del oscurecimiento de la guía
+const lienzoEme = $('lienzo-eme');
+const ctxEme = lienzoEme.getContext('2d');
 const marcador = $('regla-eme');
 const DURACION_FIESTA = 1.1;   // segundos de saltitos hasta la bandera
 const CUADRITOS = 9;   // cuadritos de alto del tablero (el tablero aún está hecho para 9)
@@ -41,7 +44,7 @@ const estado = {
   fuera: new Set(),           // piezas que no están en la bandeja (en la mano, volando o colocadas)
   arrastre: null, iman: null, vuelos: 0, mirada: null,
   guia: null,                 // guía del primer movimiento: { pieza, celda }
-  pose: null,                 // última pose de Eme (para iluminarlo en la guía)
+  encima: false,              // Eme y su bocadillo, por encima del oscurecimiento
 };
 
 const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
@@ -58,6 +61,8 @@ function ajustar() {
   if (!w) return;
   lienzo.width = Math.round(w * dpr);
   lienzo.height = Math.round(w * dpr);
+  lienzoEme.width = lienzo.width;
+  lienzoEme.height = lienzo.height;
   rehacerTablero();
 }
 
@@ -724,7 +729,13 @@ function pintar() {
     ctx.restore();
   }
 
-  dibujarEme(ctx, pose.cx, pose.cy, pose.B, { ...pose.o, ang: pose.ang });
+  // Durante la guía, Eme se pinta en su capa, que queda por encima del oscurecimiento
+  if (estado.encima || lienzoEme.dataset.sucio) {
+    ctxEme.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctxEme.clearRect(0, 0, w, w);
+    lienzoEme.dataset.sucio = estado.encima ? '1' : '';
+  }
+  dibujarEme(estado.encima ? ctxEme : ctx, pose.cx, pose.cy, pose.B, { ...pose.o, ang: pose.ang });
 
   for (const p of particulas) {
     ctx.globalAlpha = Math.max(0, 1 - p.t / p.vida);
@@ -831,7 +842,6 @@ function fotograma(ahora) {
   moverParticulas(paso || (estado.sim ? 0 : dt));
 
   const pose = pintar();
-  estado.pose = pose;
 
   if (s) {
     const e = energias(s, estado.rec);
@@ -861,13 +871,12 @@ function fotograma(ahora) {
 let temporizadorGuia = null;
 let manoTutorial = null;     // la mano fantasma (se aparta al terminar la guía)
 
-/** Rectángulo de pantalla de Eme (y un poco alrededor) en el tablero. */
-function rectEme() {
-  const p = estado.pose;
-  if (!p) return null;
-  const r = lienzo.getBoundingClientRect();
-  const m = p.B * 0.75;
-  return { left: r.left + p.cx - m, top: r.top + p.cy - m, width: 2 * m, height: 2 * m };
+const FUNDIDO_GUIA = 800;     // ms del fundido del oscurecimiento (como en el CSS)
+
+/** Eme y su bocadillo, por encima del oscurecimiento (o de vuelta a su sitio). */
+function ponerEncima(si) {
+  estado.encima = si;
+  $('tablero').classList.toggle('guiado', si);
 }
 
 function empezarGuia() {
@@ -885,8 +894,9 @@ function empezarGuia() {
   $('bocadillo').textContent = NIVEL.guia.texto;
   $('bocadillo').classList.remove('oculto');
   refrescar();
-  mostrarFoco(() => [rectEme(), $('bocadillo').getBoundingClientRect(),
-    rectHueco(estado.guia?.celda ?? 4), estado.guia ? tarjeta(estado.guia.pieza).getBoundingClientRect() : null]);
+  ponerEncima(true);
+  mostrarFoco(() => [rectHueco(estado.guia?.celda ?? 4),
+    estado.guia ? tarjeta(estado.guia.pieza).getBoundingClientRect() : null]);
 }
 
 function terminarGuia() {
@@ -895,6 +905,8 @@ function terminarGuia() {
   manoTutorial?.parar();
   quitarFoco();
   $('bocadillo').classList.add('oculto');
+  // Eme y el bocadillo bajan a su capa cuando el oscurecimiento ya se ha ido
+  setTimeout(() => { if (!estado.guia) ponerEncima(false); }, FUNDIDO_GUIA);
   refrescar();
 }
 
@@ -914,10 +926,10 @@ function cargarNivel(n) {
   terminarGuia();
   clearTimeout(temporizadorGuia);
   $('bocadillo').textContent = NIVEL.frase;
-  // Con guía, el nivel arranca limpio (sin bocadillo) y la guía llega a los 2 s
+  // Con guía, el nivel arranca limpio (sin bocadillo) y la guía llega al segundo
   const conGuia = NIVEL.guia && !estrellasDe(n);
   $('bocadillo').classList.toggle('oculto', !!conGuia);
-  if (conGuia) temporizadorGuia = setTimeout(empezarGuia, 2000);
+  if (conGuia) temporizadorGuia = setTimeout(empezarGuia, 1000);
   $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b> julitos`;
   $('objetivo-meta').innerHTML = `Meta: pararse a altura <b class="meta">${NIVEL.meta.altura}</b>`;
   $('directo-pie').textContent = `Total: ${NIVEL.energia} julitos. Siempre.`;

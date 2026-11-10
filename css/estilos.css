@@ -576,9 +576,13 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 /* ---------- foco de la guía: oscurece todo salvo lo que hay que mirar ---------- */
 .foco {
   position: fixed; inset: 0; width: 100%; height: 100%; z-index: 30; pointer-events: none;
-  opacity: 0; transition: opacity 0.45s ease;
+  opacity: 0; transition: opacity 0.8s ease;
 }
-.foco.visible { opacity: 0.62; }
+.foco.visible { opacity: 0.78; }
+/* Eme (su capa del lienzo) y su bocadillo salen por encima del oscurecimiento */
+.lienzo-eme { pointer-events: none; }
+.tablero.guiado .lienzo-eme, .tablero.guiado .bocadillo { z-index: 31; }
+.tablero.guiado .bocadillo { transition: opacity 0.8s ease; }
 .pieza.guiada { border-color: var(--naranja-o); border-width: 3px; animation: late-pieza 1.4s ease-in-out infinite; }
 @keyframes late-pieza { 50% { box-shadow: 0 0 0 6px rgba(242, 163, 58, 0.35); } }
 .pieza.bloqueada { cursor: not-allowed; }

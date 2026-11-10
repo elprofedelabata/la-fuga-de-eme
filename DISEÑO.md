@@ -87,7 +87,7 @@ El cuaderno tiene **10 niveles**. Todos usan la misma pista en «U»: plataforma
 
 Enseña los controles básicos sin física que calcular. Sale a altura 7 y la meta está a altura 7. Tres huecos (rampa, suelo y subida) y tres piezas de hielo, cada una con una forma que solo encaja en su hueco. Sin rozamiento, **Eme sube justo hasta la altura de la que salió**: la conservación de la energía en estado puro (balance 7 = 7).
 
-- **Guía del primer movimiento.** El nivel arranca limpio, sin consejos. A los 2 s se **oscurece la pantalla** (`js/foco.js`) y solo quedan iluminados Eme con su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco»), el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
+- **Guía del primer movimiento.** El nivel arranca limpio, sin consejos. Al segundo, la pantalla se **oscurece con un fundido suave** (`js/foco.js`). Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco») quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
 - Mientras dura, **todo lo demás está bloqueado**: las otras piezas tiemblan si se tocan, los otros huecos no responden y LANZAR y Vaciar están desactivados.
 - Al colocar la rampa se va el foco y se libera todo: el resto lo hace el jugador solo. La guía solo aparece mientras el nivel 1 no está superado.
 
