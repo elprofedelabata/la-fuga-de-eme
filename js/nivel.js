@@ -31,3 +31,13 @@ export const NIVEL = {
     { id: 'hondonada-hielo', forma: 'suelo', perfil: 'hondonada', material: 'hielo', nombre: ['Hondonada', 'de hielo'] },
   ],
 };
+
+// Mundos del juego: capas del libro de las que Eme escapa. De momento solo se puede jugar
+// el nivel 1; el resto aparecen en el mapa como bloqueados.
+export const MUNDOS = [
+  { id: 'cuaderno', numero: 'I', nombre: 'El cuaderno', niveles: 6 },
+  { id: 'libro', numero: 'II', nombre: 'El libro de texto', niveles: 6 },
+  { id: 'pizarra', numero: 'III', nombre: 'La pizarra', niveles: 6 },
+  { id: 'fuera', numero: '★', nombre: 'Fuera del libro', niveles: 1 },
+];
+export const NIVELES_JUGABLES = new Set([1]);

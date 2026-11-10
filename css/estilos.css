@@ -392,6 +392,119 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .inicio-pie { margin: 0; font-size: 15px; color: var(--suave); position: relative; }
 .inicio-pie a { color: var(--naranja-o); }
 
+/* ---------- selección de niveles ---------- */
+.niveles {
+  position: fixed; inset: 0; z-index: 45; overflow-y: auto; overscroll-behavior: contain;
+  padding: max(10px, env(safe-area-inset-top)) 14px max(24px, env(safe-area-inset-bottom));
+  background-color: var(--papel);
+  background-image:
+    linear-gradient(var(--cuadri) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+/* la pantalla que se va queda por encima mientras se desvanece y deja ver la siguiente */
+.inicio.saliendo, .niveles.saliendo, .historia.saliendo { z-index: 55; }
+.niveles.saliendo { animation: desaparece 0.35s ease-in forwards; }
+.niveles-cab {
+  position: sticky; top: -10px; z-index: 2; max-width: 520px; margin: 0 auto;
+  display: flex; align-items: center; gap: 12px; padding: 8px 0 10px;
+  background: linear-gradient(var(--papel) 75%, transparent);
+}
+.niveles-cab .btn.redondo { width: 48px; min-height: 48px; }
+.niveles-cab h2 { flex: 1; margin: 0; font-weight: normal; font-size: 30px; }
+.niveles-total { margin: 0; display: flex; align-items: center; gap: 5px; font-size: 19px; }
+.estrella-mini, .mini-estrellas i {
+  display: inline-block; width: 18px; height: 18px; background: var(--julito);
+  clip-path: polygon(50% 2%, 62% 36%, 98% 37%, 69% 59%, 80% 95%, 50% 74%, 20% 95%, 31% 59%, 2% 37%, 38% 36%);
+}
+.mundos { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+
+.mundo {
+  position: relative; padding: 14px 16px 10px 18px;
+  border: 2.5px solid var(--lapiz); border-radius: 12px 9px 13px 8px / 9px 13px 8px 12px;
+  box-shadow: 5px 6px 0 rgba(80, 70, 60, 0.13);
+}
+.mundo h3 { margin: 0; display: flex; align-items: baseline; gap: 10px; font-weight: normal; font-size: 26px; line-height: 1.1; }
+.mundo-num { font-size: 16px; color: var(--naranja-o); letter-spacing: 0.04em; }
+.mundo-candado { margin-left: auto; align-self: center; }
+.mundo-candado svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }
+.mundo-aviso { margin: 2px 0 0; font-size: 15px; opacity: 0.8; }
+.mundo.bloqueado { filter: saturate(0.55); }
+.mundo.bloqueado .camino { opacity: 0.75; }
+
+.camino { position: relative; margin-top: 6px; }
+.camino-6 { aspect-ratio: 16 / 10.5; }
+.camino-1 { height: 108px; }
+.camino-linea { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.camino-linea polyline { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 7 6; opacity: 0.45; }
+
+.nivel-btn {
+  position: absolute; transform: translate(-50%, -50%);
+  width: 54px; height: 54px; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: var(--lapiz);
+  background: #fff; border: 2.5px solid var(--lapiz); border-radius: 13px 10px 14px 9px / 10px 14px 9px 13px;
+  box-shadow: 2px 3px 0 rgba(80, 70, 60, 0.2);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.nivel-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; }
+.nivel-btn.completado, .nivel-btn.siguiente { background: var(--naranja); }
+.nivel-btn.siguiente { animation: late 1.6s ease-in-out infinite; }
+@keyframes late { 50% { transform: translate(-50%, -50%) scale(1.09); box-shadow: 0 0 0 6px rgba(242, 163, 58, 0.3); } }
+.nivel-btn.bloqueado { background: #ece7dc; color: #8d867d; cursor: not-allowed; }
+.nivel-btn.tiembla { animation: tiembla 0.35s; }
+@keyframes tiembla {
+  20% { transform: translate(-58%, -50%) rotate(-6deg); } 40% { transform: translate(-42%, -50%) rotate(5deg); }
+  60% { transform: translate(-55%, -50%) rotate(-3deg); } 80% { transform: translate(-46%, -50%); }
+}
+.mini-estrellas { position: absolute; top: calc(100% + 3px); left: 50%; transform: translateX(-50%); display: flex; gap: 1px; }
+.mini-estrellas i { width: 14px; height: 14px; background: #cfc8bd; }
+.mini-estrellas i.llena { background: var(--julito); filter: drop-shadow(0 0 0.5px var(--lapiz)); }
+@media (hover: hover) and (pointer: fine) {
+  .nivel-btn:not(.bloqueado):hover { transform: translate(-50%, -54%) rotate(-2deg); box-shadow: 3px 6px 0 rgba(80, 70, 60, 0.22); animation: none; }
+}
+
+/* Mundo I · el cuaderno: cuadrícula, margen rojo y espiral */
+.mundo.cuaderno {
+  background-color: #fffef9;
+  background-image:
+    linear-gradient(90deg, transparent 30px, #ec9f9f 30px, #ec9f9f 32px, transparent 32px),
+    linear-gradient(var(--cuadri) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
+  background-size: 100% 100%, 16px 16px, 16px 16px;
+  padding-left: 44px;
+}
+.mundo.cuaderno::before {   /* anillas */
+  content: ""; position: absolute; left: -9px; top: 14px; bottom: 14px; width: 18px;
+  background: radial-gradient(circle at 50% 50%, transparent 4px, var(--lapiz) 4.5px, var(--lapiz) 6px, transparent 6.5px) 0 0 / 18px 22px repeat-y;
+}
+/* Mundo II · el libro de texto: página impresa con renglones */
+.mundo.libro {
+  background: #fff repeating-linear-gradient(transparent 0 23px, #ebe6dd 23px 24px);
+  font-family: Georgia, "Times New Roman", serif;
+}
+.mundo.libro h3 { font-size: 23px; }
+.mundo.libro .mundo-num, .mundo.libro .nivel-btn { font-family: var(--fuente); }
+.mundo.libro::after {   /* esquina doblada */
+  content: ""; position: absolute; right: -2px; top: -2px; width: 26px; height: 26px;
+  background: linear-gradient(225deg, var(--papel) 50%, #ddd5c6 50%);
+  border-left: 2px solid var(--lapiz); border-bottom: 2px solid var(--lapiz); border-bottom-left-radius: 4px;
+}
+/* Mundo III · la pizarra: tiza sobre verde, marco de madera */
+.mundo.pizarra {
+  background: #2f5d48; color: #f4f1e8; border: 7px solid #7a5a3a; outline: 2px solid var(--lapiz);
+  border-radius: 6px;
+}
+.mundo.pizarra .mundo-num { color: #f7d98a; }
+.mundo.pizarra .nivel-btn { background: rgba(255, 255, 255, 0.1); border-color: rgba(244, 241, 232, 0.85); color: #f4f1e8; box-shadow: none; }
+/* Final · fuera del libro: cielo y sol */
+.mundo.fuera {
+  background:
+    radial-gradient(circle at 86% 72%, var(--julito) 0 22px, transparent 23px),
+    linear-gradient(#cfe8f7, #fff6d8);
+}
+.mundo.fuera .nivel-btn { width: 64px; height: 64px; font-size: 30px; }
+
 /* ---------- historia de primer acceso ---------- */
 .historia {
   position: fixed; inset: 0; z-index: 40;
@@ -431,7 +544,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn.saltar svg { width: 18px; height: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cargando-logo, .cargando-julitos i, .inicio-logo { animation: none; }
+  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente { animation: none; }
   .cargando-julitos i { background: var(--ep); }
   .hoja { animation: none; }
   .pieza, .btn { transition: none; }
@@ -442,7 +555,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
    mano cerrada al pulsar sobre una pieza y mientras se arrastra. */
 @media (pointer: fine) {
   html { cursor: url("../img/cursores/lapiz.svg") 2 2, default; }
-  button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a, .inicio-pie a, .app:not([data-modo="montaje"]) .pieza {
+  button, .btn, .icono, .bocadillo, .hueco, .pieza.fuera, .acerca a, .inicio-pie a, .nivel-btn, .app:not([data-modo="montaje"]) .pieza {
     cursor: url("../img/cursores/dedo.svg") 11 4, pointer;
   }
   .app[data-modo="montaje"] .pieza:not(.fuera), .hueco.lleno {
@@ -451,7 +564,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
   html.arrastrando, html.arrastrando * {
     cursor: url("../img/cursores/mano-cerrada.svg") 16 16, grabbing !important;
   }
-  .btn[disabled] { cursor: not-allowed; }
+  .btn[disabled], .nivel-btn.bloqueado { cursor: not-allowed; }
 }
 
 /* ---------- hover de los botones (solo con ratón) ----------

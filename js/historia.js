@@ -446,11 +446,11 @@ export function mostrarHistoria({ alTerminar } = {}) {
     marcarVista();
     window.removeEventListener('resize', ajustar);
     document.removeEventListener('keydown', teclas);
+    alTerminar?.();
     raiz.classList.add('saliendo');
     cierrePendiente = setTimeout(() => {
       raiz.hidden = true;
       raiz.classList.remove('saliendo');
-      alTerminar?.();
     }, reducido ? 0 : 350);
   };
 

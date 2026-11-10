@@ -29,6 +29,8 @@
   <link rel="modulepreload" href="js/arrastre.js">
   <link rel="modulepreload" href="js/historia.js">
   <link rel="modulepreload" href="js/inicio.js">
+  <link rel="modulepreload" href="js/niveles.js">
+  <link rel="modulepreload" href="js/progreso.js">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -38,6 +40,18 @@
     <div class="cargando-julitos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <p class="cargando-texto">Cargando julitos…</p>
   </div>
+
+  <!-- Selección de niveles, agrupados por mundos -->
+  <section class="niveles" id="niveles" aria-label="Elige nivel" hidden>
+    <header class="niveles-cab">
+      <button class="btn redondo" id="btn-niveles-volver" aria-label="Volver a la portada">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Elige nivel</h2>
+      <p class="niveles-total" id="niveles-total"></p>
+    </header>
+    <div class="mundos" id="mundos"></div>
+  </section>
 
   <!-- Pantalla de inicio -->
   <section class="inicio" id="inicio" aria-label="La fuga de Eme" hidden>
@@ -156,6 +170,7 @@
     <p>Coloca las piezas que faltan para que llegue a la bandera con la energía justa. Cada cuadrito de altura es un <b>julito</b> de energía potencial; cada material se come unos cuantos en forma de calor.</p>
     <p class="nota">Boceto v0.1 · solo el nivel 1. Un juego de <a href="https://elprofedelabata.es/" target="_blank" rel="noopener">El profe de la bata</a>.</p>
     <form method="dialog" class="acerca-botones">
+      <button class="btn" id="btn-elegir-nivel" value="niveles">Elegir nivel</button>
       <button class="btn" id="btn-ver-historia" value="historia">Ver la historia</button>
       <button class="btn principal">¡Vamos!</button>
     </form>

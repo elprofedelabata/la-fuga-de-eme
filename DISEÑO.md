@@ -79,9 +79,21 @@ Referencias en `arte/`: hoja de personaje, animación *idle*, boceto de interfaz
 
 Tras la carga: el logo flotando, Eme de pie sobre una tira de papel rasgada (respira, parpadea, mira a los botones y a veces se aburre) y dos botones, **JUGAR** y **OPCIONES**, con el pie «Un juego de El profe de la bata · boceto v0.1» (`js/inicio.js`).
 
-- **JUGAR** → la primera vez, la historia → nivel. Mientras no exista la selección de niveles, lleva directamente al nivel 1.
+- **JUGAR** → selección de niveles.
 - **OPCIONES** → de momento solo muestra una pegatina de «¡Próximamente!».
-- Pendiente: selección de niveles agrupados por mundos (cuaderno → libro de texto → pizarra → fuera).
+
+## Selección de niveles
+
+`js/niveles.js`. Cabecera con ← (vuelve a la portada), «Elige nivel» y las estrellas totales. Debajo, los mundos como tarjetas, cada una con su estilo:
+
+- **I · El cuaderno:** papel cuadriculado, margen rojo y anillas.
+- **II · El libro de texto:** página con renglones, títulos en letra de imprenta y esquina doblada.
+- **III · La pizarra:** tiza sobre verde y marco de madera.
+- **Final · Fuera del libro:** cielo y sol, un único nivel.
+
+Los niveles de cada mundo (6, y 1 el final; numerados de forma correlativa) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con sus estrellas debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior. Los mundos bloqueados se ven apagados con «Termina el mundo anterior». De momento solo se puede jugar el nivel 1.
+
+Las mejores estrellas de cada nivel se guardan en `localStorage` (`js/progreso.js`). Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → niveles → (historia, la primera vez) → nivel. Al cambiar de pantalla, la siguiente se coloca debajo antes del fundido de la anterior, para que nunca asome otra.
 
 ## Historia de primer acceso
 

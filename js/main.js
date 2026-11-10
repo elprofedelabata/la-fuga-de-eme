@@ -9,6 +9,8 @@ import {
 import { Fantasma } from './arrastre.js';
 import { mostrarHistoria, historiaVista } from './historia.js';
 import { mostrarInicio } from './inicio.js';
+import { mostrarNiveles } from './niveles.js';
+import { estrellasDe, guardarEstrellas } from './progreso.js';
 
 const $ = (id) => document.getElementById(id);
 const app = $('app');
@@ -477,6 +479,7 @@ function mostrarResultado() {
   if (tipo === 'meta') {
     estrellas = estado.fallos === 0 ? 3 : estado.fallos === 1 ? 2 : 1;
     estado.mejor = Math.max(estado.mejor, estrellas);
+    guardarEstrellas(NIVEL.numero, estrellas);
   } else {
     estado.fallos++;
   }
@@ -853,10 +856,13 @@ function iniciar() {
   $('btn-menu').addEventListener('click', () => { $('acerca').returnValue = ''; $('acerca').showModal(); });
   $('acerca').addEventListener('close', () => {
     if ($('acerca').returnValue === 'historia') mostrarHistoria();
+    if ($('acerca').returnValue === 'niveles') abrirNiveles();
   });
 
   ajustar();
   crearBandeja();
+  estado.mejor = estrellasDe(NIVEL.numero);
+  pintarEstrellas($('estrellas'), estado.mejor);
   refrescar();
   new ResizeObserver(() => ajustar()).observe($('tablero'));
   requestAnimationFrame(fotograma);
@@ -864,9 +870,22 @@ function iniciar() {
   // (mientras no exista la selección de niveles, JUGAR lleva directamente al nivel 1)
   // La portada se coloca debajo de la pantalla de carga antes del fundido, para que al
   // desvanecerse la carga se vea directamente la portada (y no el nivel).
-  quitarCarga(() => mostrarInicio({
-    alJugar: () => { if (!historiaVista()) mostrarHistoria(); },
-  }));
+  quitarCarga(abrirInicio);
+}
+
+// ---------- pantallas: inicio → niveles → nivel ----------
+function abrirInicio() {
+  mostrarInicio({ alJugar: abrirNiveles });
+}
+
+function abrirNiveles() {
+  mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio });
+}
+
+/** Entra en un nivel (de momento solo existe el 1); la primera vez, antes, la historia. */
+function entrarNivel() {
+  if (estado.modo !== 'montaje') volverAMontar();
+  if (!historiaVista()) mostrarHistoria();
 }
 
 // La pantalla de carga se queda al menos 2 s (contados desde que empezó a cargar la página)

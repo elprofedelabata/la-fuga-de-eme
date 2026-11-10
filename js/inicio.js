@@ -76,11 +76,11 @@ export function mostrarInicio({ alJugar } = {}) {
     if (!vivo) return;
     vivo = false;
     window.removeEventListener('resize', ajustar);
-    raiz.classList.add('saliendo');
+    alJugar?.();                       // la siguiente pantalla queda debajo…
+    raiz.classList.add('saliendo');    // …y esta se desvanece encima
     setTimeout(() => {
       raiz.hidden = true;
       raiz.classList.remove('saliendo');
-      alJugar?.();
     }, reducido ? 0 : 350);
   };
 
