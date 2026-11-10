@@ -12,12 +12,55 @@ De 4.º de ESO a 2.º de Bachillerato, por mundos (capas del libro de las que Em
 
 | Mundo | Estilo | Física |
 |---|---|---|
-| **I · El cuaderno** | Papel cuadriculado, lápiz | Julitos enteros; rozamiento por casilla |
-| **II · El libro de texto** | Páginas impresas, figuras con θ | Números reales (m, μ, d), planos con rozamiento (cos θ), muelles ½kx² |
-| **III · La pizarra** | Tiza sobre verde | Loops (v² ≥ g·R), normal variable, tiro parabólico |
-| **Final · Fuera del libro** | Color | Nivel mezcla |
+| **I · El cuaderno** | Papel cuadriculado, lápiz | Julitos enteros; rozamiento por casilla; energía elástica; condiciones locales (jorobas, paredes) |
+| **II · El libro de texto** | Páginas impresas, figuras con θ | Números reales (m, μ, d), rozamiento con cos θ, ½kx², trabajo de fuerzas externas, choques |
+| **III · La pizarra** | Tiza sobre verde | Loops (2,5 R), tiro parabólico, rozamiento que depende de la velocidad, péndulo |
+| **Final · Fuera del libro** | Color | La misma altura no siempre vale lo mismo: otros planetas y Arquímedes |
 
-Nivel trampa previsto: **EME**, el primo grande (*M* mayúscula), llega igual de lejos porque la masa se cancela.
+El detalle de cada pieza está en el **catálogo de mecánicas**.
+
+## Catálogo de mecánicas
+
+**Regla de oro: toda pieza tiene un significado físico.** Nada de «reglas de videojuego»: si una pieza da o quita energía, tiene que haber una causa física que se pueda explicar en clase.
+
+### Ya en el juego
+
+| Pieza | Física | Comportamiento |
+|---|---|---|
+| Suelos y rampas de materiales | Rozamiento (trabajo no conservativo → calor) | Cada material quita sus julitos por casilla: hielo 0, madera 1, asfalto 2, arena 3 |
+| Hondonadas | La forma no frena: solo cuenta el material | Bajan y suben sin perder energía (si son de hielo) |
+| Repisa de meta | Ep final = energía inicial − pérdidas | Hay que llegar con 0 julitos de Ec |
+
+### Mundo I · El cuaderno (julitos enteros)
+
+- **Muelles cargados** (+N). Un muelle **no crea energía**: lanza a Eme porque estaba comprimido y tenía energía elástica guardada. La pieza lo muestra («muelle cargado: 3 julitos») y suma con la etiqueta «+N ■».
+- **Superficies elásticas: rebotadores y colchones.** Devuelven la energía que reciben menos una pérdida (restitución) y cambian el sentido de Eme. Un rebotador perfecto pierde 0; un colchón, 1.
+- **Jorobas.** Para pasar por encima hay que llegar a la cima con energía suficiente (Ep de la cima + algo de Ec). Introducen las **condiciones locales**: ya no basta con que cuadre el total; **el orden de las piezas importa**.
+- **Paredes de papel** con un parámetro de **resistencia N**. Si Eme llega con Ec ≥ N, la atraviesa y pierde N julitos (trabajo para romperla). Si llega con menos, el choque es inelástico: **se estampa y se para** (nuevo tipo de fallo). Con Ec = N justo, la rompe y se queda parado detrás.
+- **Agua (−1 julito por tramo).** El rozamiento con el agua, simplificado como el de la arena. Puede ser un nivel entero bajo el agua.
+
+### Mundo II · El libro de texto (números reales)
+
+- **Piezas giratorias** (mecánica que se desbloquea aquí): la misma pieza puede subir o bajar, o empujar a favor o en contra.
+- **Cinta transportadora.** Trabajo de una fuerza externa (W = F·d): en un sentido suma julitos y en el contrario los resta. Encaja con las piezas giratorias.
+- **Ventilador.** El aire empuja durante su tramo: a favor suma, en contra resta. (Una rata empujando queda como posible guiño de personaje.)
+- **Rozamiento con ángulo y longitud reales:** W = μ·m·g·cos θ·d. La rampa de arena ya no «come 3 por casilla» («¿por qué?»).
+- **Muelles con k y x:** Ep elástica = ½·k·x².
+- **Choque con otro bloque:** conservación del momento lineal; en un choque inelástico parte de la energía se va en calor.
+- **EME, el primo grande** (*M* mayúscula): llega igual de lejos porque la masa se cancela (nivel trampa).
+
+### Mundo III · La pizarra
+
+- **Loops con Ec mínima.** Arriba del loop hace falta v² ≥ g·R, es decir, **Ec arriba ≥ R/2 julitos** (con R en cuadritos). Desde abajo equivale a entrar con **Ec ≥ 2,5·R** (la clásica «altura 2,5 R»): con R = 2 cuadritos hay que entrar con 5 julitos. Si no, Eme se despega y cae.
+- **Saltos con Ec mínima y máxima.** Lanzado a 45° y aterrizando a la misma altura, **alcance = 2·Ec** (cada julito de Ec da 2 cuadritos). La plataforma de aterrizaje tiene un ancho: si se queda corto cae al hueco y si se pasa la sobrevuela. Ni más, ni menos.
+- **Agua que frena según la velocidad** (rozamiento viscoso): por ejemplo, −2 julitos por tramo si llega rápido y −1 si llega lento.
+- **Péndulo:** Eme se agarra a una cuerda; Ep ↔ Ec en movimiento circular, con la tensión.
+
+### Final · Fuera del libro
+
+- **Otros planetas:** en la Luna, la misma altura vale menos julitos (Ep = m·g·h).
+- **Empuje de Arquímedes** bajo el agua: Eme «pesa menos» y la misma altura da menos julitos.
+- Niveles que mezclan todo lo anterior.
 
 ## Julitos (Mundo I)
 
@@ -54,7 +97,8 @@ La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/
 ## Diseño de niveles
 
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones.
-- Como la energía final solo depende de la suma de pérdidas, intercambiar dos suelos da lo mismo. Para que el orden importe, usar piezas con condiciones locales (loops, saltos).
+- Como la energía final solo depende de la suma de pérdidas, intercambiar dos suelos da lo mismo. Para que el orden importe, usar piezas con condiciones locales: jorobas, paredes de papel, loops y saltos.
+- Cada mundo introduce sus mecánicas de una en una y luego las combina (ver el catálogo).
 - Estrellas por intentos (3 a la primera, 2 a la segunda, 1 después): se puede ir probando, pero el juego premia calcular. Tras dos fallos aparece una pista con el balance incompleto («8 = 5 + ¿?»).
 
 ## Simulación
@@ -140,6 +184,6 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 
 ## Pendiente
 
-- Más niveles del Mundo I (más huecos y piezas, muelles que *dan* julitos).
+- Niveles 2 a 6 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
-- PWA, imagen para compartir, dominio propio.
+- PWA, dominio propio.
