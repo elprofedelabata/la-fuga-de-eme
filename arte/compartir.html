@@ -27,17 +27,15 @@
     .julitos i { width: 32px; height: 32px; border: 3px solid var(--lapiz); border-radius: 4px; box-sizing: border-box; }
     .ep { background: #5c8ee6; } .ec { background: #f7d046; } .calor { background: #e5533d; }
     .tarjeta {
-      position: absolute; left: 760px; top: 92px; width: 380px; height: 380px;
+      position: absolute; left: 760px; top: 122px; width: 380px; height: 380px;
       border: 4px solid var(--lapiz); border-radius: 10px 8px 11px 7px / 8px 11px 7px 10px;
       background: #fffef9; box-shadow: 9px 11px 0 rgba(80, 70, 60, 0.14);
       transform: rotate(2.2deg); overflow: hidden;
     }
     .tarjeta canvas { display: block; width: 100%; height: 100%; }
     .cinta { position: absolute; width: 110px; height: 34px; background: rgba(236, 226, 196, 0.85); }
-    .c1 { left: 720px; top: 74px; transform: rotate(-24deg); }
-    .c2 { left: 1080px; top: 78px; transform: rotate(22deg); }
-    .pie { position: absolute; left: 790px; top: 512px; margin: 0; font-size: 27px; color: var(--suave); transform: rotate(1.5deg); }
-    .pie b { font-weight: normal; color: var(--lapiz); }
+    .c1 { left: 720px; top: 104px; transform: rotate(-24deg); }
+    .c2 { left: 1080px; top: 108px; transform: rotate(22deg); }
   </style>
 </head>
 <body>
@@ -47,7 +45,6 @@
   <div class="julitos"><i class="ep"></i><i class="ep"></i><i class="ep"></i><i class="ep"></i><i class="ep"></i><i class="calor"></i><i class="calor"></i><i class="calor"></i></div>
   <div class="tarjeta"><canvas id="tablero"></canvas></div>
   <div class="cinta c1"></div><div class="cinta c2"></div>
-  <p class="pie"><b>8 = 5 + 3</b> · ni más, ni menos</p>
 
   <script type="module">
     import { NIVEL } from '../js/nivel.js';
