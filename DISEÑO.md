@@ -79,7 +79,22 @@ La meta es una repisa plana a la altura objetivo, con la bandera en su borde y u
 
 Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El objetivo se muestra siempre: una línea bajo el título que dice de dónde sale y adónde llega («Sale con **8** julitos · Meta: pararse a altura **5**», el 8 en naranja como Eme y su marcador, el 5 en rojo), el número de la meta en rojo en la regla y una línea discontinua roja a esa altura que llega hasta la bandera. No hay barra de julitos fija: la energía se ve en directo durante el lanzamiento y en el balance final.
 
-## Nivel 1 · «Ni más, ni menos»
+## Niveles del Mundo I
+
+El cuaderno tiene **10 niveles**. Todos usan la misma pista en «U»: plataforma de salida y rampa de bajada (casillas 1, 4 y 7), suelo (casilla 8) y subida en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **rampa** (casilla 4), **suelo** (casilla 8) y **subida** (casilla 6). Los niveles están en `js/nivel.js` y el validador los comprueba todos.
+
+### Nivel 1 · «Lo que baja, sube» (tutorial)
+
+Enseña los controles básicos sin física que calcular. Sale a altura 7 y la meta está a altura 7. Tres huecos (rampa, suelo y subida) y tres piezas de hielo, cada una con una forma que solo encaja en su hueco. Sin rozamiento, **Eme sube justo hasta la altura de la que salió**: la conservación de la energía en estado puro (balance 7 = 7).
+
+- El bocadillo de Eme da la instrucción: «Arrastra cada pieza a su hueco y pulsa LANZAR».
+- **Mano fantasma** (`js/tutorial.js`): coge una pieza de la bandeja y la lleva a su hueco, en bucle, mientras falten piezas; cuando están todas, señala LANZAR. Se aparta en cuanto el jugador toca la pantalla y vuelve si sigue haciendo falta.
+
+### Nivel 2
+
+Por diseñar. Mientras no exista, el nivel 3 se desbloquea al completar el 1.
+
+### Nivel 3 · «Ni más, ni menos»
 
 Salida a altura 8 (8 julitos), suelo a altura 1, meta a altura 5. Huecos: casilla 4 (rampa) y casilla 8 (suelo). Hay que perder exactamente 3.
 
@@ -145,7 +160,7 @@ De momento solo «Borrar progreso» tiene efecto; el resto se recuerda en `local
 - **III · La pizarra:** tiza sobre verde y marco de madera.
 - **Final · Fuera del libro:** cielo y sol, un único nivel.
 
-Los niveles de cada mundo (6, y 1 el final; numerados de forma correlativa) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con sus estrellas debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior. Los mundos bloqueados se ven apagados con «Termina el mundo anterior». De momento solo se puede jugar el nivel 1.
+Los niveles de cada mundo (10 en el cuaderno, 6 en el libro y en la pizarra, y 1 el final; numerados de forma correlativa) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con sus estrellas debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior que ya existe (los que aún no están hechos aparecen con candado y se saltan). Los mundos bloqueados se ven apagados con «Termina el mundo anterior». Al superar un nivel, «Siguiente» lleva al siguiente que exista.
 
 Las mejores estrellas de cada nivel se guardan en `localStorage` (`js/progreso.js`). Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → (historia, la primera vez) → niveles → nivel. La historia termina contando el plan de los mundos, que es justo lo que muestra el mapa de niveles a continuación. Al cambiar de pantalla, la siguiente se coloca debajo y la anterior se **arranca** (ver «Transiciones»).
 
@@ -184,6 +199,6 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 
 ## Pendiente
 
-- Niveles 2 a 6 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Niveles 2 y 4 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

@@ -47,7 +47,8 @@
   <div class="cinta c1"></div><div class="cinta c2"></div>
 
   <script type="module">
-    import { NIVEL } from '../js/nivel.js';
+    import { usarNivel } from '../js/nivel.js';
+    const NIVEL = usarNivel(3);   // el tablero de la imagen es el del nivel 3 («Ni más, ni menos»)
     import { dibujarTablero, dibujarEme, vistaTablero } from '../js/dibujo.js';
 
     await document.fonts.load('20px "Patrick Hand"');

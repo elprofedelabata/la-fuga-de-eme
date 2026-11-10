@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prueba: mapa de niveles</title>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+  <!-- Herramienta de prueba: muestra el mapa de niveles con un progreso de ejemplo (?p={"1":3}) -->
+  <section class="niveles" id="niveles" hidden>
+    <header class="niveles-cab">
+      <button class="btn redondo" id="btn-niveles-volver" aria-label="Volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2>Elige nivel</h2>
+      <p class="niveles-total" id="niveles-total"></p>
+    </header>
+    <div class="mundos" id="mundos"></div>
+  </section>
+  <script type="module">
+    import { mostrarNiveles } from '../js/niveles.js';
+    const p = new URLSearchParams(location.search).get('p');
+    localStorage.setItem('fuga-eme-progreso', p ?? '{}');
+    mostrarNiveles({});
+    for (const a of document.getAnimations()) a.pause();
+  </script>
+</body>
+</html>

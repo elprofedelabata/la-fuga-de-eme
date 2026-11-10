@@ -1,6 +1,6 @@
 // La fuga de Eme · boceto jugable del nivel 1.
 
-import { NIVEL, MATERIALES } from './nivel.js';
+import { NIVEL, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
 import { prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida } from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
@@ -11,6 +11,7 @@ import { mostrarHistoria, historiaVista } from './historia.js';
 import { mostrarInicio } from './inicio.js';
 import { arrancar } from './transicion.js';
 import { abrirOpciones } from './opciones.js';
+import { iniciarTutorial } from './tutorial.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
 
@@ -24,7 +25,7 @@ const CUADRITOS = 9;   // cuadritos de alto del tablero (el tablero aún está h
 
 const estado = {
   modo: 'montaje',            // montaje | directo | resultado
-  colocadas: { 4: null, 8: null },
+  colocadas: {},
   seleccion: null,            // id de la pieza levantada
   huecoElegido: null,         // hueco tocado antes de elegir pieza
   avisos: {},                 // casilla -> segundos que parpadea en rojo
@@ -517,6 +518,10 @@ function mostrarResultado() {
   const pista = $('pista-ayuda');
   pista.hidden = !(tipo !== 'meta' && estado.fallos >= 2);
   pista.textContent = `Pista: ${E} = ${hm} (altura de la meta) + ¿? (lo que tienen que perder las piezas)`;
+  const sig = siguienteNivel();
+  const puedeSeguir = !!sig && (tipo === 'meta' || estrellasDe(NIVEL.numero) > 0);
+  $('btn-siguiente').disabled = !puedeSeguir;
+  $('btn-siguiente').title = puedeSeguir ? `Ir al nivel ${sig}` : sig ? 'Supera este nivel para seguir' : 'Próximamente';
   $('hoja').hidden = false;
   $('btn-reintentar').focus({ preventScroll: true });
 }
@@ -814,14 +819,60 @@ function fotograma(ahora) {
 }
 
 // ---------- arranque ----------
-function iniciar() {
-  estado.recMontaje = prepararRecorrido(NIVEL, { 4: null, 8: null });
+/** Prepara todo lo que depende del nivel: textos, huecos, bandeja, estrellas… */
+function cargarNivel(n) {
+  usarNivel(n);
+  estado.colocadas = Object.fromEntries(Object.keys(NIVEL.huecos).map((c) => [c, null]));
+  estado.seleccion = null;
+  estado.huecoElegido = null;
+  estado.fuera = new Set();
+  estado.avisos = {};
+  estado.intentos = 0;
+  estado.fallos = 0;
+  estado.mejor = estrellasDe(n);
+  estado.recMontaje = prepararRecorrido(NIVEL, estado.colocadas);
   $('titulo-nivel').textContent = `Nivel ${NIVEL.numero} · ${NIVEL.titulo}`;
   $('bocadillo').textContent = NIVEL.frase;
+  $('bocadillo').classList.remove('oculto');
   $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b> julitos`;
   $('objetivo-meta').innerHTML = `Meta: pararse a altura <b class="meta">${NIVEL.meta.altura}</b>`;
   $('directo-pie').textContent = `Total: ${NIVEL.energia} julitos. Siempre.`;
   $('objetivo').setAttribute('aria-label', `Eme sale con ${NIVEL.energia} julitos. Meta: que se pare en la bandera, a altura ${NIVEL.meta.altura}`);
+  for (const r of $('regla').querySelectorAll('.regla-n')) {
+    r.classList.toggle('meta', Number(r.style.getPropertyValue('--h')) === NIVEL.meta.altura);
+  }
+  crearHuecos();
+  crearBandeja();
+  pintarEstrellas($('estrellas'), estado.mejor);
+  volverAMontar();
+}
+
+/** Botones invisibles sobre las casillas vacías del nivel (para tocar y arrastrar). */
+function crearHuecos() {
+  $('tablero').querySelectorAll('.hueco').forEach((b) => b.remove());
+  for (const [cs, forma] of Object.entries(NIVEL.huecos)) {
+    const celda = Number(cs);
+    const b = document.createElement('button');
+    b.className = 'hueco';
+    b.dataset.celda = celda;
+    b.setAttribute('aria-label', `Hueco de ${forma}, casilla ${celda}`);
+    b.style.left = `${((celda - 1) % 3) * 33.333}%`;
+    b.style.top = `${Math.floor((celda - 1) / 3) * 33.333}%`;
+    b.addEventListener('click', () => { if (!suprimirClick) tocarHueco(celda); });
+    b.addEventListener('pointerdown', (e) => {
+      const p = estado.colocadas[celda];
+      if (p) posibleArrastre(e, { pieza: p, desde: celda });
+    });
+    $('bocadillo').before(b);
+  }
+}
+
+/** Siguiente nivel que ya existe, o null. */
+function siguienteNivel() {
+  return [...NIVELES_JUGABLES].filter((k) => k > NIVEL.numero).sort((a, b) => a - b)[0] ?? null;
+}
+
+function iniciar() {
   $('bocadillo').addEventListener('click', ocultarBocadillo);
   // Regla de alturas: un número por cuadrito, todos iguales
   const regla = $('regla');
@@ -829,19 +880,10 @@ function iniciar() {
   regla.setAttribute('aria-label', `Regla de alturas en julitos, de 0 a ${CUADRITOS}`);
   for (let h = 0; h <= CUADRITOS; h++) {
     const n = document.createElement('span');
-    n.className = `regla-n${h === NIVEL.meta.altura ? ' meta' : ''}`;
+    n.className = 'regla-n';
     n.style.setProperty('--h', h);
     n.textContent = h;
     regla.append(n);
-  }
-  actualizarEnergia({ ep: NIVEL.energia, ec: 0, calor: 0 });
-  for (const b of document.querySelectorAll('.hueco')) {
-    const celda = Number(b.dataset.celda);
-    b.addEventListener('click', () => { if (!suprimirClick) tocarHueco(celda); });
-    b.addEventListener('pointerdown', (e) => {
-      const p = estado.colocadas[celda];
-      if (p) posibleArrastre(e, { pieza: p, desde: celda });
-    });
   }
   $('btn-lanzar').addEventListener('click', lanzar);
   $('btn-vaciar').addEventListener('click', vaciar);
@@ -855,6 +897,7 @@ function iniciar() {
   $('btn-normal').addEventListener('click', () => ponerVelocidad(1));
   $('btn-parar').addEventListener('click', volverAMontar);
   $('btn-reintentar').addEventListener('click', volverAMontar);
+  $('btn-siguiente').addEventListener('click', () => { const s = siguienteNivel(); if (s) entrarNivel(s); });
   $('btn-menu').addEventListener('click', () => { $('acerca').returnValue = ''; $('acerca').showModal(); });
   $('acerca').addEventListener('close', () => {
     if ($('acerca').returnValue === 'historia') mostrarHistoria();
@@ -863,14 +906,22 @@ function iniciar() {
   });
 
   ajustar();
-  crearBandeja();
-  estado.mejor = estrellasDe(NIVEL.numero);
-  pintarEstrellas($('estrellas'), estado.mejor);
-  refrescar();
+  cargarNivel(1);
   new ResizeObserver(() => ajustar()).observe($('tablero'));
   requestAnimationFrame(fotograma);
+  // Tutorial: una mano fantasma enseña a colocar las piezas y a lanzar
+  iniciarTutorial({
+    activo: () => NIVEL.tutorial && estado.modo === 'montaje' && !estado.arrastre && !estado.vuelos
+      && !document.querySelector('dialog[open]')
+      && ['inicio', 'niveles', 'historia'].every((id) => $(id).hidden) && !$('cargando'),
+    siguiente: () => {
+      const libre = NIVEL.piezas.find((p) => !estado.fuera.has(p.id) && !estado.colocadas[celdaDeForma(p.forma)]);
+      if (libre) return { desde: rectMini(libre.id), hasta: rectHueco(celdaDeForma(libre.forma)) };
+      if (Object.keys(NIVEL.huecos).every((c) => estado.colocadas[c])) return { pulsar: $('btn-lanzar').getBoundingClientRect() };
+      return null;
+    },
+  });
   // carga → inicio → (JUGAR) → historia, solo la primera vez → elige nivel → nivel
-  // (mientras no exista la selección de niveles, JUGAR lleva directamente al nivel 1)
   // La portada se coloca debajo de la pantalla de carga y la hoja de la carga se arranca.
   quitarCarga(abrirInicio);
 }
@@ -885,9 +936,9 @@ function abrirNiveles() {
   mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio });
 }
 
-/** Entra en un nivel (de momento solo existe el 1). */
-function entrarNivel() {
-  if (estado.modo !== 'montaje') volverAMontar();
+/** Entra en un nivel. */
+function entrarNivel(n) {
+  cargarNivel(n);
 }
 
 // La pantalla de carga se queda al menos 2 s (contados desde que empezó a cargar la página)

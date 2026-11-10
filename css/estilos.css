@@ -138,8 +138,6 @@ button { font: inherit; color: inherit; }
   position: absolute; width: 33.333%; height: 33.333%;
   border: 0; background: transparent; cursor: pointer; border-radius: 10px;
 }
-.hueco[data-celda="4"] { left: 0; top: 33.333%; }
-.hueco[data-celda="8"] { left: 33.333%; top: 66.666%; }
 .hueco:focus-visible { outline: 3px solid var(--naranja-o); outline-offset: -6px; }
 .app:not([data-modo="montaje"]) .hueco { pointer-events: none; }
 
@@ -422,6 +420,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 
 .camino { position: relative; margin-top: 6px; }
 .camino-6 { aspect-ratio: 16 / 10.5; }
+.camino-10 { aspect-ratio: 16 / 15; }
 .camino-1 { height: 108px; }
 .camino-linea { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .camino-linea polyline { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 7 6; opacity: 0.45; }
@@ -572,6 +571,12 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .opciones-nota { margin: 0; padding: 4px 18px 16px 40px; font-size: 13px; color: var(--suave); }
 @media (hover: hover) and (pointer: fine) {
   .segmentos label:hover input:not(:checked) + span { background: #fff4e3; }
+}
+
+/* ---------- mano fantasma del tutorial ---------- */
+.tutorial-mano {
+  position: fixed; left: 0; top: 0; z-index: 35; width: 46px; height: 46px;
+  pointer-events: none; opacity: 0; filter: drop-shadow(2px 3px 0 rgba(60, 50, 40, 0.25));
 }
 
 /* ---------- historia de primer acceso ---------- */

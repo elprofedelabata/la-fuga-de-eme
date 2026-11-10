@@ -287,6 +287,9 @@ export function iconoForma(ctx, cx, cy, L, forma, color) {
   if (forma === 'rampa') {
     ctx.moveTo(cx - 10 * s, cy - 22 * s);
     ctx.quadraticCurveTo(cx - 10 * s, cy + 4 * s, cx + 14 * s, cy + 10 * s);
+  } else if (forma === 'subida') {
+    ctx.moveTo(cx - 14 * s, cy + 10 * s);
+    ctx.quadraticCurveTo(cx + 10 * s, cy + 4 * s, cx + 10 * s, cy - 22 * s);
   } else {
     ctx.moveTo(cx - 20 * s, cy + 4 * s);
     ctx.lineTo(cx + 20 * s, cy + 4 * s);

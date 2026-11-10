@@ -15,12 +15,12 @@ import { MATERIALES, NIVEL } from './nivel.js';
 export const G = 3;
 
 // ---------- geometría ----------
-export function construirPista(perfilB = 'plano', alturaMeta = NIVEL.meta.altura) {
-  const pts = [[0, 8], [1.2, 8]];
-  // Rampa de salida: un "quarter pipe" de altura 8 a 1 que ocupa las casillas 1, 4 y 7
+export function construirPista(perfilB = 'plano', alturaMeta = NIVEL.meta.altura, alturaSalida = NIVEL.energia) {
+  const pts = [[0, alturaSalida], [1.2, alturaSalida]];
+  // Rampa de salida: un "quarter pipe" de la altura de salida a 1 (casillas 1, 4 y 7)
   for (let i = 1; i <= 48; i++) {
     const th = (i / 48) * Math.PI / 2;
-    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), 1 + 7 * (1 - Math.sin(th))]);
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), 1 + (alturaSalida - 1) * (1 - Math.sin(th))]);
   }
   // Casilla 8: suelo plano u hondonada
   if (perfilB === 'hondonada') {
@@ -58,7 +58,7 @@ export function celdasTramos(pts) {
 
 // ---------- recorrido para la simulación ----------
 export function prepararRecorrido(nivel, colocadas) {
-  const pts = construirPista(colocadas[8]?.perfil ?? 'plano', nivel.meta.altura);
+  const pts = construirPista(colocadas[8]?.perfil ?? 'plano', nivel.meta.altura, nivel.energia);
   const celdas = celdasTramos(pts);
   const s = [0];
   for (let i = 1; i < pts.length; i++) {

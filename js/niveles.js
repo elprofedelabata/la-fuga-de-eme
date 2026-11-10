@@ -8,6 +8,7 @@ const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Posiciones (en % de la tarjeta) de las casillas de un mundo: un zigzag de dos filas
 const POSICIONES = {
+  10: [[12, 16], [37, 13], [63, 16], [88, 13], [84, 50], [50, 47], [16, 50], [16, 84], [50, 81], [84, 84]],
   6: [[14, 26], [50, 19], [86, 28], [84, 74], [50, 81], [16, 72]],
   1: [[50, 46]],
 };
@@ -17,7 +18,9 @@ const CANDADO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5
 /** Estado de cada nivel según el progreso: completado, siguiente, disponible o bloqueado. */
 function estadoNivel(n, progreso) {
   if (!NIVELES_JUGABLES.has(n)) return 'bloqueado';
-  if (n > 1 && !progreso[n - 1]) return 'bloqueado';
+  // se desbloquea al completar el nivel jugable anterior (los que aún no existen se saltan)
+  const anterior = Math.max(0, ...[...NIVELES_JUGABLES].filter((k) => k < n));
+  if (anterior && !progreso[anterior]) return 'bloqueado';
   return progreso[n] ? 'completado' : 'siguiente';
 }
 
