@@ -30,6 +30,8 @@ El detalle de cada pieza está en el **catálogo de mecánicas**.
 | Suelos y rampas de materiales | Rozamiento (trabajo no conservativo → calor) | Cada material quita sus julitos por casilla: hielo 0, madera 1, asfalto 2, arena 3 |
 | Hondonadas | La forma no frena: solo cuenta el material | Bajan y suben sin perder energía (si son de hielo) |
 | Repisa de meta | Ep final = energía inicial − pérdidas | Hay que llegar con 0 julitos de Ec |
+| Montañitas y colinas | Lo que se gasta al subir se recupera al bajar; la cima exige energía | Sin rozamiento no cuestan nada; con rozamiento, hay que llegar arriba con energía (el orden importa) |
+| **Escaleras mecánicas** (+N) | Trabajo de una fuerza externa: el motor eléctrico da energía a Eme | Dan N julitos repartidos por su tramo (pegatina verde «+N», etiquetas «+1 ■»). Llevan a Eme aunque vaya sin velocidad y solo suben: si vuelve hacia atrás, se queda arriba. La **averiada** (+0) no tiene motor: es una cuesta normal |
 
 ### Mundo I · El cuaderno (julitos enteros)
 
@@ -67,7 +69,7 @@ El detalle de cada pieza está en el **catálogo de mecánicas**.
 - 1 cuadrito de altura = 1 julito de Ep. El tablero mide 9 × 9 cuadritos.
 - Cada material se come un número fijo de julitos por casilla: hielo 0, madera 1, asfalto 2, arena 3.
 - Simplificación consciente: en el Mundo I una rampa de arena come lo mismo que un suelo de arena. En el Mundo II se rompe a propósito («¿por qué la rampa ya no come 3?»).
-- La energía siempre suma lo mismo. Colores: **Ep azul**, **Ec amarillo**, **calor rojo**. Cada julito que se pierde aparece junto a Eme como «−1 ■» flotante que se desvanece (y «+1 ■» cuando haya piezas que den energía). Las etiquetas se reparten de forma regular por el tramo de la pieza: si quita n julitos, salen en las posiciones 1/(n+1), 2/(n+1)… (madera al 50 %; asfalto al 33 % y 67 %; arena al 25 %, 50 % y 75 %). No es como se pierde de verdad, pero se lee mejor.
+- La energía siempre suma lo mismo, salvo que una pieza con motor (las escaleras mecánicas) le dé más: entonces la barra de energía crece y el balance queda «salida + lo que dan las escaleras = altura de la meta + pérdidas». Colores: **Ep azul**, **Ec amarillo**, **calor rojo**, lo que da un motor **verde**. Cada julito que se pierde aparece junto a Eme como «−1 ■» flotante que se desvanece, y cada uno que gana, como «+1 ■» verde. Las etiquetas se reparten de forma regular por el tramo de la pieza: si quita n julitos, salen en las posiciones 1/(n+1), 2/(n+1)… (madera al 50 %; asfalto al 33 % y 67 %; arena al 25 %, 50 % y 75 %). No es como se pierde de verdad, pero se lee mejor.
 
 ## Meta: pararse a la altura objetivo
 
@@ -175,6 +177,23 @@ Piezas (7 para 3 huecos): rampa de hielo o de asfalto; suelo de hielo, de madera
 
 Si Eme se queda en la colina, la hoja de resultado lo explica: «Su cima está a altura 2: para pasarla tenía que llegar arriba habiendo perdido menos de 2 julitos, y perdió 2,5. Las cuentas cuadraban… ¡pero el orden de las piezas importa!». El análisis (`analizar` en `js/pista.js`) recorre la pista sumando lo que pierde cada tramo para detectar estos atascos, y el validador lo contrasta con la simulación.
 
+### Nivel 5 · «Sube, sube»
+
+Tablero de 3 filas y 4 columnas. Empieza donde acabó el nivel 4, a altura 1, y la meta está a altura 8, arriba a la derecha. Introduce las **piezas que dan julitos**: dos huecos para **escaleras mecánicas** (casillas 10 y 7) que suben en diagonal. Eme baja un poco hasta el pie de la primera, sube por las dos y una subida en S lo lleva a la repisa.
+
+Piezas: escaleras mecánicas de **+3, +4 y +5** y una **averiada (+0)**. Hay que conseguir 1 + ¿? = 8: entre las dos tienen que dar **7** (la de +3 y la de +4, en cualquier orden: dos soluciones). Con más se pasa; con la averiada no llega (se queda arriba de la otra escalera o no consigue subir).
+
+**Charla de las escaleras** (solo la primera vez, `fuga-eme-charla-5-vista`):
+
+1. «Uf… Estoy a altura 1 y la meta está a altura 8.» (se iluminan la salida y la meta)
+2. «Con 1 julito no subo ni un escalón. ¡Necesito más energía!»
+3. «Por suerte, hay escaleras mecánicas: tienen motor y, al subirme, me dan julitos.» (la bandeja)
+4. «Esos julitos salen de la electricidad del motor. El número verde es lo que me da cada una.» (las pegatinas)
+5. «Y ojo con la averiada: sin motor, no me da nada.»
+6. «¿Cuántos julitos me tienen que dar entre las dos para pararme justo en la bandera?» (la bandera)
+
+Las escaleras se dibujan con chapa de metal, escalones y pasamanos. La hoja de resultado muestra lo que da cada escalera en verde («1 + 4 + 3 = 8»).
+
 ## Diseño de niveles
 
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
@@ -266,6 +285,6 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 
 ## Pendiente
 
-- Niveles 5 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Niveles 6 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

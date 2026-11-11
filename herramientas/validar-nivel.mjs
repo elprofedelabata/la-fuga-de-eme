@@ -51,7 +51,7 @@ for (const nivel of Object.values(NIVELES)) {
     if (!ok) errores++;
     if (a.tipo === 'meta') soluciones++;
     const nombres = Object.values(comb).map((p) => p.nombre.join(' ')).join(' + ');
-    console.log(`${ok ? '✓' : '✗'} ${nombres.padEnd(48)} pierde ${a.perdidas} · llega con ${String(a.llegada).padStart(2)} → ${a.tipo.padEnd(8)} simulación: ${r.fin} (t=${r.sim.t.toFixed(1)} s${r.x ? `, se para en x=${r.x.toFixed(2)}` : ''})`);
+    console.log(`${ok ? '✓' : '✗'} ${nombres.padEnd(48)} ${a.ganancias ? `gana ${a.ganancias} · ` : ''}pierde ${a.perdidas} · llega con ${String(a.llegada).padStart(2)} → ${a.tipo.padEnd(8)} simulación: ${r.fin} (t=${r.sim.t.toFixed(1)} s${r.x ? `, se para en x=${r.x.toFixed(2)}` : ''})`);
   }
   // Continuidad: empieza donde acabó el nivel anterior
   const anterior = NIVELES[nivel.numero - 1];

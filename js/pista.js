@@ -13,6 +13,17 @@ import { MATERIALES, NIVEL } from './nivel.js';
 
 // "Gravedad" visual en cuadritos/s². La rapidez sale de Ec = v² / (2·G).
 export const G = 3;
+// Rapidez mínima en una escalera mecánica (cuadritos/s): la escalera lleva a Eme aunque vaya
+// sin velocidad. No cambia las cuentas de energía, solo el movimiento.
+const V_ESCALERA = 1.4;
+
+/**
+ * Julitos que cambia una pieza al recorrerla: positivo si los quita (rozamiento), negativo si
+ * los da (escaleras mecánicas, con `gana`).
+ */
+export const cambioDe = (p) => (!p ? 0 : p.gana != null ? -p.gana : MATERIALES[p.material].pierde);
+/** ¿Tiene motor? (una escalera que da julitos; la averiada no) */
+export const conMotor = (p) => (p?.gana ?? 0) > 0;
 
 // ---------- geometría ----------
 // El tablero tiene siempre 3 filas de casillas (9 cuadritos de alto) y 3 o más columnas.
@@ -102,7 +113,35 @@ function pistaColina(nivel) {
   return pts;
 }
 
-const TRAZADOS = { u: pistaU, colina: pistaColina };
+/**
+ * Escaleras (tablero de 4 columnas): Eme sale abajo, baja un poco hasta el pie de la primera
+ * escalera mecánica (casilla 10), sube por ella y por la segunda (casilla 7) en diagonal, y una
+ * subida en S lo lleva a la repisa de la meta, arriba a la derecha.
+ */
+function pistaEscaleras(nivel) {
+  const hs = nivel.energia, hm = nivel.meta.altura;
+  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const suave = (u) => u * u * (3 - 2 * u);
+  const pie = hs - 0.5;           // pie de la primera escalera
+  const pts = [[0, hs], [1.2, hs]];
+  // bajadita hasta el pie de la escalera (empieza con caída, como las rampas): así Eme
+  // arranca y llega a la escalera con algo de velocidad
+  for (let i = 1; i <= 24; i++) {
+    const th = (i / 24) * Math.PI / 2;
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), pie + (hs - pie) * (1 - Math.sin(th))]);
+  }
+  // primera escalera: recta, de (3, pie) a (6, 3)
+  for (let i = 1; i <= 12; i++) pts.push([3 + (3 * i) / 12, pie + ((3 - pie) * i) / 12]);
+  // segunda escalera: recta, de (6, 3) a (9, 6)
+  for (let i = 1; i <= 12; i++) pts.push([6 + (3 * i) / 12, 3 + (3 * i) / 12]);
+  // subida en S hasta la repisa de la meta
+  for (let i = 1; i <= 20; i++) pts.push([9 + (repisa - 9) * (i / 20), 6 + (hm - 6) * suave(i / 20)]);
+  // repisa plana y sin rozamiento hasta el precipicio
+  for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);
+  return pts;
+}
+
+const TRAZADOS = { u: pistaU, colina: pistaColina, escaleras: pistaEscaleras };
 
 export function celdaDe(x, h, cols = 3) {
   const c = Math.min(Math.max(Math.floor(x / 3), 0), cols - 1);
@@ -127,13 +166,15 @@ export function prepararRecorrido(nivel, colocadas) {
   for (let i = 1; i < pts.length; i++) {
     s.push(s[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
   }
-  const material = (c) => (nivel.huecos[c] ? colocadas[c]?.material ?? 'fijo' : 'fijo');
+  const pieza = (c) => (nivel.huecos[c] ? colocadas[c] ?? null : null);
+  const material = (c) => pieza(c)?.material ?? 'fijo';
   const largo = {};
   for (let i = 0; i < celdas.length; i++) largo[celdas[i]] = (largo[celdas[i]] ?? 0) + (s[i + 1] - s[i]);
-  // densidad de pérdida (julitos por cuadrito recorrido) de cada tramo
-  const dens = celdas.map((c) => MATERIALES[material(c)].pierde / largo[c]);
+  // densidad de pérdida (julitos por cuadrito recorrido) de cada tramo; negativa si los da
+  const dens = celdas.map((c) => cambioDe(pieza(c)) / largo[c]);
   const mats = celdas.map(material);
-  return { pts, s, dens, celdas, mats, total: s[s.length - 1] };
+  const motor = celdas.map((c) => conMotor(pieza(c)));
+  return { pts, s, dens, celdas, mats, motor, total: s[s.length - 1] };
 }
 
 function indice(rec, q) {
@@ -169,11 +210,12 @@ export function sDeX(rec, x) {
 // ---------- resultado esperado (cuentas con julitos enteros) ----------
 export function analizar(nivel, colocadas) {
   const piezas = Object.values(colocadas).filter(Boolean);
-  const perdidas = piezas.reduce((a, p) => a + MATERIALES[p.material].pierde, 0);
-  const llegada = nivel.energia - nivel.meta.altura - perdidas;   // Ec al llegar a la meta
+  const perdidas = piezas.reduce((a, p) => a + Math.max(cambioDe(p), 0), 0);
+  const ganancias = piezas.reduce((a, p) => a + Math.max(-cambioDe(p), 0), 0);
+  const llegada = nivel.energia + ganancias - nivel.meta.altura - perdidas;   // Ec al llegar a la meta
   const atasco = buscarAtasco(nivel, colocadas);
   const tipo = atasco ? 'nollega' : llegada === 0 ? 'meta' : llegada > 0 ? 'pasaste' : 'nollega';
-  return { tipo, perdidas, llegada, piezas, atasco };
+  return { tipo, perdidas, ganancias, llegada, piezas, atasco };
 }
 
 /**
@@ -211,8 +253,9 @@ function buscarAtasco(nivel, colocadas) {
 // ---------- simulación ----------
 export function nuevaSimulacion(rec, nivel) {
   return {
-    s: sDeX(rec, nivel.salidaX), dir: 1, perdido: 0, t: 0, v: 0,
+    s: sDeX(rec, nivel.salidaX), dir: 1, perdido: 0, ganado: 0, t: 0, v: 0,
     perdidoCelda: {},     // julitos perdidos en cada casilla (para repartir las etiquetas −1)
+    ganadoCelda: {},      // julitos ganados en cada casilla (etiquetas +1)
     estado: 'rodando',    // rodando | cayendo | meta | parado
     vueltas: 0, gracia: 1.0, caida: null,   // gracia: el empujoncito inicial
     E0: nivel.energia,
@@ -222,7 +265,7 @@ export function nuevaSimulacion(rec, nivel) {
 export function energias(sim, rec) {
   const h = sim.caida ? sim.caida.h : muestra(rec, sim.s).h;
   const ep = Math.max(h, 0);
-  return { ep, ec: Math.max(sim.E0 - h - sim.perdido, 0), calor: sim.perdido };
+  return { ep, ec: Math.max(sim.E0 + sim.ganado - h - sim.perdido, 0), calor: sim.perdido, ganado: sim.ganado };
 }
 
 export function avanzar(sim, rec, nivel, dt) {
@@ -244,8 +287,9 @@ export function avanzar(sim, rec, nivel, dt) {
     sim.t += h;
     sim.gracia -= h;
     const m = muestra(rec, sim.s);
-    const ec = sim.E0 - m.h - sim.perdido;
-    const v = Math.sqrt(2 * G * (Math.max(ec, 0) + 0.02));
+    const ec = sim.E0 + sim.ganado - m.h - sim.perdido;
+    let v = Math.sqrt(2 * G * (Math.max(ec, 0) + 0.02));
+    if (rec.motor[m.i]) v = Math.max(v, V_ESCALERA);   // la escalera lo lleva
     sim.v = v;
     const ns = sim.s + sim.dir * v * h;
 
@@ -255,21 +299,29 @@ export function avanzar(sim, rec, nivel, dt) {
       return;
     }
     const i = muestra(rec, (sim.s + Math.max(ns, 0)) / 2).i;
+    // Una escalera mecánica solo sube: si Eme vuelve hacia atrás y llega a ella, se queda arriba
+    if (sim.dir === -1 && rec.motor[i]) {
+      sim.estado = 'parado';
+      return;
+    }
     const dl = rec.dens[i] * Math.abs(ns - sim.s);
     const mn = muestra(rec, ns);
-    const ecn = sim.E0 - mn.h - sim.perdido - dl;
+    const ecn = sim.E0 + sim.ganado - mn.h - sim.perdido - dl;
 
     // Tolerancia de una centésima de julito: las cuentas del nivel son enteras, pero la
     // integración numérica deja restos minúsculos que no deben mover a Eme.
-    if (ecn < 0.01 && sim.gracia <= 0) {
+    if (ecn < 0.01 && sim.gracia <= 0 && !rec.motor[i]) {
       detener(sim, nivel, m);
       return;
     }
     sim.s = Math.max(ns, 0);
+    const c = rec.celdas[i];
     if (dl > 0) {
       sim.perdido += dl;
-      const c = rec.celdas[i];
       sim.perdidoCelda[c] = (sim.perdidoCelda[c] ?? 0) + dl;
+    } else if (dl < 0) {
+      sim.ganado -= dl;
+      sim.ganadoCelda[c] = (sim.ganadoCelda[c] ?? 0) - dl;
     }
   }
 }

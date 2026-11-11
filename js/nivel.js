@@ -17,6 +17,9 @@ export const MATERIALES = {
   madera: { nombre: 'madera', pierde: 1 },
   asfalto: { nombre: 'asfalto', pierde: 2 },
   arena: { nombre: 'arena', pierde: 3 },
+  // Las escaleras mecánicas no rozan: tienen motor y DAN julitos (cada pieza dice cuántos,
+  // en `gana`). La energía sale de la red eléctrica: el motor hace trabajo sobre Eme.
+  escalera: { nombre: 'escalera mecánica', pierde: 0 },
 };
 
 export const NIVELES = {
@@ -139,6 +142,36 @@ export const NIVELES = {
       { id: 'suelo-asfalto', forma: 'suelo', material: 'asfalto', nombre: ['Suelo', 'de asfalto'] },
       { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
       { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
+    ],
+  },
+
+  // Eme se ha quedado abajo (a altura 1) y la meta está a altura 8: solo puede subir con las
+  // escaleras mecánicas, piezas que dan julitos. Entre las dos tienen que dar justo 7.
+  5: {
+    numero: 5,
+    titulo: 'Sube, sube',
+    frase: 'Ocho cuadritos de subida… y yo con 1 julito.',
+    columnas: 4,
+    trazado: 'escaleras',
+    soluciones: 2,         // +3 y +4, en un orden o en el otro
+    energia: 1,            // empieza donde acabó el nivel 4: a altura 1
+    salidaX: 1.0,
+    meta: { altura: 8, bandera: 11.55 },
+    huecos: { 10: 'escalera', 7: 'escalera' },
+    // Primer nivel con piezas que dan julitos: Eme lo explica (solo la primera vez)
+    charla: [
+      { texto: 'Uf… Estoy a altura 1 y la meta está a altura 8.', expr: 'gulp', zonas: ['salida', 'meta'], px: 0.95, py: -0.6 },
+      { texto: 'Con 1 julito no subo ni un escalón. ¡Necesito más energía!' },
+      { texto: 'Por suerte, hay escaleras mecánicas: tienen motor y, al subirme, me dan julitos.', zonas: ['bandeja'], px: 0.2, py: 0.95 },
+      { texto: 'Esos julitos salen de la electricidad del motor. El número verde es lo que me da cada una.', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
+      { texto: 'Y ojo con la averiada: sin motor, no me da nada.', expr: 'gulp', zonas: ['pegatinas'] },
+      { texto: '¿Cuántos julitos me tienen que dar entre las dos para pararme justo en la bandera?', expr: 'win', zonas: ['bandera'] },
+    ],
+    piezas: [
+      { id: 'escalera-3', forma: 'escalera', material: 'escalera', gana: 3, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-4', forma: 'escalera', material: 'escalera', gana: 4, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-5', forma: 'escalera', material: 'escalera', gana: 5, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-averiada', forma: 'escalera', material: 'escalera', gana: 0, nombre: ['Escalera', 'averiada'] },
     ],
   },
 };

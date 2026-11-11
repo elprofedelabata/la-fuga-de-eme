@@ -3,7 +3,7 @@
 import { NIVEL, NIVELES, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
 import {
   prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida,
-  columnas, anchoTablero, inicioRepisa,
+  columnas, anchoTablero, inicioRepisa, cambioDe,
 } from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
@@ -118,8 +118,10 @@ function crearBandeja() {
     const b = document.createElement('button');
     b.className = 'pieza';
     b.dataset.id = p.id;
-    const pierde = MATERIALES[p.material].pierde;
-    b.setAttribute('aria-label', `${p.nombre.join(' ')}: pierde ${pierde} julitos`);
+    const pierde = cambioDe(p);   // negativo si da julitos
+    b.setAttribute('aria-label', p.gana != null
+      ? `${p.nombre.join(' ')}: da ${p.gana} julitos`
+      : `${p.nombre.join(' ')}: pierde ${pierde} julitos`);
     const cv = document.createElement('canvas');
     const lado = 60;
     cv.width = cv.height = lado * dpr;
@@ -129,7 +131,9 @@ function crearBandeja() {
     b.append(cv);
     b.insertAdjacentHTML('beforeend',
       `<span class="n1">${p.nombre[0]}</span><span class="n2">${p.nombre[1]}</span>` +
-      `<span class="pegatina${pierde ? '' : ' cero'}">−${pierde}</span>`);
+      (p.gana != null
+        ? `<span class="pegatina gana${p.gana ? '' : ' cero'}">+${p.gana}</span>`
+        : `<span class="pegatina${pierde ? '' : ' cero'}">−${pierde}</span>`));
     b.addEventListener('pointerdown', (e) => posibleArrastre(e, { pieza: p, desde: 'bandeja' }));
     b.addEventListener('click', () => { if (!suprimirClick) tocarPieza(p.id); });
     cont.append(b);
@@ -464,6 +468,12 @@ function lanzar() {
   estado.rec = prepararRecorrido(NIVEL, estado.colocadas);
   estado.sim = nuevaSimulacion(estado.rec, NIVEL);
   estado.analisis = analizar(NIVEL, estado.colocadas);
+  estado.escalaE = NIVEL.energia + estado.analisis.ganancias;   // la barra, con lo que darán las escaleras
+  const E = NIVEL.energia, ganancias = estado.analisis.ganancias;
+  const jul = (n) => `${n} ${n === 1 ? 'julito' : 'julitos'}`;
+  $('directo-pie').textContent = ganancias
+    ? `Total: sale con ${jul(E)} y las escaleras le dan ${ganancias} más.`
+    : `Total: ${jul(E)}. Siempre.`;
   estado.espera = 0;
   estado.etiquetas = {};
   estado.metaVista = false;
@@ -480,6 +490,7 @@ function volverAMontar() {
   particulas.length = 0;
   $('hoja').hidden = true;
   ponerModo('montaje');
+  estado.escalaE = NIVEL.energia;
   actualizarEnergia({ ep: NIVEL.energia, ec: 0, calor: 0 });
   refrescar();
 }
@@ -501,8 +512,8 @@ function ponerVelocidad(v) {
 }
 
 // ---------- energía en pantalla ----------
-function enteros({ ep, ec, calor }) {
-  const E = NIVEL.energia;
+function enteros({ ep, ec, calor, ganado = 0 }) {
+  const E = NIVEL.energia + Math.round(ganado);   // la que tiene ahora (las escaleras dan más)
   const c = Math.min(Math.round(calor), E);
   const p = Math.min(Math.max(Math.round(ep), 0), E - c);
   return { ep: p, ec: Math.max(E - p - c, 0), calor: c };
@@ -513,6 +524,7 @@ function enteros({ ep, ec, calor }) {
 const ICONOS = {
   Ep: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20 L9.5 7 L13.5 13.5 L16.5 9.5 L22 20 Z"/><path d="M7.6 10.4 L9.5 12 L11.4 10.4" class="nieve"/></svg>',
   Ec: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 17.5 A9 9 0 1 1 20.8 17.5"/><path d="M5.6 10.2 L7.2 11.2 M12 5.5 V7.4 M18.4 10.2 L16.8 11.2"/><path d="M12 15.5 L16.6 9.4"/><circle cx="12" cy="15.5" r="1.6" class="nucleo"/></svg>',
+  motor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2 L5 13.5 H11 L10 22 L19 10 H13 Z"/></svg>',
   calor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 C12.5 6.5 18.5 9 18.5 14.5 A6.5 6.5 0 0 1 5.5 14.5 C5.5 11 8 9.5 8.5 7 C10 9 10.5 10 10.5 11.5 C12.5 9.5 12.5 6 12 2.5 Z"/><path d="M12 21 A2.6 2.6 0 0 1 9.4 18.4 C9.4 16.5 11.5 15.8 12 13.8 C12.8 15.8 14.6 16.6 14.6 18.4 A2.6 2.6 0 0 1 12 21 Z" class="nucleo"/></svg>',
 };
 
@@ -523,7 +535,7 @@ const EC = 'E<sub>c</sub>';
 
 function actualizarEnergia(e) {
   const n = enteros(e);
-  const E = NIVEL.energia;
+  const E = estado.escalaE ?? NIVEL.energia;
   const [sEp, sEc, sCal] = $('barra-e').children;
   for (const [el, val, nom] of [[sEp, n.ep, 'Ep'], [sEc, n.ec, 'Ec'], [sCal, n.calor, 'calor']]) {
     el.style.width = `${(100 * val) / E}%`;
@@ -548,7 +560,7 @@ function grupo(n, clase, etiqueta) {
   const fs = document.createElement('div');
   fs.className = 'fs';
   for (let i = 0; i < n; i++) fs.append(Object.assign(document.createElement('i'), { className: `ficha ${clase}` }));
-  const icono = ICONOS[{ ep: 'Ep', ec: 'Ec', calor: 'calor' }[clase]];
+  const icono = ICONOS[{ ep: 'Ep', ec: 'Ec', calor: 'calor', gana: 'motor' }[clase]];
   const txt = document.createElement('small');
   txt.innerHTML = `${icono}<span>${etiqueta} · ${n}</span>`;
   g.append(fs, txt);
@@ -556,7 +568,7 @@ function grupo(n, clase, etiqueta) {
 }
 
 function mostrarResultado() {
-  const { tipo, perdidas, llegada, piezas, atasco } = estado.analisis;
+  const { tipo, perdidas, ganancias, llegada, piezas, atasco } = estado.analisis;
   const E = NIVEL.energia, hm = NIVEL.meta.altura;
   const t = TEXTOS[tipo];
   estado.modo = 'resultado';
@@ -577,22 +589,28 @@ function mostrarResultado() {
 
   const bal = $('balance');
   bal.innerHTML = '';
-  const conPerdida = piezas.filter((p) => MATERIALES[p.material].pierde > 0);
-  const piezasGrupos = () => conPerdida.forEach((p) => bal.append(grupo(MATERIALES[p.material].pierde, 'calor', MATERIALES[p.material].nombre)));
-  const perdidasPiezas = conPerdida.map((p) => MATERIALES[p.material].pierde);
+  const conPerdida = piezas.filter((p) => cambioDe(p) > 0);
+  const piezasGrupos = () => conPerdida.forEach((p) => bal.append(grupo(cambioDe(p), 'calor', MATERIALES[p.material].nombre)));
+  const perdidasPiezas = conPerdida.map((p) => cambioDe(p));
+  // escaleras mecánicas: lo que dan se suma a la energía de salida
+  const conGanancia = piezas.filter((p) => cambioDe(p) < 0);
+  const gananciasGrupos = () => conGanancia.forEach((p) => bal.append(grupo(p.gana, 'gana', 'escalera')));
+  const entra = [E, ...conGanancia.map((p) => p.gana)].join(' + ');   // lado izquierdo del balance
   let msg, ecu;
   if (tipo === 'meta') {
     msg = `Llega a la meta con 0 julitos de ${EC} y se queda justo en la bandera. ${estado.fallos === 0 ? '¡A la primera!' : ''}`;
+    gananciasGrupos();
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
-    ecu = `${E} = ${[hm, ...perdidasPiezas].join(' + ')}`;
+    ecu = `${entra} = ${[hm, ...perdidasPiezas].join(' + ')}`;
   } else if (tipo === 'pasaste') {
     msg = `Llegó a la meta con ${llegada} ${llegada === 1 ? 'julito' : 'julitos'} de ${EC}: le sobraba energía, ` +
       'cruzó la repisa y cayó por el precipicio.';
+    gananciasGrupos();
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
     bal.append(grupo(llegada, 'ec', 'sobran'));
-    ecu = `${E} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
+    ecu = `${entra} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
   } else if (atasco) {
     // se quedó en una colina: perdió demasiado antes de llegar a la cima
     const julitos = (x) => `${String(x).replace('.', ',')} ${x === 1 ? 'julito' : 'julitos'}`;
@@ -603,16 +621,22 @@ function mostrarResultado() {
     bal.append(grupo(E - Math.round(atasco.cima), 'ec', 'margen'));
     ecu = `${E} = ${atasco.cima} (cima) + ${E - atasco.cima} (lo que podía perder antes)`;
   } else {
-    msg = `Por el camino perdió ${perdidas} julitos: solo le quedaban ${E - perdidas} para subir, y la meta está a altura ${hm}.`;
-    bal.append(grupo(E - perdidas, 'ep', 'altura máx.'));
+    const tiene = E + ganancias - perdidas;   // la energía con la que podía subir
+    msg = ganancias
+      ? `Las escaleras le dieron ${ganancias} julitos: en total tenía ${tiene}, y la meta está a altura ${hm}. No le llegaba para subir.`
+      : `Por el camino perdió ${perdidas} julitos: solo le quedaban ${tiene} para subir, y la meta está a altura ${hm}.`;
+    gananciasGrupos();
+    bal.append(grupo(Math.max(tiene, 0), 'ep', 'altura máx.'));
     piezasGrupos();
-    ecu = `${E} = ${[E - perdidas, ...perdidasPiezas].join(' + ')}`;
+    ecu = `${entra} = ${[tiene, ...perdidasPiezas].join(' + ')}`;
   }
   $('hoja-msg').innerHTML = msg;
   $('ecuacion').textContent = ecu;
   const pista = $('pista-ayuda');
   pista.hidden = !(tipo !== 'meta' && estado.fallos >= 2);
-  pista.textContent = `Pista: ${E} = ${hm} (altura de la meta) + ¿? (lo que tienen que perder las piezas)`;
+  pista.textContent = NIVEL.piezas.some((p) => p.gana != null)
+    ? `Pista: ${E} + ¿? (lo que tienen que dar las escaleras) = ${hm} (altura de la meta)`
+    : `Pista: ${E} = ${hm} (altura de la meta) + ¿? (lo que tienen que perder las piezas)`;
   const sig = siguienteNivel();
   const puedeSeguir = !!sig && (tipo === 'meta' || estrellasDe(NIVEL.numero) > 0);
   $('btn-siguiente').disabled = !puedeSeguir;
@@ -765,11 +789,16 @@ function bocadilloEnLaBoca(pose) {
   const b = $('bocadillo');
   const x = pose.cx + pose.B / 2 + 17;     // a la derecha de Eme, lo que mide el pico y un poco más
   const y = pose.cy + 0.18 * pose.B;       // a la altura de la boca
+  const alto = b.offsetHeight;
   // (solo si se ha movido de verdad: la respiración de Eme no debe hacerlo temblar)
-  if (Math.abs(x - (b._x ?? -99)) < 2 && Math.abs(y - (b._y ?? -99)) < 2) return;
-  b._x = x; b._y = y;
+  if (Math.abs(x - (b._x ?? -99)) < 2 && Math.abs(y - (b._y ?? -99)) < 2 && alto === b._alto) return;
+  b._x = x; b._y = y; b._alto = alto;
+  // El pico, a la altura de la primera línea; si el bocadillo no cabe por debajo (Eme está
+  // abajo del todo), sube lo justo para no salirse del tablero y el pico baja hasta la boca.
+  const top = Math.max(4, Math.min(y - 21, H() - alto - 4));
   b.style.setProperty('--bx', `${x.toFixed(1)}px`);
-  b.style.setProperty('--by', `${y.toFixed(1)}px`);
+  b.style.setProperty('--by', `${Math.min(y, top + alto - 14).toFixed(1)}px`);
+  b.style.setProperty('--top', `${top.toFixed(1)}px`);
 }
 
 function pintar() {
@@ -929,6 +958,15 @@ function fotograma(ahora) {
       while (pose && (estado.etiquetas[c] ?? 0) < deben) {
         estado.etiquetas[c] = (estado.etiquetas[c] ?? 0) + 1;
         cambioJulitos(-1, pose, s.dir);
+      }
+    }
+    // y cada julito que da una escalera mecánica, como «+1 ■»
+    for (const [c, L] of Object.entries(s.ganadoCelda)) {
+      const n = estado.colocadas[c]?.gana ?? 0;
+      const deben = etiquetasPerdida(L, n);
+      while (pose && (estado.etiquetas[`+${c}`] ?? 0) < deben) {
+        estado.etiquetas[`+${c}`] = (estado.etiquetas[`+${c}`] ?? 0) + 1;
+        cambioJulitos(1, pose, s.dir);
       }
     }
     if (pose && estado.fiesta?.t >= DURACION_FIESTA && !estado.metaVista) {
@@ -1101,7 +1139,6 @@ function cargarNivel(n) {
   if (conAyuda) temporizadorGuia = setTimeout(empezarAyuda, 1000);
   $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b>&nbsp;julitos`;
   $('objetivo-meta').innerHTML = `Meta: pararse a altura&nbsp;<b class="meta">${NIVEL.meta.altura}</b>`;
-  $('directo-pie').textContent = `Total: ${NIVEL.energia} julitos. Siempre.`;
   $('objetivo').setAttribute('aria-label', `Eme sale con ${NIVEL.energia} julitos. Meta: que se pare en la bandera, a altura ${NIVEL.meta.altura}`);
   for (const r of $('regla').querySelectorAll('.regla-n')) {
     r.classList.toggle('meta', Number(r.style.getPropertyValue('--h')) === NIVEL.meta.altura);

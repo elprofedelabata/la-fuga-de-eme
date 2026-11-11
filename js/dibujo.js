@@ -13,6 +13,7 @@ export const C = {
 };
 export const MAT_COLOR = {
   fijo: '#E9E1CE', hielo: '#D4EBF7', arena: '#EED298', madera: '#CD965C', asfalto: '#96969C',
+  escalera: '#A9B0B8',
 };
 export const FUENTE = '"Patrick Hand", "Segoe Print", "Comic Sans MS", cursive';
 
@@ -153,6 +154,14 @@ function patron(ctx, mat) {
       const jx = r() * N;
       g.beginPath(); g.moveTo(jx, y); g.lineTo(jx, y + 8); g.stroke();
     }
+  } else if (mat === 'escalera') {
+    // chapa de metal con estrías
+    g.strokeStyle = 'rgba(80,88,98,0.55)';
+    g.lineWidth = 1.2;
+    for (let y = 3; y < N; y += 6) { g.beginPath(); g.moveTo(0, y); g.lineTo(N, y); g.stroke(); }
+    g.strokeStyle = 'rgba(255,255,255,0.5)';
+    g.lineWidth = 0.8;
+    for (let y = 4.5; y < N; y += 6) { g.beginPath(); g.moveTo(0, y); g.lineTo(N, y); g.stroke(); }
   } else if (mat === 'hielo') {
     g.strokeStyle = 'rgba(255,255,255,0.95)';
     g.lineWidth = 2;
@@ -248,6 +257,11 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
   }
   cerrar();
 
+  // escaleras mecánicas colocadas: pasamanos por encima de los escalones
+  for (const [cs, p] of Object.entries(colocadas)) {
+    if (p?.material === 'escalera') pasamanos(ctx, v, pista, celdas, Number(cs));
+  }
+
   // huecos vacíos: recuadro discontinuo, icono de la forma y conectores
   for (const [cs, forma] of Object.entries(nivel.huecos)) {
     const c = Number(cs);
@@ -284,6 +298,41 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
   ctx.restore();
 }
 
+/** Pasamanos de una escalera mecánica: una barandilla paralela a la pista, con dos postes. */
+function pasamanos(ctx, v, pista, celdas, celda) {
+  const pts = [];
+  for (let i = 0; i < celdas.length; i++) {
+    if (celdas[i] !== celda) continue;
+    if (!pts.length) pts.push(pista[i]);
+    pts.push(pista[i + 1]);
+  }
+  if (pts.length < 2) return;
+  const alto = 1.1;   // cuadritos por encima de los escalones
+  const arriba = pts.map(([x, h]) => v.px(x, h + alto));
+  ctx.save();
+  // escalones: dientes de sierra justo por debajo de la pista
+  const [x0, h0] = pts[0], [x1, h1] = pts[pts.length - 1];
+  const n = Math.max(3, Math.round(Math.hypot(x1 - x0, h1 - h0) / 0.55));
+  const dx = (x1 - x0) / n, dh = (h1 - h0) / n;
+  ctx.strokeStyle = 'rgba(70,76,86,0.75)';
+  ctx.lineWidth = Math.max(1, v.k * 0.05);
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    ctx.moveTo(...v.px(x0 + i * dx, h0 + i * dh));
+    ctx.lineTo(...v.px(x0 + (i + 1) * dx, h0 + i * dh));
+    ctx.lineTo(...v.px(x0 + (i + 1) * dx, h0 + (i + 1) * dh));
+  }
+  ctx.stroke();
+  ctx.strokeStyle = C.lapiz;
+  ctx.lineWidth = 1.4;
+  for (const k of [0, pts.length - 1]) {
+    const [x, h] = pts[k];
+    ctx.beginPath(); ctx.moveTo(...v.px(x, h)); ctx.lineTo(...v.px(x, h + alto)); ctx.stroke();
+  }
+  ctx.restore();
+  lapiz(ctx, arriba, { ancho: Math.max(2.5, v.k * 0.16), color: '#3d3a36', doble: false, amp: 0.3 });
+}
+
 export function iconoForma(ctx, cx, cy, L, forma, color) {
   ctx.save();
   ctx.strokeStyle = color;
@@ -298,6 +347,13 @@ export function iconoForma(ctx, cx, cy, L, forma, color) {
   } else if (forma === 'subida') {
     ctx.moveTo(cx - 14 * s, cy + 10 * s);
     ctx.quadraticCurveTo(cx + 10 * s, cy + 4 * s, cx + 10 * s, cy - 22 * s);
+  } else if (forma === 'escalera') {
+    // escalones en diagonal
+    ctx.moveTo(cx - 20 * s, cy + 12 * s);
+    for (let i = 0; i < 4; i++) {
+      ctx.lineTo(cx - 20 * s + i * 10 * s, cy + 12 * s - (i + 1) * 9 * s);
+      ctx.lineTo(cx - 10 * s + i * 10 * s, cy + 12 * s - (i + 1) * 9 * s);
+    }
   } else if (forma === 'colina') {
     ctx.moveTo(cx - 22 * s, cy + 8 * s);
     ctx.bezierCurveTo(cx - 8 * s, cy + 8 * s, cx - 8 * s, cy - 16 * s, cx, cy - 16 * s);
@@ -387,6 +443,7 @@ export function dibujarMiniatura(ctx, lado, celda, pieza, nivel = NIVEL) {
     pts.push(v.px(...pista[i + 1]));
   }
   if (pts.length > 1) lapiz(ctx, pts, { ancho: 2, doble: false, amp: 0.4 });
+  if (pieza.material === 'escalera') pasamanos(ctx, v, pista, celdas, celda);
 }
 
 // ---------- Eme ----------

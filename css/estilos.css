@@ -96,6 +96,7 @@ button { font: inherit; color: inherit; }
 .ficha.ep { background: var(--ep); }
 .ficha.ec { background: var(--julito); }
 .ficha.calor { background: var(--calor); }
+.ficha.gana { background: #3C8D3C; }
 
 /* ---------- tablero ---------- */
 .tablero-zona { flex: 1 1 auto; min-height: 220px; container-type: size; display: grid; place-items: center; }
@@ -193,6 +194,7 @@ button { font: inherit; color: inherit; }
   font-family: system-ui, sans-serif; font-weight: 700; font-size: 13px; color: #fff; text-align: center;
   background: var(--calor); border-radius: 9px;
 }
+.pieza .pegatina.gana { background: #3C8D3C; }   /* da julitos */
 .pieza .pegatina.cero { background: #9a9a9a; }
 .pieza.seleccionada {
   transform: translateY(-10px); border-color: var(--naranja-o); border-width: 3px;
