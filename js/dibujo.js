@@ -341,10 +341,10 @@ export function iconoForma(ctx, cx, cy, L, forma, color) {
   ctx.lineCap = 'round';
   const s = L / 122;
   ctx.beginPath();
-  if (forma === 'rampa') {
+  if (forma === 'bajada') {
     ctx.moveTo(cx - 10 * s, cy - 22 * s);
     ctx.quadraticCurveTo(cx - 10 * s, cy + 4 * s, cx + 14 * s, cy + 10 * s);
-  } else if (forma === 'subida') {
+  } else if (forma === 'rampa') {
     ctx.moveTo(cx - 14 * s, cy + 10 * s);
     ctx.quadraticCurveTo(cx + 10 * s, cy + 4 * s, cx + 10 * s, cy - 22 * s);
   } else if (forma === 'escalera') {
@@ -354,9 +354,6 @@ export function iconoForma(ctx, cx, cy, L, forma, color) {
       ctx.lineTo(cx - 20 * s + i * 10 * s, cy + 12 * s - (i + 1) * 9 * s);
       ctx.lineTo(cx - 10 * s + i * 10 * s, cy + 12 * s - (i + 1) * 9 * s);
     }
-  } else if (forma === 'bajada') {
-    ctx.moveTo(cx - 20 * s, cy - 18 * s);
-    ctx.bezierCurveTo(cx, cy - 18 * s, cx, cy + 10 * s, cx + 20 * s, cy + 10 * s);
   } else if (forma === 'colina') {
     ctx.moveTo(cx - 22 * s, cy + 8 * s);
     ctx.bezierCurveTo(cx - 8 * s, cy + 8 * s, cx - 8 * s, cy - 16 * s, cx, cy - 16 * s);

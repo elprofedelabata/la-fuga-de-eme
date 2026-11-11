@@ -6,10 +6,11 @@
 // Unidades: el tablero mide 9 x 9 cuadritos (3 x 3 casillas de 3 x 3 cuadritos).
 // 1 cuadrito de altura = 1 julito de energía potencial.
 //
-// La pista de los niveles del cuaderno es una «U»: plataforma de salida y rampa de bajada
-// (casillas 1, 4 y 7), suelo (casilla 8) y subida en S hasta la repisa de la meta
+// La pista de los primeros niveles es una «U»: plataforma de salida y bajada
+// (casillas 1, 4 y 7), suelo (casilla 8) y rampa en S hasta la repisa de la meta
 // (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta y qué casillas
-// están vacías. Formas de hueco: «rampa» (casilla 4), «suelo» (casilla 8) y «subida» (casilla 6).
+// están vacías. Formas de hueco: «bajada» (casilla 4), «suelo» (casilla 8) y «rampa» (casilla 6).
+// Nombres: las piezas que bajan son «bajadas» y las que suben, «rampas».
 
 export const MATERIALES = {
   fijo: { nombre: 'pista', pierde: 0 },
@@ -61,15 +62,15 @@ export const NIVELES = {
       { texto: 'Yo te espero en la salida. ¡Tú puedes!', expr: 'win' },
     ],
     // Guía del primer movimiento: a los 2 s se oscurece todo salvo Eme, este hueco y esta pieza
-    guia: { pieza: 'rampa-hielo', texto: '¡Empecemos! Arrastra la rampa de hielo hasta su hueco.' },
+    guia: { pieza: 'bajada-hielo', texto: '¡Empecemos! Arrastra la bajada de hielo hasta su hueco.' },
     energia: 7,            // sale desde altura 7 y en reposo: 7 julitos
     salidaX: 1.0,
     meta: { altura: 7, bandera: 8.55 },
-    huecos: { 4: 'rampa', 8: 'suelo', 6: 'subida' },
+    huecos: { 4: 'bajada', 8: 'suelo', 6: 'rampa' },
     piezas: [
-      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
       { id: 'suelo-hielo', forma: 'suelo', perfil: 'plano', material: 'hielo', nombre: ['Suelo', 'de hielo'] },
-      { id: 'subida-hielo', forma: 'subida', material: 'hielo', nombre: ['Subida', 'de hielo'] },
+      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
     ],
   },
 
@@ -84,13 +85,13 @@ export const NIVELES = {
     energia: 7,            // empieza donde acabó el nivel 1: a altura 7
     salidaX: 1.0,
     meta: { altura: 7, bandera: 8.55 },
-    huecos: { 4: 'rampa', 8: 'suelo', 6: 'subida' },
+    huecos: { 4: 'bajada', 8: 'suelo', 6: 'rampa' },
     piezas: [
-      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
       { id: 'hondonada-hielo', forma: 'suelo', perfil: 'hondonada', material: 'hielo', nombre: ['Hondonada', 'de hielo'] },
       { id: 'montanita-hielo', forma: 'suelo', perfil: 'montana1', material: 'hielo', nombre: ['Montañita', 'de hielo'] },
       { id: 'montana-hielo', forma: 'suelo', perfil: 'montana2', material: 'hielo', nombre: ['Montaña', 'de hielo'] },
-      { id: 'subida-hielo', forma: 'subida', material: 'hielo', nombre: ['Subida', 'de hielo'] },
+      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
     ],
   },
 
@@ -110,10 +111,10 @@ export const NIVELES = {
     energia: 7,            // empieza donde acabó el nivel 2: a altura 7
     salidaX: 1.0,
     meta: { altura: 4, bandera: 8.55 },   // hay que perder 3 y llegar con 0 julitos de Ec
-    huecos: { 4: 'rampa', 8: 'suelo' },
+    huecos: { 4: 'bajada', 8: 'suelo' },
     piezas: [
-      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
-      { id: 'rampa-arena', forma: 'rampa', material: 'arena', nombre: ['Rampa', 'de arena'] },
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-arena', forma: 'bajada', material: 'arena', nombre: ['Bajada', 'de arena'] },
       { id: 'suelo-madera', forma: 'suelo', perfil: 'plano', material: 'madera', nombre: ['Suelo', 'de madera'] },
       { id: 'suelo-asfalto', forma: 'suelo', perfil: 'plano', material: 'asfalto', nombre: ['Suelo', 'de asfalto'] },
       { id: 'hondonada-hielo', forma: 'suelo', perfil: 'hondonada', material: 'hielo', nombre: ['Hondonada', 'de hielo'] },
@@ -133,10 +134,10 @@ export const NIVELES = {
     energia: 4,            // empieza donde acabó el nivel 3: a altura 4
     salidaX: 1.0,
     meta: { altura: 1, bandera: 11.55 },
-    huecos: { 9: 'rampa', 10: 'suelo', 11: 'colina' },
+    huecos: { 9: 'bajada', 10: 'suelo', 11: 'colina' },
     piezas: [
-      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
-      { id: 'rampa-asfalto', forma: 'rampa', material: 'asfalto', nombre: ['Rampa', 'de asfalto'] },
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-asfalto', forma: 'bajada', material: 'asfalto', nombre: ['Bajada', 'de asfalto'] },
       { id: 'suelo-hielo', forma: 'suelo', material: 'hielo', nombre: ['Suelo', 'de hielo'] },
       { id: 'suelo-madera', forma: 'suelo', material: 'madera', nombre: ['Suelo', 'de madera'] },
       { id: 'suelo-asfalto', forma: 'suelo', material: 'asfalto', nombre: ['Suelo', 'de asfalto'] },
@@ -184,25 +185,24 @@ export const NIVELES = {
     frase: 'Colina, bajada y escalera… Esto ya no es un paseo.',
     columnas: 5,
     trazado: 'travesia',
-    valle: 3.5,            // altura del valle entre la rampa y la colina
+    valle: 3.5,            // altura del valle entre la primera bajada y la colina
     cima: 5.5,             // cima de la colina
     suelo: 0.5,            // fondo, al pie de la escalera
     escalera: 2.9,         // altura a la que deja la escalera
     energia: 8,            // empieza donde acabó el nivel 5: a altura 8
     salidaX: 1.0,
     meta: { altura: 6, bandera: 14.55 },
-    huecos: { 6: 'rampa', 7: 'colina', 13: 'bajada', 14: 'escalera' },
+    huecos: { 6: 'bajada', 7: 'colina', 13: 'bajada', 14: 'escalera' },
+    // Las dos bajadas (antes y después de la colina) aceptan las mismas piezas
     piezas: [
-      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
-      { id: 'rampa-asfalto', forma: 'rampa', material: 'asfalto', nombre: ['Rampa', 'de asfalto'] },
-      { id: 'rampa-arena', forma: 'rampa', material: 'arena', nombre: ['Rampa', 'de arena'] },
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-asfalto', forma: 'bajada', material: 'asfalto', nombre: ['Bajada', 'de asfalto'] },
+      { id: 'bajada-arena', forma: 'bajada', material: 'arena', nombre: ['Bajada', 'de arena'] },
       { id: 'colina-asfalto', forma: 'colina', material: 'asfalto', nombre: ['Colina', 'de asfalto'] },
       { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
-      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
-      { id: 'bajada-madera', forma: 'bajada', material: 'madera', nombre: ['Bajada', 'de madera'] },
-      { id: 'escalera-2', forma: 'escalera', material: 'escalera', gana: 2, nombre: ['Escalera', 'mecánica'] },
-      { id: 'escalera-3', forma: 'escalera', material: 'escalera', gana: 3, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-1', forma: 'escalera', material: 'escalera', gana: 1, nombre: ['Escalera', 'mecánica'] },
       { id: 'escalera-4', forma: 'escalera', material: 'escalera', gana: 4, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-5', forma: 'escalera', material: 'escalera', gana: 5, nombre: ['Escalera', 'mecánica'] },
     ],
   },
 };

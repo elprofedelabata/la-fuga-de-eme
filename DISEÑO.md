@@ -27,7 +27,7 @@ El detalle de cada pieza está en el **catálogo de mecánicas**.
 
 | Pieza | Física | Comportamiento |
 |---|---|---|
-| Suelos y rampas de materiales | Rozamiento (trabajo no conservativo → calor) | Cada material quita sus julitos por casilla: hielo 0, madera 1, asfalto 2, arena 3 |
+| Bajadas, suelos y rampas de materiales | Rozamiento (trabajo no conservativo → calor) | Cada material quita sus julitos por casilla: hielo 0, madera 1, asfalto 2, arena 3 |
 | Hondonadas | La forma no frena: solo cuenta el material | Bajan y suben sin perder energía (si son de hielo) |
 | Repisa de meta | Ep final = energía inicial − pérdidas | Hay que llegar con 0 julitos de Ec |
 | Montañitas y colinas | Lo que se gasta al subir se recupera al bajar; la cima exige energía | Sin rozamiento no cuestan nada; con rozamiento, hay que llegar arriba con energía (el orden importa) |
@@ -46,7 +46,7 @@ El detalle de cada pieza está en el **catálogo de mecánicas**.
 - **Piezas giratorias** (mecánica que se desbloquea aquí): la misma pieza puede subir o bajar, o empujar a favor o en contra.
 - **Cinta transportadora.** Trabajo de una fuerza externa (W = F·d): en un sentido suma julitos y en el contrario los resta. Encaja con las piezas giratorias.
 - **Ventilador.** El aire empuja durante su tramo: a favor suma, en contra resta. (Una rata empujando queda como posible guiño de personaje.)
-- **Rozamiento con ángulo y longitud reales:** W = μ·m·g·cos θ·d. La rampa de arena ya no «come 3 por casilla» («¿por qué?»).
+- **Rozamiento con ángulo y longitud reales:** W = μ·m·g·cos θ·d. La bajada de arena ya no «come 3 por casilla» («¿por qué?»).
 - **Muelles con k y x:** Ep elástica = ½·k·x².
 - **Choque con otro bloque:** conservación del momento lineal; en un choque inelástico parte de la energía se va en calor.
 - **EME, el primo grande** (*M* mayúscula): llega igual de lejos porque la masa se cancela (nivel trampa).
@@ -68,7 +68,7 @@ El detalle de cada pieza está en el **catálogo de mecánicas**.
 
 - 1 cuadrito de altura = 1 julito de Ep. El tablero mide 9 × 9 cuadritos.
 - Cada material se come un número fijo de julitos por casilla: hielo 0, madera 1, asfalto 2, arena 3.
-- Simplificación consciente: en el Mundo I una rampa de arena come lo mismo que un suelo de arena. En el Mundo II se rompe a propósito («¿por qué la rampa ya no come 3?»).
+- Simplificación consciente: en el Mundo I una bajada de arena come lo mismo que un suelo de arena. En el Mundo II se rompe a propósito («¿por qué la bajada ya no come 3?»).
 - La energía siempre suma lo mismo, salvo que una pieza con motor (las escaleras mecánicas) le dé más: entonces la barra de energía crece y el balance queda «salida + lo que dan las escaleras = altura de la meta + pérdidas». Colores: **Ep azul**, **Ec amarillo**, **calor rojo**, lo que da un motor **verde**. Cada julito que se pierde aparece junto a Eme como «−1 ■» flotante que se desvanece, y cada uno que gana, como «+1 ■» verde. Las etiquetas se reparten de forma regular por el tramo de la pieza: si quita n julitos, salen en las posiciones 1/(n+1), 2/(n+1)… (madera al 50 %; asfalto al 33 % y 67 %; arena al 25 %, 50 % y 75 %). No es como se pierde de verdad, pero se lee mejor.
 
 ## Meta: pararse a la altura objetivo
@@ -87,13 +87,15 @@ El cuaderno tiene **10 niveles**.
 
 **Tablero.** Siempre tiene **3 filas** de casillas (9 cuadritos de alto, así que la regla va siempre de 0 a 9) y **3 o más columnas** (`columnas` en los datos del nivel; 3 por defecto). Cada casilla mide 3 x 3 cuadritos y se numeran por filas, de arriba abajo y de izquierda a derecha (en un tablero de 4 columnas, la fila de abajo son las casillas 9 a 12). Cada nivel elige su **trazado** de pista (`trazado`): la «U» de los niveles 1 a 3 o el valle con colina del nivel 4. La repisa de la meta ocupa siempre los últimos 1,6 cuadritos del tablero, hasta el precipicio.
 
-**La «U»** (niveles 1 a 3, 3 columnas): plataforma de salida y rampa de bajada (casillas 1, 4 y 7), suelo (casilla 8) y subida en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **rampa** (casilla 4), **suelo** (casilla 8) y **subida** (casilla 6). Perfiles del suelo: plano, hondonada y montañitas de 1 y 2 cuadritos de alto. Los niveles están en `js/nivel.js` y el validador los comprueba todos.
+**Nombres de las piezas:** las que bajan son **bajadas** y las que suben, **rampas** (además de suelos, colinas y escaleras mecánicas). Todas las bajadas de un nivel aceptan las mismas piezas, aunque su forma cambie un poco de un hueco a otro.
+
+**La «U»** (niveles 1 a 3, 3 columnas): plataforma de salida y bajada (casillas 1, 4 y 7), suelo (casilla 8) y rampa en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **bajada** (casilla 4), **suelo** (casilla 8) y **rampa** (casilla 6). Perfiles del suelo: plano, hondonada y montañitas de 1 y 2 cuadritos de alto. Los niveles están en `js/nivel.js` y el validador los comprueba todos.
 
 **Continuidad del camino.** Cada nivel es un tramo del camino de Eme y **empieza donde acabó el anterior**: la altura de salida de un nivel es la de la meta del anterior (el validador lo comprueba). Más adelante, elementos decorativos reforzarán esa continuidad espacial.
 
 ### Nivel 1 · «Lo que baja, sube» (tutorial)
 
-Enseña los controles básicos sin física que calcular. Sale a altura 7 y la meta está a altura 7. Tres huecos (rampa, suelo y subida) y tres piezas de hielo, cada una con una forma que solo encaja en su hueco. Sin rozamiento, **Eme sube justo hasta la altura de la que salió**: la conservación de la energía en estado puro (balance 7 = 7).
+Enseña los controles básicos sin física que calcular. Sale a altura 7 y la meta está a altura 7. Tres huecos (bajada, suelo y rampa) y tres piezas de hielo, cada una con una forma que solo encaja en su hueco. Sin rozamiento, **Eme sube justo hasta la altura de la que salió**: la conservación de la energía en estado puro (balance 7 = 7).
 
 - **Bienvenida** (`js/bienvenida.js`, solo la primera vez). El nivel arranca limpio, sin consejos. Al segundo, la pantalla se **oscurece con un fundido suave** (`js/foco.js`) y Eme sube desde abajo en **primer plano** para presentarse. Habla con bocadillos que se escriben letra a letra mientras mueve la boca; debajo de cada uno, «Haz clic para continuar» («Toca para continuar» en pantallas táctiles). Al tocar el bocadillo se completa el texto o se pasa al siguiente. Las frases están en los datos del nivel (`bienvenida`):
   1. «¡Hola! Soy Eme.»
@@ -116,9 +118,9 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
 
   Se recuerda en `fuga-eme-charla-1-vista`. Después llega la guía del primer movimiento.
 - **Bocadillos de Eme** (`js/escritura.js`). El del tablero se coloca solo para que su pico salga de la **boca de Eme**, esté donde esté la salida; si Eme está muy arriba, el bocadillo no se sale del tablero y el pico baja hasta la boca. Al escribirse letra a letra, el texto entero ya está puesto (lo que falta, invisible), así que ninguna palabra salta de línea. Nada se corta feo: un número va siempre con su palabra («7 julitos»), las citas cortas entre comillas no se parten («sin rozamiento») y las dos últimas palabras van juntas, para que la última línea nunca se quede con una palabra suelta.
-- **Guía del primer movimiento.** Con la pantalla oscurecida (tras la charla o, si ya se vio, al segundo de empezar el nivel, con un fundido suave), Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco», escrito letra a letra mientras Eme mira la bandeja) quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
+- **Guía del primer movimiento.** Con la pantalla oscurecida (tras la charla o, si ya se vio, al segundo de empezar el nivel, con un fundido suave), Eme y su bocadillo («¡Empecemos! Arrastra la bajada de hielo hasta su hueco», escrito letra a letra mientras Eme mira la bandeja) quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la bajada (latiendo) y la bajada en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
 - Mientras dura, **todo lo demás está bloqueado**: las otras piezas tiemblan si se tocan, los otros huecos no responden y LANZAR y Vaciar están desactivados.
-- **Felicitación.** Al colocar la rampa, se ve un momento cómo encaja (solo su hueco iluminado) y Eme vuelve en **primer plano**, como en la bienvenida, a felicitar al jugador (datos `felicitacion` del nivel):
+- **Felicitación.** Al colocar la bajada, se ve un momento cómo encaja (solo su hueco iluminado) y Eme vuelve en **primer plano**, como en la bienvenida, a felicitar al jugador (datos `felicitacion` del nivel):
   1. «¡Eso es! ¡Lo has hecho genial!»
   2. «Ahora sigue tú: coloca las otras dos piezas y pulsa LANZAR.»
   3. «Yo te espero en la salida. ¡Tú puedes!»
@@ -127,7 +129,7 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
 
 ### Nivel 2 · «Todos los caminos»
 
-Empieza donde acabó el nivel 1, a altura 7, y la meta está también a altura 7. Los mismos tres huecos que el nivel 1 (rampa, suelo y subida), pero **cinco piezas, todas de hielo**: rampa, subida y tres para el suelo, una hondonada y dos montañitas (de 1 y de 2 cuadritos de alto). Como no hay rozamiento, las tres sirven: hay **tres soluciones**. Enseña que, sin rozamiento, **la forma del camino no importa**: lo que Eme gasta en subir una montaña lo recupera al bajarla, y llega siempre hasta la altura de la que salió (balance 7 = 7).
+Empieza donde acabó el nivel 1, a altura 7, y la meta está también a altura 7. Los mismos tres huecos que el nivel 1 (bajada, suelo y rampa), pero **cinco piezas, todas de hielo**: bajada, rampa y tres para el suelo, una hondonada y dos montañitas (de 1 y de 2 cuadritos de alto). Como no hay rozamiento, las tres sirven: hay **tres soluciones**. Enseña que, sin rozamiento, **la forma del camino no importa**: lo que Eme gasta en subir una montaña lo recupera al bajarla, y llega siempre hasta la altura de la que salió (balance 7 = 7).
 
 - Es el primer nivel con más piezas que huecos: hay que elegir, aunque aquí cualquier elección que encaje vale.
 - El bocadillo lo insinúa: «Subir una montaña me cuesta julitos… pero bajarla me los devuelve».
@@ -135,16 +137,16 @@ Empieza donde acabó el nivel 1, a altura 7, y la meta está también a altura 7
 
 ### Nivel 3 · «Ni más, ni menos»
 
-Empieza donde acabó el nivel 2, a altura 7 (7 julitos); suelo a altura 1, meta a altura 4. Huecos: casilla 4 (rampa) y casilla 8 (suelo). Hay que perder exactamente 3.
+Empieza donde acabó el nivel 2, a altura 7 (7 julitos); suelo a altura 1, meta a altura 4. Huecos: casilla 4 (bajada) y casilla 8 (suelo). Hay que perder exactamente 3.
 
 | Hueco 4 | Hueco 8 | Pierde | Llega con | Resultado |
 |---|---|---|---|---|
-| Rampa de hielo | Suelo de madera | 1 | 2 | Se pasa |
-| Rampa de hielo | Suelo de asfalto | 2 | 1 | Se pasa |
-| Rampa de hielo | Hondonada de hielo | 0 | 3 | Se pasa |
-| Rampa de arena | Suelo de madera | 4 | — | No llega |
-| Rampa de arena | Suelo de asfalto | 5 | — | No llega |
-| **Rampa de arena** | **Hondonada de hielo** | **3** | **0** | **Victoria** |
+| Bajada de hielo | Suelo de madera | 1 | 2 | Se pasa |
+| Bajada de hielo | Suelo de asfalto | 2 | 1 | Se pasa |
+| Bajada de hielo | Hondonada de hielo | 0 | 3 | Se pasa |
+| Bajada de arena | Suelo de madera | 4 | — | No llega |
+| Bajada de arena | Suelo de asfalto | 5 | — | No llega |
+| **Bajada de arena** | **Hondonada de hielo** | **3** | **0** | **Victoria** |
 
 **Charla del rozamiento** (primer nivel con rozamiento; solo la primera vez, se recuerda en `fuga-eme-charla-3-vista`). Al segundo de empezar, con todo oscurecido y bloqueado, Eme lo explica desde la salida con el mismo sistema de bocadillos que en el nivel 1:
 
@@ -161,13 +163,13 @@ La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/
 
 ### Nivel 4 · «La colina»
 
-Primer tablero de **3 filas y 4 columnas**. Empieza donde acabó el nivel 3, a altura 4, y la meta está a altura 1: hay que perder 3 julitos. Trazado de **valle y colina** en la fila de abajo: rampa de bajada (casilla 9), suelo llano a altura 0,5 (casilla 10), una colina con la cima a altura 2 (casilla 11) y una subida suave hasta la repisa de la meta (casilla 12). Las dos filas de arriba quedan libres para la decoración.
+Primer tablero de **3 filas y 4 columnas**. Empieza donde acabó el nivel 3, a altura 4, y la meta está a altura 1: hay que perder 3 julitos. Trazado de **valle y colina** en la fila de abajo: bajada (casilla 9), suelo llano a altura 0,5 (casilla 10), una colina con la cima a altura 2 (casilla 11) y una rampa suave hasta la repisa de la meta (casilla 12). Las dos filas de arriba quedan libres para la decoración.
 
 Lo nuevo: **el orden importa**. Para pasar la cima (altura 2), Eme tiene que llegar arriba habiendo perdido menos de 2 julitos (4 − 2); el rozamiento de la propia colina cuenta a medias, porque la mitad se pierde subiendo. Si pierde demasiado antes, no sube la colina, vuelve al valle y no llega, aunque la suma total sea la buena.
 
-Piezas (7 para 3 huecos): rampa de hielo o de asfalto; suelo de hielo, de madera o de asfalto; colina de madera o de arena.
+Piezas (7 para 3 huecos): bajada de hielo o de asfalto; suelo de hielo, de madera o de asfalto; colina de madera o de arena.
 
-| Rampa | Suelo | Colina | Pierde | Resultado |
+| Bajada | Suelo | Colina | Pierde | Resultado |
 |---|---|---|---|---|
 | **Hielo** | **Hielo** | **Arena** | **3** | **Victoria** (llega a la cima habiendo perdido 1,5) |
 | Hielo | Asfalto | Madera | 3 | No sube la colina (perdió 2,5 antes de la cima) |
@@ -179,7 +181,7 @@ Si Eme se queda en la colina, la hoja de resultado lo explica: «Su cima está a
 
 ### Nivel 5 · «Sube, sube»
 
-Tablero de 3 filas y 4 columnas. Empieza donde acabó el nivel 4, a altura 1, y la meta está a altura 8, arriba a la derecha. Introduce las **piezas que dan julitos**: dos huecos para **escaleras mecánicas** (casillas 10 y 7) que suben en diagonal. Eme baja un poco hasta el pie de la primera, sube por las dos y una subida en S lo lleva a la repisa.
+Tablero de 3 filas y 4 columnas. Empieza donde acabó el nivel 4, a altura 1, y la meta está a altura 8, arriba a la derecha. Introduce las **piezas que dan julitos**: dos huecos para **escaleras mecánicas** (casillas 10 y 7) que suben en diagonal. Eme baja un poco hasta el pie de la primera, sube por las dos y una rampa en S lo lleva a la repisa.
 
 Piezas: escaleras mecánicas de **+3, +4 y +5** y una **averiada (+0)**. Hay que conseguir 1 + ¿? = 8: entre las dos tienen que dar **7** (la de +3 y la de +4, en cualquier orden: dos soluciones). Con más se pasa; con la averiada no llega (se queda arriba de la otra escalera o no consigue subir).
 
@@ -196,15 +198,15 @@ Las escaleras se dibujan con chapa de metal, escalones y pasamanos. La hoja de r
 
 ### Nivel 6 · «Sube y baja» (pico de dificultad)
 
-Tablero de **3 filas y 5 columnas**: la pista más larga hasta ahora. Empieza donde acabó el nivel 5, a altura 8, y la meta está a altura 6. Trazado de **travesía**: rampa desde lo alto hasta un valle a media altura (3,5), una **colina alta** (cima a 5,5), una bajada en S hasta el fondo (0,5), una **escalera mecánica** que sube hasta 2,9 y una subida en S hasta la repisa de la meta.
+Tablero de **3 filas y 5 columnas**: la pista más larga hasta ahora. Empieza donde acabó el nivel 5, a altura 8, y la meta está a altura 6. Trazado de **travesía**: bajada desde lo alto hasta un valle a media altura (3,5), una **colina alta** (cima a 5,5), otra bajada en S hasta el fondo (0,5), una **escalera mecánica** que sube hasta 2,9 y una rampa en S hasta la repisa de la meta.
 
 Combina todo lo anterior: hay que cuadrar el balance (8 + lo que da la escalera = 6 + lo que quitan las piezas) **y** llegar a la cima de la colina con energía, así que antes de la cima solo se pueden perder menos de 2,5 julitos (8 − 5,5). La colina cuenta a medias, porque la mitad se pierde subiendo.
 
-Piezas (10 para 4 huecos): rampa de hielo, asfalto o arena; colina de asfalto o arena; bajada de hielo o madera; escalera mecánica de +2, +3 o +4. De las 36 combinaciones:
+Las **dos bajadas** (antes y después de la colina) **aceptan las mismas piezas**. Piezas (8 para 4 huecos): bajada de hielo, asfalto o arena; colina de asfalto o arena; escalera mecánica de +1, +4 o +5. De las 36 combinaciones:
 
-- **Una solución:** rampa de hielo, colina de arena, bajada de madera y escalera +2 (8 + 2 = 6 + 3 + 1). Llega a la cima habiendo perdido 1,5.
-- **Siete trampas:** combinaciones que cuadran el balance pero no suben la colina, porque pierden demasiado antes (por ejemplo, rampa de asfalto + colina de asfalto + bajada de hielo + escalera +2: pierde 3 antes de la cima).
-- La idea clave: **el rozamiento, después de la colina**, y que la escalera devuelva lo que falte.
+- **Una solución:** bajada de hielo antes de la colina, colina de arena, bajada de arena después y escalera +4 (8 + 4 = 6 + 3 + 3). Llega a la cima habiendo perdido 1,5.
+- **Tres trampas** que cuadran el balance pero no suben la colina. La más bonita es la solución con las dos bajadas **intercambiadas** (arena antes, hielo después): mismas piezas, misma suma… y Eme se queda en la colina.
+- La idea clave: **el rozamiento, en la colina o después de ella**, y que la escalera devuelva lo que falte.
 
 La hoja de resultado escribe las alturas con coma decimal y dibuja medio cuadradito en el balance para las mitades («8 = 5,5 (cima) + 2,5 (margen)»).
 

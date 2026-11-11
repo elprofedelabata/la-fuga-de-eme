@@ -45,12 +45,12 @@ export function construirPista(nivel = NIVEL, colocadas = {}) {
   return (TRAZADOS[nivel.trazado ?? 'u'])(nivel, colocadas);
 }
 
-/** La «U» de los primeros niveles: rampa de bajada, suelo y subida en S hasta la meta. */
+/** La «U» de los primeros niveles: bajada, suelo y rampa en S hasta la meta. */
 function pistaU(nivel, colocadas) {
   const perfilB = colocadas[8]?.perfil ?? 'plano';
   const alturaMeta = nivel.meta.altura, alturaSalida = nivel.energia;
   const pts = [[0, alturaSalida], [1.2, alturaSalida]];
-  // Rampa de salida: un "quarter pipe" de la altura de salida a 1 (casillas 1, 4 y 7)
+  // Bajada de salida: un "quarter pipe" de la altura de salida a 1 (casillas 1, 4 y 7)
   for (let i = 1; i <= 48; i++) {
     const th = (i / 48) * Math.PI / 2;
     pts.push([1.2 + 1.8 * (1 - Math.cos(th)), 1 + (alturaSalida - 1) * (1 - Math.sin(th))]);
@@ -71,7 +71,7 @@ function pistaU(nivel, colocadas) {
   } else {
     for (let i = 1; i <= 12; i++) pts.push([3 + (3 * i) / 12, 1]);
   }
-  // Subida en S hasta la repisa de la meta (casillas 9 y 6), que empieza en x = 7.4
+  // Rampa en S hasta la repisa de la meta (casillas 9 y 6), que empieza en x = 7.4
   for (let i = 1; i <= 40; i++) {
     const u = i / 40;
     pts.push([6 + 1.4 * u, 1 + (alturaMeta - 1) * u * u * (3 - 2 * u)]);
@@ -82,16 +82,16 @@ function pistaU(nivel, colocadas) {
 }
 
 /**
- * Valle y colina (tablero de 4 columnas): rampa de bajada hasta el suelo del valle, un tramo
- * llano, una colina y una subida suave hasta la repisa de la meta.
- *   casillas de la fila de abajo: rampa | suelo | colina | subida y meta
+ * Valle y colina (tablero de 4 columnas): bajada hasta el suelo del valle, un tramo llano,
+ * una colina y una rampa suave hasta la repisa de la meta.
+ *   casillas de la fila de abajo: bajada | suelo | colina | rampa y meta
  */
 function pistaColina(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
   const suelo = nivel.suelo ?? 0.5, cima = nivel.cima ?? 2;
   const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
   const pts = [[0, hs], [1.2, hs]];
-  // rampa: "quarter pipe" de la salida al suelo (de x = 1.2 a 3)
+  // bajada: "quarter pipe" de la salida al suelo (de x = 1.2 a 3)
   for (let i = 1; i <= 48; i++) {
     const th = (i / 48) * Math.PI / 2;
     pts.push([1.2 + 1.8 * (1 - Math.cos(th)), suelo + (hs - suelo) * (1 - Math.sin(th))]);
@@ -142,10 +142,10 @@ function pistaEscaleras(nivel) {
 }
 
 /**
- * Travesía (tablero de 5 columnas): rampa desde lo alto hasta un valle a media altura,
- * colina alta, bajada en S hasta el fondo, escalera mecánica y subida en S hasta la meta.
- *   fila del medio: rampa (6) | colina (7) | inicio de la bajada
- *   fila de abajo:                         | bajada (13) | escalera (14) | subida
+ * Travesía (tablero de 5 columnas): bajada desde lo alto hasta un valle a media altura,
+ * colina alta, otra bajada en S hasta el fondo, escalera mecánica y rampa en S hasta la meta.
+ *   fila del medio: bajada (6) | colina (7) | inicio de la segunda bajada
+ *   fila de abajo:                          | bajada (13) | escalera (14) | rampa
  */
 function pistaTravesia(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
@@ -154,7 +154,7 @@ function pistaTravesia(nivel) {
   const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
   const suave = (u) => u * u * (3 - 2 * u);
   const pts = [[0, hs], [1.2, hs]];
-  // rampa: "quarter pipe" de la salida al valle (de x = 1.2 a 3)
+  // bajada: "quarter pipe" de la salida al valle (de x = 1.2 a 3)
   for (let i = 1; i <= 48; i++) {
     const th = (i / 48) * Math.PI / 2;
     pts.push([1.2 + 1.8 * (1 - Math.cos(th)), valle + (hs - valle) * (1 - Math.sin(th))]);

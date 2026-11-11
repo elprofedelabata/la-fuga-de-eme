@@ -58,7 +58,7 @@
     const ctx = cv.getContext('2d');
     ctx.scale(dpr, dpr);
     const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
-    dibujarTablero(ctx, W, NIVEL, { 4: pieza('rampa-arena'), 8: pieza('hondonada-hielo') });
+    dibujarTablero(ctx, W, NIVEL, { 4: pieza('bajada-arena'), 8: pieza('hondonada-hielo') });
     // Eme en la meta, con la bandera de sombrero
     const v = vistaTablero(W);
     const [x, y] = v.px(NIVEL.meta.bandera - 0.25, NIVEL.meta.altura);
