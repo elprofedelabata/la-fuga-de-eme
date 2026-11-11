@@ -116,6 +116,31 @@ export const NIVELES = {
       { id: 'hondonada-hielo', forma: 'suelo', perfil: 'hondonada', material: 'hielo', nombre: ['Hondonada', 'de hielo'] },
     ],
   },
+
+  // Primer tablero de 4 columnas: valle y colina. Hay que perder 3 julitos, pero no da igual
+  // dónde: si Eme pierde demasiado antes de llegar a la cima, no la sube. El orden importa.
+  4: {
+    numero: 4,
+    titulo: 'La colina',
+    frase: 'Una colina en medio del camino… ¿llegaré arriba?',
+    columnas: 4,
+    trazado: 'colina',
+    suelo: 0.5,            // altura del suelo del valle
+    cima: 2,               // altura de la cima de la colina
+    energia: 4,            // empieza donde acabó el nivel 3: a altura 4
+    salidaX: 1.0,
+    meta: { altura: 1, bandera: 11.55 },
+    huecos: { 9: 'rampa', 10: 'suelo', 11: 'colina' },
+    piezas: [
+      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
+      { id: 'rampa-asfalto', forma: 'rampa', material: 'asfalto', nombre: ['Rampa', 'de asfalto'] },
+      { id: 'suelo-hielo', forma: 'suelo', material: 'hielo', nombre: ['Suelo', 'de hielo'] },
+      { id: 'suelo-madera', forma: 'suelo', material: 'madera', nombre: ['Suelo', 'de madera'] },
+      { id: 'suelo-asfalto', forma: 'suelo', material: 'asfalto', nombre: ['Suelo', 'de asfalto'] },
+      { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
+      { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
+    ],
+  },
 };
 
 /**

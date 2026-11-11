@@ -1,7 +1,8 @@
 // Dibujo con estilo de cuaderno: trazo de lápiz, texturas de materiales, tablero y Eme.
 // Todas las medidas van en píxeles CSS; el lienzo ya viene escalado por devicePixelRatio.
 
-import { construirPista, celdasTramos, celdaDe } from './pista.js';
+import { construirPista, celdasTramos, celdaDe, columnas, anchoTablero, inicioRepisa } from './pista.js';
+import { NIVEL } from './nivel.js';
 
 export const C = {
   papel: '#FBF8EF', tarjeta: '#FFFEF9', cuadri: '#E2EBF5', rejilla: '#A0A3AA',
@@ -167,22 +168,23 @@ function patron(ctx, mat) {
 }
 
 // ---------- vistas: de cuadritos (x, altura) a píxeles ----------
-export function vistaTablero(W) {
-  const k = W / 9;
+// W es el ancho del tablero en píxeles; el alto es siempre 9 cuadritos (3 filas de casillas).
+export function vistaTablero(W, cols = columnas()) {
+  const k = W / (3 * cols);
   return { k, px: (x, h) => [x * k, (9 - h) * k] };
 }
-export function vistaCelda(celda, lado) {
-  const c = (celda - 1) % 3, r = Math.floor((celda - 1) / 3);
+export function vistaCelda(celda, lado, cols = columnas()) {
+  const c = (celda - 1) % cols, r = Math.floor((celda - 1) / cols);
   const x0 = c * 3, h0 = (2 - r) * 3, k = lado / 3;
   return { k, px: (x, h) => [(x - x0) * k, (h0 + 3 - h) * k] };
 }
-export function rectCelda(W, celda) {
-  const L = W / 3, c = (celda - 1) % 3, r = Math.floor((celda - 1) / 3);
+export function rectCelda(W, celda, cols = columnas()) {
+  const L = W / cols, c = (celda - 1) % cols, r = Math.floor((celda - 1) / cols);
   return [c * L, r * L, L, L];
 }
 
 function pintarTerreno(ctx, v, pista, rect, mat) {
-  const poly = [...pista, [9, -1], [0, -1]].map(([x, h]) => v.px(x, h));
+  const poly = [...pista, [pista[pista.length - 1][0], -1], [0, -1]].map(([x, h]) => v.px(x, h));
   ctx.save();
   ctx.beginPath();
   ctx.rect(...rect);
@@ -194,12 +196,13 @@ function pintarTerreno(ctx, v, pista, rect, mat) {
 }
 
 /** Puntos donde la pista entra o sale de una casilla. */
-export function conectores(nivel, celda, perfil) {
-  const pista = construirPista(perfil);
+export function conectores(nivel, celda, colocadas) {
+  const pista = construirPista(nivel, colocadas);
+  const cols = columnas(nivel);
   const out = [];
   for (let i = 1; i < pista.length; i++) {
-    const a = celdaDe(...pista[i - 1]);
-    const b = celdaDe(...pista[i]);
+    const a = celdaDe(...pista[i - 1], cols);
+    const b = celdaDe(...pista[i], cols);
     if (a !== b && (a === celda || b === celda)) out.push(pista[i - 1]);
   }
   return out;
@@ -207,29 +210,32 @@ export function conectores(nivel, celda, perfil) {
 
 // ---------- tablero (parte estática) ----------
 export function dibujarTablero(ctx, W, nivel, colocadas) {
-  const v = vistaTablero(W);
-  const k = v.k;
+  const cols = columnas(nivel), ancho = anchoTablero(nivel);
+  const v = vistaTablero(W, cols);
+  const k = v.k, H = 9 * k;
   ctx.fillStyle = C.tarjeta;
-  ctx.fillRect(0, 0, W, W);
+  ctx.fillRect(0, 0, W, H);
   ctx.strokeStyle = C.cuadri;
   ctx.lineWidth = 1;
+  for (let i = 1; i < ancho; i++) {
+    if (i % 3 === 0) continue;
+    ctx.beginPath(); ctx.moveTo(i * k, 0); ctx.lineTo(i * k, H); ctx.stroke();
+  }
   for (let i = 1; i < 9; i++) {
     if (i % 3 === 0) continue;
-    ctx.beginPath(); ctx.moveTo(i * k, 0); ctx.lineTo(i * k, W); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, i * k); ctx.lineTo(W, i * k); ctx.stroke();
   }
 
-  const perfil = colocadas[8]?.perfil ?? 'plano';
-  const pista = construirPista(perfil);
+  const pista = construirPista(nivel, colocadas);
   const vacia = (c) => nivel.huecos[c] && !colocadas[c];
-  for (let c = 1; c <= 9; c++) {
+  for (let c = 1; c <= 3 * cols; c++) {
     if (vacia(c)) continue;
     const mat = nivel.huecos[c] ? colocadas[c].material : 'fijo';
-    pintarTerreno(ctx, v, pista, rectCelda(W, c), mat);
+    pintarTerreno(ctx, v, pista, rectCelda(W, c, cols), mat);
   }
 
   // trazo de la pista, cortado en los huecos vacíos
-  const celdas = celdasTramos(pista);
+  const celdas = celdasTramos(pista, cols);
   let tramo = [];
   const cerrar = () => {
     if (tramo.length > 1) lapiz(ctx, tramo.map(([x, h]) => v.px(x, h)), { ancho: 2.4, seed: tramo.length });
@@ -246,12 +252,12 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
   for (const [cs, forma] of Object.entries(nivel.huecos)) {
     const c = Number(cs);
     if (!vacia(c)) continue;
-    const [x, y, L] = rectCelda(W, c);
+    const [x, y, L] = rectCelda(W, c, cols);
     const m = L * 0.06;
     discontinua(ctx, rrectPts(x + m, y + m, x + L - m, y + L - m, L * 0.08), { ancho: 1.6, color: C.suave });
     iconoForma(ctx, x + L / 2, y + L / 2, L, forma, C.suave);
     ctx.fillStyle = C.suave;
-    for (const [px, ph] of conectores(nivel, c, perfil)) {
+    for (const [px, ph] of conectores(nivel, c, colocadas)) {
       const [cx, cy] = v.px(px, ph);
       ctx.beginPath(); ctx.arc(cx, cy, Math.max(3, k * 0.1), 0, 6.29); ctx.fill();
     }
@@ -259,15 +265,17 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
 
   // (la regla de alturas va fuera del tablero, en el HTML)
 
-  // rejilla 3x3, bien marcada por encima del terreno
+  // rejilla de casillas, bien marcada por encima del terreno
+  for (let i = 1; i < cols; i++) {
+    lapiz(ctx, [[i * 3 * k, 0], [i * 3 * k, H]], { ancho: 2.2, color: C.rejilla, seed: 400 + i, amp: 0.5 });
+  }
   for (const i of [1, 2]) {
-    lapiz(ctx, [[i * 3 * k, 0], [i * 3 * k, W]], { ancho: 2.2, color: C.rejilla, seed: 400 + i, amp: 0.5 });
     lapiz(ctx, [[0, i * 3 * k], [W, i * 3 * k]], { ancho: 2.2, color: C.rejilla, seed: 410 + i, amp: 0.5 });
   }
 
   // altura objetivo: línea discontinua roja desde la regla hasta la meta
   const [, ym] = v.px(0, nivel.meta.altura);
-  const [xm] = v.px(7.4, nivel.meta.altura);
+  const [xm] = v.px(inicioRepisa(nivel), nivel.meta.altura);
   ctx.save();
   ctx.setLineDash([7, 5]);
   ctx.strokeStyle = 'rgba(229,83,61,0.75)';
@@ -290,6 +298,10 @@ export function iconoForma(ctx, cx, cy, L, forma, color) {
   } else if (forma === 'subida') {
     ctx.moveTo(cx - 14 * s, cy + 10 * s);
     ctx.quadraticCurveTo(cx + 10 * s, cy + 4 * s, cx + 10 * s, cy - 22 * s);
+  } else if (forma === 'colina') {
+    ctx.moveTo(cx - 22 * s, cy + 8 * s);
+    ctx.bezierCurveTo(cx - 8 * s, cy + 8 * s, cx - 8 * s, cy - 16 * s, cx, cy - 16 * s);
+    ctx.bezierCurveTo(cx + 8 * s, cy - 16 * s, cx + 8 * s, cy + 8 * s, cx + 22 * s, cy + 8 * s);
   } else {
     ctx.moveTo(cx - 20 * s, cy + 4 * s);
     ctx.lineTo(cx + 20 * s, cy + 4 * s);
@@ -338,7 +350,7 @@ export function dibujarResaltes(ctx, W, estados, t) {
 }
 
 export function dibujarBandera(ctx, W, nivel) {
-  const v = vistaTablero(W);
+  const v = vistaTablero(W, columnas(nivel));
   const [bx, by] = v.px(nivel.meta.bandera, nivel.meta.altura);
   const [, ty] = v.px(nivel.meta.bandera, nivel.meta.altura + 1.6);
   ctx.save();
@@ -354,8 +366,9 @@ export function dibujarBandera(ctx, W, nivel) {
 }
 
 /** Miniatura de una pieza: la casilla real del nivel, con su material. */
-export function dibujarMiniatura(ctx, lado, celda, pieza) {
-  const v = vistaCelda(celda, lado);
+export function dibujarMiniatura(ctx, lado, celda, pieza, nivel = NIVEL) {
+  const cols = columnas(nivel);
+  const v = vistaCelda(celda, lado, cols);
   ctx.fillStyle = C.tarjeta;
   ctx.fillRect(0, 0, lado, lado);
   ctx.strokeStyle = C.cuadri;
@@ -364,9 +377,9 @@ export function dibujarMiniatura(ctx, lado, celda, pieza) {
     ctx.beginPath(); ctx.moveTo((i * lado) / 3, 0); ctx.lineTo((i * lado) / 3, lado); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, (i * lado) / 3); ctx.lineTo(lado, (i * lado) / 3); ctx.stroke();
   }
-  const pista = construirPista(pieza.perfil ?? 'plano');
+  const pista = construirPista(nivel, { [celda]: pieza });
   pintarTerreno(ctx, v, pista, [0, 0, lado, lado], pieza.material);
-  const celdas = celdasTramos(pista);
+  const celdas = celdasTramos(pista, cols);
   const pts = [];
   for (let i = 0; i < celdas.length; i++) {
     if (celdas[i] !== celda) continue;

@@ -6,7 +6,7 @@
 //      node herramientas/validar-nivel.mjs 3      (solo el nivel 3)
 
 import { NIVELES, usarNivel } from '../js/nivel.js';
-import { prepararRecorrido, nuevaSimulacion, avanzar, analizar, muestra } from '../js/pista.js';
+import { prepararRecorrido, nuevaSimulacion, avanzar, analizar, muestra, inicioRepisa } from '../js/pista.js';
 
 function combinaciones(nivel) {
   const huecos = Object.entries(nivel.huecos).map(([c, forma]) => [Number(c), nivel.piezas.filter((p) => p.forma === forma)]);
@@ -27,12 +27,12 @@ function simular(nivel, colocadas) {
     avanzar(sim, rec, nivel, 1 / 60);
     if (sim.estado === 'rodando') {
       const m = muestra(rec, sim.s);
-      if (m.h > nivel.meta.altura - 0.05 && m.x > 7.3) llegoRepisa = true;
+      if (m.h > nivel.meta.altura - 0.05 && m.x > inicioRepisa(nivel) - 0.1) llegoRepisa = true;
     }
     if (sim.estado === 'meta') return { fin: 'meta', sim, x: muestra(rec, sim.s).x };
     if (sim.estado === 'cayendo') return { fin: 'pasaste', sim };
     if (sim.vueltas > 0 && !llegoRepisa) return { fin: 'nollega', sim };
-    if (sim.estado === 'parado') return { fin: 'parado', sim };
+    if (sim.estado === 'parado') return { fin: 'nollega', sim };   // se para en llano sin llegar
   }
   return { fin: 'tiempo', sim };
 }

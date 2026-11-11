@@ -15,7 +15,29 @@ import { MATERIALES, NIVEL } from './nivel.js';
 export const G = 3;
 
 // ---------- geometría ----------
-export function construirPista(perfilB = 'plano', alturaMeta = NIVEL.meta.altura, alturaSalida = NIVEL.energia) {
+// El tablero tiene siempre 3 filas de casillas (9 cuadritos de alto) y 3 o más columnas.
+// Cada casilla mide 3 x 3 cuadritos. Las casillas se numeran por filas, de arriba abajo y
+// de izquierda a derecha.
+
+/** Columnas de casillas del tablero del nivel. */
+export const columnas = (nivel = NIVEL) => nivel.columnas ?? 3;
+/** Ancho del tablero en cuadritos. */
+export const anchoTablero = (nivel = NIVEL) => 3 * columnas(nivel);
+/** x donde empieza la repisa de la meta (llana y sin rozamiento hasta el precipicio). */
+export const inicioRepisa = (nivel = NIVEL) => anchoTablero(nivel) - 1.6;
+
+/**
+ * Puntos de la pista del nivel con las piezas colocadas (las piezas con perfil propio
+ * cambian la forma de su casilla). Cada nivel elige su trazado.
+ */
+export function construirPista(nivel = NIVEL, colocadas = {}) {
+  return (TRAZADOS[nivel.trazado ?? 'u'])(nivel, colocadas);
+}
+
+/** La «U» de los primeros niveles: rampa de bajada, suelo y subida en S hasta la meta. */
+function pistaU(nivel, colocadas) {
+  const perfilB = colocadas[8]?.perfil ?? 'plano';
+  const alturaMeta = nivel.meta.altura, alturaSalida = nivel.energia;
   const pts = [[0, alturaSalida], [1.2, alturaSalida]];
   // Rampa de salida: un "quarter pipe" de la altura de salida a 1 (casillas 1, 4 y 7)
   for (let i = 1; i <= 48; i++) {
@@ -48,25 +70,59 @@ export function construirPista(perfilB = 'plano', alturaMeta = NIVEL.meta.altura
   return pts;
 }
 
-export function celdaDe(x, h) {
-  const c = Math.min(Math.max(Math.floor(x / 3), 0), 2);
+/**
+ * Valle y colina (tablero de 4 columnas): rampa de bajada hasta el suelo del valle, un tramo
+ * llano, una colina y una subida suave hasta la repisa de la meta.
+ *   casillas de la fila de abajo: rampa | suelo | colina | subida y meta
+ */
+function pistaColina(nivel) {
+  const hs = nivel.energia, hm = nivel.meta.altura;
+  const suelo = nivel.suelo ?? 0.5, cima = nivel.cima ?? 2;
+  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const pts = [[0, hs], [1.2, hs]];
+  // rampa: "quarter pipe" de la salida al suelo (de x = 1.2 a 3)
+  for (let i = 1; i <= 48; i++) {
+    const th = (i / 48) * Math.PI / 2;
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), suelo + (hs - suelo) * (1 - Math.sin(th))]);
+  }
+  // suelo llano (de 3 a 6)
+  for (let i = 1; i <= 12; i++) pts.push([3 + (3 * i) / 12, suelo]);
+  // colina (de 6 a 9): sube y baja con suavidad, con la cima en el centro
+  for (let i = 1; i <= 36; i++) {
+    const x = 6 + (3 * i) / 36;
+    pts.push([x, suelo + ((cima - suelo) * (1 - Math.cos((2 * Math.PI * (x - 6)) / 3))) / 2]);
+  }
+  // subida suave en S hasta la repisa de la meta
+  for (let i = 1; i <= 20; i++) {
+    const u = i / 20;
+    pts.push([9 + (repisa - 9) * u, suelo + (hm - suelo) * u * u * (3 - 2 * u)]);
+  }
+  // repisa plana y sin rozamiento hasta el precipicio
+  for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);
+  return pts;
+}
+
+const TRAZADOS = { u: pistaU, colina: pistaColina };
+
+export function celdaDe(x, h, cols = 3) {
+  const c = Math.min(Math.max(Math.floor(x / 3), 0), cols - 1);
   const r = Math.min(Math.max(Math.floor(h / 3), 0), 2);
-  return (2 - r) * 3 + c + 1;
+  return (2 - r) * cols + c + 1;
 }
 
 /** Casilla de cada tramo de la pista (por su punto medio). */
-export function celdasTramos(pts) {
+export function celdasTramos(pts, cols = 3) {
   const out = [];
   for (let i = 0; i < pts.length - 1; i++) {
-    out.push(celdaDe((pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2));
+    out.push(celdaDe((pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2, cols));
   }
   return out;
 }
 
 // ---------- recorrido para la simulación ----------
 export function prepararRecorrido(nivel, colocadas) {
-  const pts = construirPista(colocadas[8]?.perfil ?? 'plano', nivel.meta.altura, nivel.energia);
-  const celdas = celdasTramos(pts);
+  const pts = construirPista(nivel, colocadas);
+  const celdas = celdasTramos(pts, columnas(nivel));
   const s = [0];
   for (let i = 1; i < pts.length; i++) {
     s.push(s[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
@@ -115,8 +171,41 @@ export function analizar(nivel, colocadas) {
   const piezas = Object.values(colocadas).filter(Boolean);
   const perdidas = piezas.reduce((a, p) => a + MATERIALES[p.material].pierde, 0);
   const llegada = nivel.energia - nivel.meta.altura - perdidas;   // Ec al llegar a la meta
-  const tipo = llegada === 0 ? 'meta' : llegada > 0 ? 'pasaste' : 'nollega';
-  return { tipo, perdidas, llegada, piezas };
+  const atasco = buscarAtasco(nivel, colocadas);
+  const tipo = atasco ? 'nollega' : llegada === 0 ? 'meta' : llegada > 0 ? 'pasaste' : 'nollega';
+  return { tipo, perdidas, llegada, piezas, atasco };
+}
+
+/**
+ * ¿Se queda Eme sin energía en una colina antes de la meta? Recorre la pista sumando lo que
+ * pierde cada tramo: si en algún punto la energía no le llega para la altura, y después
+ * la pista vuelve a bajar (es una colina, no la subida final), se queda atascado ahí.
+ * Devuelve { celda, cima, antes } (antes: julitos perdidos al llegar a la cima) o null.
+ */
+function buscarAtasco(nivel, colocadas) {
+  const rec = prepararRecorrido(nivel, colocadas);
+  const { pts, s, dens, celdas } = rec;
+  const repisa = inicioRepisa(nivel);
+  let perdido = 0, bajo = false;
+  const perdidoEn = [0];
+  for (let i = 0; i < pts.length - 1; i++) {
+    perdido += dens[i] * (s[i + 1] - s[i]);
+    perdidoEn.push(perdido);
+    const [x, h] = pts[i + 1];
+    if (x >= repisa - 1e-9) break;
+    if (h < nivel.energia - 0.05) bajo = true;          // ya ha dejado la salida
+    if (!bajo || nivel.energia - h - perdido >= -1e-9) continue;
+    // sin energía para esta altura: ¿es una colina (luego baja) o la subida final?
+    if (!pts.slice(i + 1).some(([, hh]) => hh < h - 0.3)) return null;
+    const celda = celdas[i];
+    let k = i + 1;
+    for (let j = 0; j < pts.length - 1; j++) if (celdas[j] === celda && pts[j + 1][1] > pts[k][1]) k = j + 1;
+    // pérdida hasta la cima de esa casilla
+    let antes = 0;
+    for (let j = 0; j < k; j++) antes += dens[j] * (s[j + 1] - s[j]);
+    return { celda, cima: Math.round(pts[k][1] * 100) / 100, antes: Math.round(antes * 100) / 100 };
+  }
+  return null;
 }
 
 // ---------- simulación ----------
@@ -186,7 +275,8 @@ export function avanzar(sim, rec, nivel, dt) {
 }
 
 function detener(sim, nivel, m) {
-  if (sim.dir === 1 && m.h > nivel.meta.altura - 0.05) {   // llega a la meta sin energía: se queda
+  // llega a la meta sin energía: se queda (en la subida final, no en una colina por el camino)
+  if (sim.dir === 1 && m.h > nivel.meta.altura - 0.05 && m.x > inicioRepisa(nivel) - 0.5) {
     sim.estado = 'meta';
     return;
   }

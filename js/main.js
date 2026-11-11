@@ -1,7 +1,10 @@
 // La fuga de Eme · boceto jugable del nivel 1.
 
 import { NIVEL, NIVELES, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
-import { prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida } from './pista.js';
+import {
+  prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida,
+  columnas, anchoTablero, inicioRepisa,
+} from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
   vistaTablero, cuadradito, rectCelda,
@@ -52,7 +55,8 @@ const estado = {
 };
 
 const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
-const W = () => lienzo.clientWidth;
+const W = () => lienzo.clientWidth;    // ancho del tablero en píxeles
+const H = () => lienzo.clientHeight;   // alto (9 cuadritos; el ancho depende de las columnas)
 let dpr = 1;
 let cache = null;          // tablero estático pre-dibujado
 let reloj = 0;
@@ -64,7 +68,7 @@ function ajustar() {
   const w = W();
   if (!w) return;
   lienzo.width = Math.round(w * dpr);
-  lienzo.height = Math.round(w * dpr);
+  lienzo.height = Math.round(H() * dpr);
   lienzoEme.width = lienzo.width;
   lienzoEme.height = lienzo.height;
   rehacerTablero();
@@ -75,7 +79,7 @@ function rehacerTablero() {
   if (!w) return;
   cache = document.createElement('canvas');
   cache.width = Math.round(w * dpr);
-  cache.height = Math.round(w * dpr);
+  cache.height = Math.round(H() * dpr);
   const c = cache.getContext('2d');
   c.scale(dpr, dpr);
   dibujarTablero(c, w, NIVEL, estado.colocadas);
@@ -552,7 +556,7 @@ function grupo(n, clase, etiqueta) {
 }
 
 function mostrarResultado() {
-  const { tipo, perdidas, llegada, piezas } = estado.analisis;
+  const { tipo, perdidas, llegada, piezas, atasco } = estado.analisis;
   const E = NIVEL.energia, hm = NIVEL.meta.altura;
   const t = TEXTOS[tipo];
   estado.modo = 'resultado';
@@ -589,6 +593,15 @@ function mostrarResultado() {
     piezasGrupos();
     bal.append(grupo(llegada, 'ec', 'sobran'));
     ecu = `${E} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
+  } else if (atasco) {
+    // se quedó en una colina: perdió demasiado antes de llegar a la cima
+    const julitos = (x) => `${String(x).replace('.', ',')} ${x === 1 ? 'julito' : 'julitos'}`;
+    msg = `No pudo subir la colina. Su cima está a altura ${atasco.cima}: para pasarla tenía que llegar arriba ` +
+      `habiendo perdido menos de ${julitos(E - atasco.cima)}, y perdió ${julitos(atasco.antes)}.` +
+      (llegada === 0 ? ' Las cuentas cuadraban… ¡pero el orden de las piezas importa!' : '');
+    bal.append(grupo(Math.round(atasco.cima), 'ep', 'cima'));
+    bal.append(grupo(E - Math.round(atasco.cima), 'ec', 'margen'));
+    ecu = `${E} = ${atasco.cima} (cima) + ${E - atasco.cima} (lo que podía perder antes)`;
   } else {
     msg = `Por el camino perdió ${perdidas} julitos: solo le quedaban ${E - perdidas} para subir, y la meta está a altura ${hm}.`;
     bal.append(grupo(E - perdidas, 'ep', 'altura máx.'));
@@ -763,8 +776,8 @@ function pintar() {
   const w = W();
   if (!w || !cache) return;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, w, w);
-  ctx.drawImage(cache, 0, 0, w, w);
+  ctx.clearRect(0, 0, w, H());
+  ctx.drawImage(cache, 0, 0, w, H());
   if (estado.modo === 'montaje') dibujarResaltes(ctx, w, estadosHuecos(), reloj);
 
   const pose = poseEme(w);
@@ -794,7 +807,7 @@ function pintar() {
   // Durante la guía, Eme se pinta en su capa, que queda por encima del oscurecimiento
   if (estado.encima || lienzoEme.dataset.sucio) {
     ctxEme.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctxEme.clearRect(0, 0, w, w);
+    ctxEme.clearRect(0, 0, w, H());
     lienzoEme.dataset.sucio = estado.encima ? '1' : '';
   }
   dibujarEme(estado.encima ? ctxEme : ctx, pose.cx, pose.cy, pose.B, { ...pose.o, ang: pose.ang });
@@ -977,7 +990,7 @@ function zona(nombre) {
   if (nombre === 'bandera') {
     // la repisa de la meta con su bandera
     const v = vistaTablero(W()), r = lienzo.getBoundingClientRect();
-    const [x0, y0] = v.px(7.1, NIVEL.meta.altura + 2.6), [x1, y1] = v.px(9, NIVEL.meta.altura - 1.1);
+    const [x0, y0] = v.px(inicioRepisa() - 0.3, NIVEL.meta.altura + 2.6), [x1, y1] = v.px(anchoTablero(), NIVEL.meta.altura - 1.1);
     return { left: r.left + x0, top: r.top + y0, width: x1 - x0, height: y1 - y0 };
   }
   const el = {
@@ -1067,6 +1080,7 @@ function terminarGuia() {
 /** Prepara todo lo que depende del nivel: textos, huecos, bandeja, estrellas… */
 function cargarNivel(n) {
   usarNivel(n);
+  $('tablero').style.setProperty('--cols', columnas());   // 3 filas y las columnas del nivel
   estado.colocadas = Object.fromEntries(Object.keys(NIVEL.huecos).map((c) => [c, null]));
   estado.seleccion = null;
   estado.huecoElegido = null;
@@ -1107,8 +1121,10 @@ function crearHuecos() {
     b.className = 'hueco';
     b.dataset.celda = celda;
     b.setAttribute('aria-label', `Hueco de ${forma}, casilla ${celda}`);
-    b.style.left = `${((celda - 1) % 3) * 33.333}%`;
-    b.style.top = `${Math.floor((celda - 1) / 3) * 33.333}%`;
+    const cols = columnas();
+    b.style.left = `${((celda - 1) % cols) * (100 / cols)}%`;
+    b.style.top = `${Math.floor((celda - 1) / cols) * (100 / 3)}%`;
+    b.style.width = `${100 / cols}%`;
     b.addEventListener('click', () => { if (!suprimirClick) tocarHueco(celda); });
     b.addEventListener('pointerdown', (e) => {
       const p = estado.colocadas[celda];

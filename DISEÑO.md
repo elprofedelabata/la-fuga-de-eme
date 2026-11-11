@@ -81,7 +81,11 @@ Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El 
 
 ## Niveles del Mundo I
 
-El cuaderno tiene **10 niveles**. Todos usan la misma pista en «U»: plataforma de salida y rampa de bajada (casillas 1, 4 y 7), suelo (casilla 8) y subida en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **rampa** (casilla 4), **suelo** (casilla 8) y **subida** (casilla 6). Perfiles del suelo: plano, hondonada y montañitas de 1 y 2 cuadritos de alto. Los niveles están en `js/nivel.js` y el validador los comprueba todos.
+El cuaderno tiene **10 niveles**.
+
+**Tablero.** Siempre tiene **3 filas** de casillas (9 cuadritos de alto, así que la regla va siempre de 0 a 9) y **3 o más columnas** (`columnas` en los datos del nivel; 3 por defecto). Cada casilla mide 3 x 3 cuadritos y se numeran por filas, de arriba abajo y de izquierda a derecha (en un tablero de 4 columnas, la fila de abajo son las casillas 9 a 12). Cada nivel elige su **trazado** de pista (`trazado`): la «U» de los niveles 1 a 3 o el valle con colina del nivel 4. La repisa de la meta ocupa siempre los últimos 1,6 cuadritos del tablero, hasta el precipicio.
+
+**La «U»** (niveles 1 a 3, 3 columnas): plataforma de salida y rampa de bajada (casillas 1, 4 y 7), suelo (casilla 8) y subida en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **rampa** (casilla 4), **suelo** (casilla 8) y **subida** (casilla 6). Perfiles del suelo: plano, hondonada y montañitas de 1 y 2 cuadritos de alto. Los niveles están en `js/nivel.js` y el validador los comprueba todos.
 
 **Continuidad del camino.** Cada nivel es un tramo del camino de Eme y **empieza donde acabó el anterior**: la altura de salida de un nivel es la de la meta del anterior (el validador lo comprueba). Más adelante, elementos decorativos reforzarán esa continuidad espacial.
 
@@ -152,6 +156,24 @@ Empieza donde acabó el nivel 2, a altura 7 (7 julitos); suelo a altura 1, meta 
 Después se va el oscurecimiento y se juega con normalidad. Cualquier nivel puede tener su `charla`.
 
 La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/validar-nivel.mjs` comprueba esta tabla con la simulación real.
+
+### Nivel 4 · «La colina»
+
+Primer tablero de **3 filas y 4 columnas**. Empieza donde acabó el nivel 3, a altura 4, y la meta está a altura 1: hay que perder 3 julitos. Trazado de **valle y colina** en la fila de abajo: rampa de bajada (casilla 9), suelo llano a altura 0,5 (casilla 10), una colina con la cima a altura 2 (casilla 11) y una subida suave hasta la repisa de la meta (casilla 12). Las dos filas de arriba quedan libres para la decoración.
+
+Lo nuevo: **el orden importa**. Para pasar la cima (altura 2), Eme tiene que llegar arriba habiendo perdido menos de 2 julitos (4 − 2); el rozamiento de la propia colina cuenta a medias, porque la mitad se pierde subiendo. Si pierde demasiado antes, no sube la colina, vuelve al valle y no llega, aunque la suma total sea la buena.
+
+Piezas (7 para 3 huecos): rampa de hielo o de asfalto; suelo de hielo, de madera o de asfalto; colina de madera o de arena.
+
+| Rampa | Suelo | Colina | Pierde | Resultado |
+|---|---|---|---|---|
+| **Hielo** | **Hielo** | **Arena** | **3** | **Victoria** (llega a la cima habiendo perdido 1,5) |
+| Hielo | Asfalto | Madera | 3 | No sube la colina (perdió 2,5 antes de la cima) |
+| Asfalto | Hielo | Madera | 3 | No sube la colina (perdió 2,5 antes de la cima) |
+| Hielo | Hielo / Madera | Madera | 1 / 2 | Se pasa |
+| (resto) | | | 4 o más | No llega |
+
+Si Eme se queda en la colina, la hoja de resultado lo explica: «Su cima está a altura 2: para pasarla tenía que llegar arriba habiendo perdido menos de 2 julitos, y perdió 2,5. Las cuentas cuadraban… ¡pero el orden de las piezas importa!». El análisis (`analizar` en `js/pista.js`) recorre la pista sumando lo que pierde cada tramo para detectar estos atascos, y el validador lo contrasta con la simulación.
 
 ## Diseño de niveles
 
@@ -244,6 +266,6 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 
 ## Pendiente
 
-- Niveles 4 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Niveles 5 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.
