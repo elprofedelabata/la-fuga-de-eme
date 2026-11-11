@@ -1,6 +1,6 @@
 // Validador de niveles: para cada nivel, prueba todas las combinaciones de piezas, simula
 // cada una y comprueba que el final de la simulación coincide con las cuentas en julitos
-// y que hay exactamente una solución.
+// y que hay exactamente una solución (o las que diga el nivel en `soluciones`).
 // Uso: node herramientas/validar-nivel.mjs        (todos los niveles)
 //      node herramientas/validar-nivel.mjs 3      (solo el nivel 3)
 
@@ -52,8 +52,9 @@ for (const nivel of Object.values(NIVELES)) {
     const nombres = Object.values(comb).map((p) => p.nombre.join(' ')).join(' + ');
     console.log(`${ok ? '✓' : '✗'} ${nombres.padEnd(48)} pierde ${a.perdidas} · llega con ${String(a.llegada).padStart(2)} → ${a.tipo.padEnd(8)} simulación: ${r.fin} (t=${r.sim.t.toFixed(1)} s${r.x ? `, se para en x=${r.x.toFixed(2)}` : ''})`);
   }
-  const bien = errores === 0 && soluciones === 1;
+  const esperadas = nivel.soluciones ?? 1;
+  const bien = errores === 0 && soluciones === esperadas;
   if (!bien) fallos++;
-  console.log(`${bien ? 'OK' : 'REVISAR'}: ${soluciones} solución(es) · ${errores} discrepancia(s)`);
+  console.log(`${bien ? 'OK' : 'REVISAR'}: ${soluciones} solución(es), se esperaban ${esperadas} · ${errores} discrepancia(s)`);
 }
 process.exit(fallos ? 1 : 0);

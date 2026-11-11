@@ -66,7 +66,24 @@ export const NIVELES = {
     ],
   },
 
-  // (El nivel 2 está por diseñar.)
+  // Sin rozamiento, la forma del camino da igual: Eme sube siempre hasta la altura de salida.
+  // Hay más piezas que huecos y todas son de hielo, así que hay más de una solución.
+  2: {
+    numero: 2,
+    titulo: 'Todos los caminos',
+    frase: '¿Recto o con curva? Sin rozamiento, ¿qué más da?',
+    soluciones: 2,         // el validador comprueba que haya justo estas
+    energia: 6,            // sale desde altura 6 y en reposo: 6 julitos
+    salidaX: 1.0,
+    meta: { altura: 6, bandera: 8.55 },
+    huecos: { 4: 'rampa', 8: 'suelo', 6: 'subida' },
+    piezas: [
+      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
+      { id: 'suelo-hielo', forma: 'suelo', perfil: 'plano', material: 'hielo', nombre: ['Suelo', 'de hielo'] },
+      { id: 'hondonada-hielo', forma: 'suelo', perfil: 'hondonada', material: 'hielo', nombre: ['Hondonada', 'de hielo'] },
+      { id: 'subida-hielo', forma: 'subida', material: 'hielo', nombre: ['Subida', 'de hielo'] },
+    ],
+  },
 
   3: {
     numero: 3,

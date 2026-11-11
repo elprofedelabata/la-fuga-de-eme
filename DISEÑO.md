@@ -117,9 +117,13 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
 
   Después Eme baja, se va el oscurecimiento y se libera todo: el resto lo hace el jugador solo. La guía (y con ella la felicitación) solo aparece mientras el nivel 1 no está superado.
 
-### Nivel 2
+### Nivel 2 · «Todos los caminos»
 
-Por diseñar. Mientras no exista, el nivel 3 se desbloquea al completar el 1.
+Sale a altura 6 y la meta está a altura 6. Los mismos tres huecos que el nivel 1 (rampa, suelo y subida), pero **cuatro piezas, todas de hielo**: rampa, subida y dos para el suelo, una plana y una hondonada. Como no hay rozamiento, las dos sirven: hay **dos soluciones**. Enseña que, sin rozamiento, **la forma del camino no importa**: Eme sube siempre hasta la altura de la que salió (balance 6 = 6).
+
+- Es el primer nivel con más piezas que huecos: hay que elegir, aunque aquí cualquier elección que encaje vale.
+- El bocadillo lo insinúa: «¿Recto o con curva? Sin rozamiento, ¿qué más da?».
+- En los datos, `soluciones: 2` le dice al validador cuántas soluciones debe haber.
 
 ### Nivel 3 · «Ni más, ni menos»
 
@@ -138,7 +142,7 @@ La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/
 
 ## Diseño de niveles
 
-- Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones.
+- Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
 - Como la energía final solo depende de la suma de pérdidas, intercambiar dos suelos da lo mismo. Para que el orden importe, usar piezas con condiciones locales: jorobas, paredes de papel, loops y saltos.
 - Cada mundo introduce sus mecánicas de una en una y luego las combina (ver el catálogo).
 - Estrellas por intentos (3 a la primera, 2 a la segunda, 1 después): se puede ir probando, pero el juego premia calcular. Tras dos fallos aparece una pista con el balance incompleto («8 = 5 + ¿?»).
@@ -227,6 +231,6 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 
 ## Pendiente
 
-- Niveles 2 y 4 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Niveles 4 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.
