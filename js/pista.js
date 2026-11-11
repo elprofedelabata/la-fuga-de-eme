@@ -141,7 +141,41 @@ function pistaEscaleras(nivel) {
   return pts;
 }
 
-const TRAZADOS = { u: pistaU, colina: pistaColina, escaleras: pistaEscaleras };
+/**
+ * Travesía (tablero de 5 columnas): rampa desde lo alto hasta un valle a media altura,
+ * colina alta, bajada en S hasta el fondo, escalera mecánica y subida en S hasta la meta.
+ *   fila del medio: rampa (6) | colina (7) | inicio de la bajada
+ *   fila de abajo:                         | bajada (13) | escalera (14) | subida
+ */
+function pistaTravesia(nivel) {
+  const hs = nivel.energia, hm = nivel.meta.altura;
+  const valle = nivel.valle ?? 3.5, cima = nivel.cima ?? 5.5, fondo = nivel.suelo ?? 0.5;
+  const arriba = nivel.escalera ?? 2.9;    // altura a la que deja la escalera
+  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const suave = (u) => u * u * (3 - 2 * u);
+  const pts = [[0, hs], [1.2, hs]];
+  // rampa: "quarter pipe" de la salida al valle (de x = 1.2 a 3)
+  for (let i = 1; i <= 48; i++) {
+    const th = (i / 48) * Math.PI / 2;
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), valle + (hs - valle) * (1 - Math.sin(th))]);
+  }
+  // colina (de 3 a 6)
+  for (let i = 1; i <= 36; i++) {
+    const x = 3 + (3 * i) / 36;
+    pts.push([x, valle + ((cima - valle) * (1 - Math.cos((2 * Math.PI * (x - 3)) / 3))) / 2]);
+  }
+  // bajada en S del valle al fondo (de 6 a 9)
+  for (let i = 1; i <= 24; i++) pts.push([6 + (3 * i) / 24, valle - (valle - fondo) * suave(i / 24)]);
+  // escalera mecánica: recta, del fondo hasta `arriba` (de 9 a 12)
+  for (let i = 1; i <= 12; i++) pts.push([9 + (3 * i) / 12, fondo + ((arriba - fondo) * i) / 12]);
+  // subida en S hasta la repisa de la meta
+  for (let i = 1; i <= 20; i++) pts.push([12 + (repisa - 12) * (i / 20), arriba + (hm - arriba) * suave(i / 20)]);
+  // repisa plana y sin rozamiento hasta el precipicio
+  for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);
+  return pts;
+}
+
+const TRAZADOS = { u: pistaU, colina: pistaColina, escaleras: pistaEscaleras, travesia: pistaTravesia };
 
 export function celdaDe(x, h, cols = 3) {
   const c = Math.min(Math.max(Math.floor(x / 3), 0), cols - 1);

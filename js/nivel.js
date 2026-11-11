@@ -174,6 +174,37 @@ export const NIVELES = {
       { id: 'escalera-averiada', forma: 'escalera', material: 'escalera', gana: 0, nombre: ['Escalera', 'averiada'] },
     ],
   },
+
+  // Pico de dificultad: rozamiento, una colina alta y una escalera mecánica. Hay que llegar a
+  // la cima de la colina con energía (no se puede perder mucho antes), bajar al fondo y que la
+  // escalera devuelva lo justo para pararse en la meta, a altura 6.
+  6: {
+    numero: 6,
+    titulo: 'Sube y baja',
+    frase: 'Colina, bajada y escalera… Esto ya no es un paseo.',
+    columnas: 5,
+    trazado: 'travesia',
+    valle: 3.5,            // altura del valle entre la rampa y la colina
+    cima: 5.5,             // cima de la colina
+    suelo: 0.5,            // fondo, al pie de la escalera
+    escalera: 2.9,         // altura a la que deja la escalera
+    energia: 8,            // empieza donde acabó el nivel 5: a altura 8
+    salidaX: 1.0,
+    meta: { altura: 6, bandera: 14.55 },
+    huecos: { 6: 'rampa', 7: 'colina', 13: 'bajada', 14: 'escalera' },
+    piezas: [
+      { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
+      { id: 'rampa-asfalto', forma: 'rampa', material: 'asfalto', nombre: ['Rampa', 'de asfalto'] },
+      { id: 'rampa-arena', forma: 'rampa', material: 'arena', nombre: ['Rampa', 'de arena'] },
+      { id: 'colina-asfalto', forma: 'colina', material: 'asfalto', nombre: ['Colina', 'de asfalto'] },
+      { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-madera', forma: 'bajada', material: 'madera', nombre: ['Bajada', 'de madera'] },
+      { id: 'escalera-2', forma: 'escalera', material: 'escalera', gana: 2, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-3', forma: 'escalera', material: 'escalera', gana: 3, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-4', forma: 'escalera', material: 'escalera', gana: 4, nombre: ['Escalera', 'mecánica'] },
+    ],
+  },
 };
 
 /**

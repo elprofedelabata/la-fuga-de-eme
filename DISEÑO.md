@@ -194,6 +194,20 @@ Piezas: escaleras mecánicas de **+3, +4 y +5** y una **averiada (+0)**. Hay que
 
 Las escaleras se dibujan con chapa de metal, escalones y pasamanos. La hoja de resultado muestra lo que da cada escalera en verde («1 + 4 + 3 = 8»).
 
+### Nivel 6 · «Sube y baja» (pico de dificultad)
+
+Tablero de **3 filas y 5 columnas**: la pista más larga hasta ahora. Empieza donde acabó el nivel 5, a altura 8, y la meta está a altura 6. Trazado de **travesía**: rampa desde lo alto hasta un valle a media altura (3,5), una **colina alta** (cima a 5,5), una bajada en S hasta el fondo (0,5), una **escalera mecánica** que sube hasta 2,9 y una subida en S hasta la repisa de la meta.
+
+Combina todo lo anterior: hay que cuadrar el balance (8 + lo que da la escalera = 6 + lo que quitan las piezas) **y** llegar a la cima de la colina con energía, así que antes de la cima solo se pueden perder menos de 2,5 julitos (8 − 5,5). La colina cuenta a medias, porque la mitad se pierde subiendo.
+
+Piezas (10 para 4 huecos): rampa de hielo, asfalto o arena; colina de asfalto o arena; bajada de hielo o madera; escalera mecánica de +2, +3 o +4. De las 36 combinaciones:
+
+- **Una solución:** rampa de hielo, colina de arena, bajada de madera y escalera +2 (8 + 2 = 6 + 3 + 1). Llega a la cima habiendo perdido 1,5.
+- **Siete trampas:** combinaciones que cuadran el balance pero no suben la colina, porque pierden demasiado antes (por ejemplo, rampa de asfalto + colina de asfalto + bajada de hielo + escalera +2: pierde 3 antes de la cima).
+- La idea clave: **el rozamiento, después de la colina**, y que la escalera devuelva lo que falte.
+
+La hoja de resultado escribe las alturas con coma decimal y dibuja medio cuadradito en el balance para las mitades («8 = 5,5 (cima) + 2,5 (margen)»).
+
 ## Diseño de niveles
 
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
@@ -285,6 +299,6 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 
 ## Pendiente
 
-- Niveles 6 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Niveles 7 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

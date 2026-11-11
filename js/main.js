@@ -562,10 +562,12 @@ function grupo(n, clase, etiqueta) {
   g.className = `grupo ${clase}`;
   const fs = document.createElement('div');
   fs.className = 'fs';
-  for (let i = 0; i < n; i++) fs.append(Object.assign(document.createElement('i'), { className: `ficha ${clase}` }));
+  for (let i = 0; i < Math.floor(n + 1e-9); i++) fs.append(Object.assign(document.createElement('i'), { className: `ficha ${clase}` }));
+  // medio julito (cimas a media altura): media ficha
+  if (n % 1 > 0.25) fs.append(Object.assign(document.createElement('i'), { className: `ficha ${clase} media` }));
   const icono = ICONOS[{ ep: 'Ep', ec: 'Ec', calor: 'calor', gana: 'motor' }[clase]];
   const txt = document.createElement('small');
-  txt.innerHTML = `${icono}<span>${etiqueta} · ${n}</span>`;
+  txt.innerHTML = `${icono}<span>${etiqueta} · ${String(Math.round(n * 100) / 100).replace('.', ',')}</span>`;
   g.append(fs, txt);
   return g;
 }
@@ -616,13 +618,15 @@ function mostrarResultado() {
     ecu = `${entra} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
   } else if (atasco) {
     // se quedó en una colina: perdió demasiado antes de llegar a la cima
-    const julitos = (x) => `${String(x).replace('.', ',')} ${x === 1 ? 'julito' : 'julitos'}`;
-    msg = `No pudo subir la colina. Su cima está a altura ${atasco.cima}: para pasarla tenía que llegar arriba ` +
-      `habiendo perdido menos de ${julitos(E - atasco.cima)}, y perdió ${julitos(atasco.antes)}.` +
+    const num = (x) => String(Math.round(x * 100) / 100).replace('.', ',');   // decimales con coma
+    const julitos = (x) => `${num(x)} ${x === 1 ? 'julito' : 'julitos'}`;
+    const margen = E - atasco.cima;   // (atasco.antes ya descuenta lo que haya dado una escalera antes)
+    msg = `No pudo subir la colina. Su cima está a altura ${num(atasco.cima)}: para pasarla tenía que llegar arriba ` +
+      `habiendo perdido menos de ${julitos(margen)}, y perdió ${julitos(atasco.antes)}.` +
       (llegada === 0 ? ' Las cuentas cuadraban… ¡pero el orden de las piezas importa!' : '');
-    bal.append(grupo(Math.round(atasco.cima), 'ep', 'cima'));
-    bal.append(grupo(E - Math.round(atasco.cima), 'ec', 'margen'));
-    ecu = `${E} = ${atasco.cima} (cima) + ${E - atasco.cima} (lo que podía perder antes)`;
+    bal.append(grupo(atasco.cima, 'ep', 'cima'));
+    bal.append(grupo(margen, 'ec', 'margen'));
+    ecu = `${E} = ${num(atasco.cima)} (cima) + ${num(margen)} (margen)`;
   } else {
     const tiene = E + ganancias - perdidas;   // la energía con la que podía subir
     msg = ganancias

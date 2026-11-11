@@ -306,6 +306,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .grupo { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .grupo .fs { display: flex; gap: 3px; padding-bottom: 4px; border-bottom: 1.5px solid var(--suave); }
 .grupo .ficha { width: 20px; height: 20px; }
+.grupo .ficha.media { width: 10px; }   /* medio julito */
 .grupo small { font-size: 13px; display: flex; align-items: center; gap: 3px; }
 .grupo small svg {
   width: 14px; height: 14px; flex: none;
