@@ -6,17 +6,28 @@
 //      node herramientas/validar-nivel.mjs 3      (solo el nivel 3)
 
 import { NIVELES, usarNivel } from '../js/nivel.js';
-import { prepararRecorrido, nuevaSimulacion, avanzar, analizar, muestra, inicioRepisa } from '../js/pista.js';
+import { prepararRecorrido, nuevaSimulacion, avanzar, analizar, muestra, inicioRepisa, huecosDe } from '../js/pista.js';
 
 function combinaciones(nivel) {
-  const huecos = Object.entries(nivel.huecos).map(([c, forma]) => [Number(c), nivel.piezas.filter((p) => p.forma === forma)]);
-  const rec = (i, acc) => {
-    if (i === huecos.length) return [{ ...acc }];
-    const [c, opciones] = huecos[i];
-    // una misma pieza no puede estar en dos huecos
-    return opciones.filter((p) => !Object.values(acc).includes(p)).flatMap((p) => rec(i + 1, { ...acc, [c]: p }));
+  // Se rellena siempre el primer hueco vacío: con una pieza simple de su forma o con una doble
+  // anclada en él (que ocupa también el de su derecha o el de debajo). Así cada colocación sale
+  // una sola vez.
+  const huecos = Object.keys(nivel.huecos).map(Number).sort((a, b) => a - b);
+  const rec = (acc, usadas) => {
+    const c = huecos.find((h) => !acc[h]);
+    if (c === undefined) return [{ ...acc }];
+    const out = [];
+    for (const p of nivel.piezas) {
+      if (usadas.has(p.id) || p.forma !== nivel.huecos[c]) continue;
+      const hs = huecosDe(p, c, nivel);
+      if (!hs || !hs.every((h) => nivel.huecos[h] === p.forma && !acc[h])) continue;
+      const nuevo = { ...acc };
+      for (const h of hs) nuevo[h] = p;
+      out.push(...rec(nuevo, new Set([...usadas, p.id])));
+    }
+    return out;
   };
-  return rec(0, {});
+  return rec({}, new Set());
 }
 
 function simular(nivel, colocadas) {
@@ -50,7 +61,7 @@ for (const nivel of Object.values(NIVELES)) {
     const ok = a.tipo === r.fin;
     if (!ok) errores++;
     if (a.tipo === 'meta') soluciones++;
-    const nombres = Object.values(comb).map((p) => p.nombre.join(' ')).join(' + ');
+    const nombres = [...new Set(Object.values(comb))].map((p) => p.nombre.join(' ')).join(' + ');
     console.log(`${ok ? '✓' : '✗'} ${nombres.padEnd(48)} ${a.ganancias ? `gana ${a.ganancias} · ` : ''}pierde ${a.perdidas} · llega con ${String(a.llegada).padStart(2)} → ${a.tipo.padEnd(8)} simulación: ${r.fin} (t=${r.sim.t.toFixed(1)} s${r.x ? `, se para en x=${r.x.toFixed(2)}` : ''})`);
   }
   // Continuidad: empieza donde acabó el nivel anterior

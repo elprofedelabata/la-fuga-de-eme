@@ -3,7 +3,7 @@
 import { NIVEL, NIVELES, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
 import {
   prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida,
-  columnas, anchoTablero, inicioRepisa, cambioDe,
+  columnas, anchoTablero, inicioRepisa, cambioDe, cambioPorCasilla, huecosDe,
 } from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
@@ -96,6 +96,29 @@ const rectHueco = (c) => botonHueco(c).getBoundingClientRect();
 const rectMini = (id) => tarjeta(id).querySelector('canvas').getBoundingClientRect();
 const centro = (r) => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
 const celdaDePieza = (id) => Number(Object.keys(estado.colocadas).find((c) => estado.colocadas[c]?.id === id));
+
+// ---------- piezas dobles ----------
+// Una pieza se ancla en una casilla y ocupa los huecos de huecosDe(): ese, o ese y el de al
+// lado si es doble. Todos tienen que tener su forma.
+const encaja = (p, a) => { const hs = huecosDe(p, a); return !!hs && hs.every((c) => NIVEL.huecos[c] === p.forma); };
+/** Casillas donde puede anclarse la pieza. */
+const anclas = (p) => Object.keys(NIVEL.huecos).map(Number).filter((a) => encaja(p, a));
+/** Ancla para que la pieza ocupe el hueco `celda` (ella misma, o la de su izquierda o encima), o null. */
+function anclaPara(p, celda) {
+  for (const a of [celda, celda - 1, celda - columnas()]) {
+    if (a > 0 && encaja(p, a) && huecosDe(p, a).includes(celda)) return a;
+  }
+  return null;
+}
+/** Rectángulo de pantalla de los huecos de la pieza anclada en `a`. */
+function rectHuecos(p, a) {
+  const rs = (huecosDe(p, a) ?? [a]).map((c) => rectHueco(c));
+  const left = Math.min(...rs.map((r) => r.left)), top = Math.min(...rs.map((r) => r.top));
+  const right = Math.max(...rs.map((r) => r.right)), bottom = Math.max(...rs.map((r) => r.bottom));
+  return { left, top, right, bottom, width: right - left, height: bottom - top };
+}
+/** Casilla cuya forma dibuja la miniatura de la pieza. */
+const celdaMuestra = (p) => (p.doble ? anclas(p)[0] : NIVEL.miniatura?.[p.forma] ?? celdaDeForma(p.forma));
 // Vibración corta en móviles que la admiten (solo tras un gesto real, si no Chrome la bloquea)
 const vibrar = (ms) => { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(ms); };
 let suprimirClick = false;
@@ -126,11 +149,16 @@ function crearBandeja() {
       ? `${p.nombre.join(' ')}: da ${p.gana} julitos`
       : `${p.nombre.join(' ')}: pierde ${pierde} julitos`);
     const cv = document.createElement('canvas');
-    const lado = 60;
-    cv.width = cv.height = lado * dpr;
+    // una casilla mide 60 px en la tarjeta; las dobles, algo menos para que la tarjeta no crezca tanto
+    const lado = p.doble === 'h' ? 46 : p.doble === 'v' ? 40 : 60;
+    const { nx, ny } = { nx: p.doble === 'h' ? 2 : 1, ny: p.doble === 'v' ? 2 : 1 };
+    cv.width = lado * nx * dpr;
+    cv.height = lado * ny * dpr;
+    cv.style.width = `${lado * nx}px`;
+    cv.style.height = `${lado * ny}px`;
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);
-    dibujarMiniatura(c, lado, celdaDeForma(p.forma), p);
+    dibujarMiniatura(c, lado, celdaMuestra(p), p);
     b.append(cv);
     b.insertAdjacentHTML('beforeend',
       `<span class="n1">${p.nombre[0]}</span><span class="n2">${p.nombre[1]}</span>` +
@@ -149,7 +177,7 @@ function refrescar() {
     const p = pieza(b.dataset.id);
     b.classList.toggle('fuera', estado.fuera.has(p.id));
     b.classList.toggle('seleccionada', estado.seleccion === p.id);
-    b.classList.toggle('no-encaja', !!formaFiltro && p.forma !== formaFiltro);
+    b.classList.toggle('no-encaja', !!formaFiltro && !anclaPara(p, estado.huecoElegido));
     b.classList.toggle('bloqueada', !!estado.guia && p.id !== estado.guia.pieza);
     b.classList.toggle('guiada', !!estado.guia && p.id === estado.guia.pieza);
   }
@@ -219,7 +247,8 @@ function tocarPieza(id) {
     return;
   }
   if (estado.huecoElegido) {
-    if (NIVEL.huecos[estado.huecoElegido] === p.forma) colocar(estado.huecoElegido, p);
+    const a = anclaPara(p, estado.huecoElegido);
+    if (a) colocar(a, p);
     return;
   }
   estado.seleccion = estado.seleccion === id ? null : id;
@@ -230,11 +259,11 @@ function tocarHueco(celda) {
   if (ocupado()) return;
   if (estado.guia && celda !== estado.guia.celda) { if (estado.guia.celda) estado.avisos[celda] = 0.6; return; }
   ocultarBocadillo();
-  const forma = NIVEL.huecos[celda];
   if (estado.seleccion) {
     const p = pieza(estado.seleccion);
-    if (p.forma === forma) {
-      colocar(celda, p);
+    const a = anclaPara(p, celda);
+    if (a) {
+      colocar(a, p);
     } else {
       estado.avisos[celda] = 0.9;     // no encaja: ese hueco parpadea en rojo
     }
@@ -249,9 +278,9 @@ function tocarHueco(celda) {
 }
 
 // ---------- vuelos animados entre bandeja y tablero ----------
-const nuevoFantasma = (p, rect) => new Fantasma(p, celdaDeForma(p.forma), rectHueco(celdaDeForma(p.forma)).width, rect);
+const nuevoFantasma = (p, rect) => new Fantasma(p, celdaMuestra(p), rectHueco(celdaMuestra(p)).width, rect);
 
-/** Lleva la pieza a un hueco (volando desde la bandeja o desde donde esté el fantasma). */
+/** Lleva la pieza a su hueco anclada en `celda` (volando desde la bandeja o desde el fantasma). */
 async function colocar(celda, p, f = null) {
   estado.vuelos++;
   estado.fuera.add(p.id);
@@ -261,18 +290,24 @@ async function colocar(celda, p, f = null) {
   refrescar();
   f.decaerGiro = true;
   f.arco = true;
-  f.ir(() => ({ ...centro(rectHueco(celda)), s: 1, r: 0, alto: 0 }), 18);
+  f.ir(() => ({ ...centro(rectHuecos(p, celda)), s: 1, r: 0, alto: 0 }), 18);
   await f.llegar();
 
-  const previa = estado.colocadas[celda];
-  if (previa && previa.id !== p.id) devolver(previa, nuevoFantasma(previa, rectHueco(celda)));
-  estado.colocadas[celda] = p;
+  // las piezas que ya ocupaban esos huecos vuelven a la bandeja
+  const mias = huecosDe(p, celda);
+  for (const previa of new Set(mias.map((c) => estado.colocadas[c]).filter((q) => q && q.id !== p.id))) {
+    const a = celdaDePieza(previa.id);
+    const rect = rectHuecos(previa, a);
+    for (const c of Object.keys(estado.colocadas)) if (estado.colocadas[c] === previa) estado.colocadas[c] = null;
+    devolver(previa, nuevoFantasma(previa, rect));
+  }
+  for (const c of mias) estado.colocadas[c] = p;
   if (estado.guia && p.id === estado.guia.pieza) primerMovimientoHecho(celda);
   // La pieza ya está en su sitio: se libera la interacción sin esperar al rebote, para que
   // una animación congelada (pestaña en segundo plano) nunca deje el tablero bloqueado.
   estado.vuelos--;
   refrescar();
-  polvo(celda);
+  for (const c of mias) polvo(c);
   vibrar(12);
   await f.rebote();
   f.quitar();
@@ -301,8 +336,8 @@ async function devolver(p, f) {
 function quitar(celda) {
   const p = estado.colocadas[celda];
   if (!p) return;
-  const f = nuevoFantasma(p, rectHueco(celda));
-  estado.colocadas[celda] = null;
+  const f = nuevoFantasma(p, rectHuecos(p, celdaDePieza(p.id)));
+  for (const c of Object.keys(estado.colocadas)) if (estado.colocadas[c] === p) estado.colocadas[c] = null;
   refrescar();
   devolver(p, f);
 }
@@ -357,8 +392,8 @@ function iniciarArrastre(ev, info, tactil) {
     f = nuevoFantasma(p, rectMini(p.id));
     estado.fuera.add(p.id);
   } else {
-    f = nuevoFantasma(p, rectHueco(info.desde));
-    estado.colocadas[info.desde] = null;
+    f = nuevoFantasma(p, rectHuecos(p, info.desde));
+    for (const c of Object.keys(estado.colocadas)) if (estado.colocadas[c] === p) estado.colocadas[c] = null;
   }
   f.decaerGiro = true;
   estado.seleccion = null;
@@ -383,21 +418,22 @@ function seguir(ev) {
   a.lx = ev.clientX;
   a.lt = ahora;
 
-  // imán: si el dedo está cerca de un hueco compatible, la pieza se engancha a él
-  let iman = null;
-  for (const [cs, forma] of Object.entries(NIVEL.huecos)) {
-    if (forma !== a.pieza.forma) continue;
-    const r = rectHueco(cs);
-    const m = r.width * 0.3;
+  // imán: si el dedo está cerca de un hueco compatible (o de la pareja de huecos, si la pieza
+  // es doble), la pieza se engancha a él; si hay varios, al más cercano
+  let iman = null, mejor = Infinity;
+  for (const an of anclas(a.pieza)) {
+    const r = rectHuecos(a.pieza, an);
+    const m = Math.min(r.width, r.height) * 0.3;
     if (ev.clientX > r.left - m && ev.clientX < r.right + m && ev.clientY > r.top - m && ev.clientY < r.bottom + m) {
-      iman = Number(cs);
+      const d = Math.hypot(ev.clientX - (r.left + r.right) / 2, ev.clientY - (r.top + r.bottom) / 2);
+      if (d < mejor) { mejor = d; iman = an; }
     }
   }
   if (iman !== estado.iman && iman) vibrar(5);
   estado.iman = iman;
   a.f.enganchar(!!iman);
   if (iman) {
-    a.f.ir({ ...centro(rectHueco(iman)), s: 1.04, r: 0, alto: 8 }, 24);
+    a.f.ir({ ...centro(rectHuecos(a.pieza, iman)), s: 1.04, r: 0, alto: 8 }, 24);
   } else {
     const s = 0.84;
     const encima = a.tactil ? (a.f.lado * s) / 2 + 14 : 0;   // en móvil, por encima del dedo
@@ -432,11 +468,13 @@ function estadosHuecos() {
     }
     return out;
   }
-  const forma = estado.arrastre?.pieza.forma ?? (estado.seleccion ? pieza(estado.seleccion).forma : null);
-  for (const [cs, f] of Object.entries(NIVEL.huecos)) {
+  const pz = estado.arrastre?.pieza ?? (estado.seleccion ? pieza(estado.seleccion) : null);
+  const validos = pz ? new Set(anclas(pz).flatMap((a) => huecosDe(pz, a))) : null;
+  const enIman = pz && estado.iman ? huecosDe(pz, estado.iman) : [];
+  for (const cs of Object.keys(NIVEL.huecos)) {
     const c = Number(cs);
     if (estado.avisos[c] > 0) out[c] = 'aviso';
-    else if (forma) out[c] = f !== forma ? 'apagado' : estado.iman === c ? 'iman' : 'activo';
+    else if (pz) out[c] = !validos.has(c) ? 'apagado' : enIman.includes(c) ? 'iman' : 'activo';
     else if (estado.huecoElegido) out[c] = estado.huecoElegido === c ? 'activo' : null;
   }
   return out;
@@ -974,7 +1012,7 @@ function fotograma(ahora) {
     }
     // y cada julito que da una escalera mecánica, como «+1 ■»
     for (const [c, L] of Object.entries(s.ganadoCelda)) {
-      const n = estado.colocadas[c]?.gana ?? 0;
+      const n = Math.max(0, -cambioPorCasilla(estado.colocadas[c]));
       const deben = etiquetasPerdida(L, n);
       while (pose && (estado.etiquetas[`+${c}`] ?? 0) < deben) {
         estado.etiquetas[`+${c}`] = (estado.etiquetas[`+${c}`] ?? 0) + 1;
@@ -1177,7 +1215,7 @@ function crearHuecos() {
     b.addEventListener('click', () => { if (!suprimirClick) tocarHueco(celda); });
     b.addEventListener('pointerdown', (e) => {
       const p = estado.colocadas[celda];
-      if (p) posibleArrastre(e, { pieza: p, desde: celda });
+      if (p) posibleArrastre(e, { pieza: p, desde: celdaDePieza(p.id) });   // (las dobles, desde su ancla)
     });
     $('bocadillo').before(b);
   }

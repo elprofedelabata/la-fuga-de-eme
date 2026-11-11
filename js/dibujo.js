@@ -1,7 +1,7 @@
 // Dibujo con estilo de cuaderno: trazo de lápiz, texturas de materiales, tablero y Eme.
 // Todas las medidas van en píxeles CSS; el lienzo ya viene escalado por devicePixelRatio.
 
-import { construirPista, celdasTramos, celdaDe, columnas, anchoTablero, inicioRepisa } from './pista.js';
+import { construirPista, celdasTramos, celdaDe, columnas, anchoTablero, inicioRepisa, huecosDe } from './pista.js';
 import { NIVEL } from './nivel.js';
 
 export const C = {
@@ -422,28 +422,42 @@ export function dibujarBandera(ctx, W, nivel) {
 }
 
 /** Miniatura de una pieza: la casilla real del nivel, con su material. */
+/** Tamaño de la miniatura de una pieza (en casillas): 1 x 1, 2 x 1 (doble horizontal) o 1 x 2. */
+export const casillasMini = (pieza) => ({ nx: pieza.doble === 'h' ? 2 : 1, ny: pieza.doble === 'v' ? 2 : 1 });
+
+/**
+ * Miniatura de una pieza: la casilla real del nivel (o las dos, si es doble), con su material.
+ * `lado` es lo que mide una casilla; el dibujo ocupa nx·lado x ny·lado.
+ */
 export function dibujarMiniatura(ctx, lado, celda, pieza, nivel = NIVEL) {
   const cols = columnas(nivel);
-  const v = vistaCelda(celda, lado, cols);
+  const { nx, ny } = casillasMini(pieza);
+  const ancho = nx * lado, alto = ny * lado;
+  const mias = huecosDe(pieza, celda, nivel) ?? [celda];
+  const v0 = vistaCelda(celda, lado, cols);   // la primera casilla manda: es la de arriba a la izquierda
   ctx.fillStyle = C.tarjeta;
-  ctx.fillRect(0, 0, lado, lado);
+  ctx.fillRect(0, 0, ancho, alto);
   ctx.strokeStyle = C.cuadri;
   ctx.lineWidth = 1;
-  for (const i of [1, 2]) {
-    ctx.beginPath(); ctx.moveTo((i * lado) / 3, 0); ctx.lineTo((i * lado) / 3, lado); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, (i * lado) / 3); ctx.lineTo(lado, (i * lado) / 3); ctx.stroke();
+  for (let i = 1; i < 3 * nx; i++) { ctx.beginPath(); ctx.moveTo((i * lado) / 3, 0); ctx.lineTo((i * lado) / 3, alto); ctx.stroke(); }
+  for (let i = 1; i < 3 * ny; i++) { ctx.beginPath(); ctx.moveTo(0, (i * lado) / 3); ctx.lineTo(ancho, (i * lado) / 3); ctx.stroke(); }
+  if (nx * ny > 1) {   // la junta entre las dos casillas
+    ctx.strokeStyle = 'rgba(160,163,170,0.7)';
+    ctx.beginPath();
+    if (nx > 1) { ctx.moveTo(lado, 0); ctx.lineTo(lado, alto); } else { ctx.moveTo(0, lado); ctx.lineTo(ancho, lado); }
+    ctx.stroke();
   }
-  const pista = construirPista(nivel, { [celda]: pieza });
-  pintarTerreno(ctx, v, pista, [0, 0, lado, lado], pieza.material);
+  const pista = construirPista(nivel, Object.fromEntries(mias.map((c) => [c, pieza])));
+  pintarTerreno(ctx, v0, pista, [0, 0, ancho, alto], pieza.material);
   const celdas = celdasTramos(pista, cols);
   const pts = [];
   for (let i = 0; i < celdas.length; i++) {
-    if (celdas[i] !== celda) continue;
-    if (!pts.length) pts.push(v.px(...pista[i]));
-    pts.push(v.px(...pista[i + 1]));
+    if (!mias.includes(celdas[i])) continue;
+    if (!pts.length) pts.push(v0.px(...pista[i]));
+    pts.push(v0.px(...pista[i + 1]));
   }
   if (pts.length > 1) lapiz(ctx, pts, { ancho: 2, doble: false, amp: 0.4 });
-  if (pieza.material === 'escalera') pasamanos(ctx, v, pista, celdas, celda);
+  if (pieza.material === 'escalera') for (const c of mias) pasamanos(ctx, v0, pista, celdas, c);
 }
 
 // ---------- Eme ----------

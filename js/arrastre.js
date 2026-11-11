@@ -4,7 +4,7 @@
 // una fracción de la distancia que le queda hasta su objetivo. Eso le da inercia al
 // arrastrarla y hace que los vuelos frenen solos al llegar.
 
-import { dibujarMiniatura } from './dibujo.js';
+import { dibujarMiniatura, casillasMini } from './dibujo.js';
 
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PROPS = ['x', 'y', 's', 'r', 'alto'];
@@ -15,16 +15,21 @@ export class Fantasma {
    * @param celda  casilla del tablero cuya forma dibuja
    * @param lado   lado de una casilla del tablero en píxeles CSS (tamaño a escala 1)
    * @param rect   rectángulo de pantalla desde el que sale (miniatura o hueco)
+   * Las piezas dobles miden dos casillas de ancho (horizontales) o de alto (verticales).
    */
   constructor(pieza, celda, lado, rect) {
     this.pieza = pieza;
-    this.lado = lado;
+    const { nx, ny } = casillasMini(pieza);
+    this.lado = lado * nx;       // ancho a escala 1 (la escala se mide por el ancho)
+    this.altoPx = lado * ny;
     const el = document.createElement('div');
     el.className = 'fantasma';
-    el.style.width = el.style.height = `${lado}px`;
+    el.style.width = `${this.lado}px`;
+    el.style.height = `${this.altoPx}px`;
     const cv = document.createElement('canvas');
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
-    cv.width = cv.height = Math.round(lado * dpr);
+    cv.width = Math.round(this.lado * dpr);
+    cv.height = Math.round(this.altoPx * dpr);
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);
     dibujarMiniatura(c, lado, celda, pieza);
@@ -35,7 +40,7 @@ export class Fantasma {
 
     this.x = rect.left + rect.width / 2;
     this.y = rect.top + rect.height / 2;
-    this.s = rect.width / lado;
+    this.s = rect.width / this.lado;
     this.r = 0;
     this.alto = 0;
     this.obj = { x: this.x, y: this.y, s: this.s, r: 0, alto: 0 };
@@ -88,9 +93,9 @@ export class Fantasma {
   }
 
   aplicar() {
-    const m = this.lado / 2;
+    const mx = this.lado / 2, my = this.altoPx / 2;
     this.el.style.transform =
-      `translate(${(this.x - m).toFixed(2)}px, ${(this.y - m).toFixed(2)}px) rotate(${this.r.toFixed(2)}deg) scale(${this.s.toFixed(4)})`;
+      `translate(${(this.x - mx).toFixed(2)}px, ${(this.y - my).toFixed(2)}px) rotate(${this.r.toFixed(2)}deg) scale(${this.s.toFixed(4)})`;
     this.el.style.setProperty('--alto', this.alto.toFixed(1));
   }
 

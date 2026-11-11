@@ -205,6 +205,34 @@ export const NIVELES = {
       { id: 'escalera-5', forma: 'escalera', material: 'escalera', gana: 5, nombre: ['Escalera', 'mecánica'] },
     ],
   },
+
+  // Piezas dobles: ocupan dos huecos contiguos (`doble: 'v'` hacia abajo, `doble: 'h'` a la
+  // derecha). Cada zona de dos huecos se rellena con una doble o con dos simples. El rozamiento
+  // va por casilla: una pieza doble de madera quita 2 julitos.
+  7: {
+    numero: 7,
+    titulo: 'Piezas dobles',
+    frase: 'Una pieza que ocupa dos casillas… ¿rozará el doble?',
+    columnas: 4,
+    trazado: 'larga',
+    suelo: 0.5,
+    energia: 6,            // empieza donde acabó el nivel 6: a altura 6
+    salidaX: 1.0,
+    meta: { altura: 4, bandera: 11.55 },
+    huecos: { 5: 'bajada', 9: 'bajada', 10: 'suelo', 11: 'suelo' },
+    miniatura: { bajada: 9 },   // las bajadas simples se dibujan con la forma de la casilla 9
+    piezas: [
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-asfalto', forma: 'bajada', material: 'asfalto', nombre: ['Bajada', 'de asfalto'] },
+      { id: 'suelo-hielo', forma: 'suelo', material: 'hielo', nombre: ['Suelo', 'de hielo'] },
+      { id: 'suelo-madera', forma: 'suelo', material: 'madera', nombre: ['Suelo', 'de madera'] },
+      { id: 'suelo-arena', forma: 'suelo', material: 'arena', nombre: ['Suelo', 'de arena'] },
+      { id: 'bajada-doble-hielo', forma: 'bajada', doble: 'v', material: 'hielo', nombre: ['Bajada doble', 'de hielo'] },
+      { id: 'bajada-doble-madera', forma: 'bajada', doble: 'v', material: 'madera', nombre: ['Bajada doble', 'de madera'] },
+      { id: 'suelo-doble-madera', forma: 'suelo', doble: 'h', material: 'madera', nombre: ['Suelo doble', 'de madera'] },
+      { id: 'suelo-doble-asfalto', forma: 'suelo', doble: 'h', material: 'asfalto', nombre: ['Suelo doble', 'de asfalto'] },
+    ],
+  },
 };
 
 /**

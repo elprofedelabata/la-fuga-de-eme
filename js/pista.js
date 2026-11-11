@@ -21,7 +21,22 @@ const V_ESCALERA = 1.4;
  * Julitos que cambia una pieza al recorrerla: positivo si los quita (rozamiento), negativo si
  * los da (escaleras mecánicas, con `gana`).
  */
-export const cambioDe = (p) => (!p ? 0 : p.gana != null ? -p.gana : MATERIALES[p.material].pierde);
+export const cambioDe = (p) => (!p ? 0 : p.gana != null ? -p.gana : MATERIALES[p.material].pierde * tamDe(p));
+/** Casillas que ocupa una pieza: 1, o 2 si es doble (horizontal o vertical). */
+export const tamDe = (p) => (p?.doble ? 2 : 1);
+/** Julitos que cambia la pieza en cada una de sus casillas (el rozamiento va por casilla). */
+export const cambioPorCasilla = (p) => cambioDe(p) / tamDe(p);
+
+/**
+ * Huecos que ocupa la pieza si se ancla en la casilla `a`: [a], o [a, la de al lado] si es
+ * doble ('h': la de la derecha; 'v': la de debajo). null si se saldría del tablero.
+ */
+export function huecosDe(p, a, nivel = NIVEL) {
+  if (!p.doble) return [a];
+  const cols = columnas(nivel);
+  if (p.doble === 'h') return a % cols === 0 ? null : [a, a + 1];
+  return a + cols > 3 * cols ? null : [a, a + cols];
+}
 /** ¿Tiene motor? (una escalera que da julitos; la averiada no) */
 export const conMotor = (p) => (p?.gana ?? 0) > 0;
 
@@ -175,7 +190,32 @@ function pistaTravesia(nivel) {
   return pts;
 }
 
-const TRAZADOS = { u: pistaU, colina: pistaColina, escaleras: pistaEscaleras, travesia: pistaTravesia };
+/**
+ * Bajada larga y suelo largo (tablero de 4 columnas): de la salida baja hasta el fondo
+ * atravesando dos filas, recorre dos casillas de suelo llano y sube en S hasta la meta.
+ *   columna 1: bajada (casillas 5 y 9: hueco doble vertical)
+ *   fila de abajo: suelo (casillas 10 y 11: hueco doble horizontal) | rampa y meta
+ */
+function pistaLarga(nivel) {
+  const hs = nivel.energia, hm = nivel.meta.altura, suelo = nivel.suelo ?? 0.5;
+  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const suave = (u) => u * u * (3 - 2 * u);
+  const pts = [[0, hs], [1.2, hs]];
+  // bajada: "quarter pipe" de la salida al suelo (de x = 1.2 a 3)
+  for (let i = 1; i <= 48; i++) {
+    const th = (i / 48) * Math.PI / 2;
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), suelo + (hs - suelo) * (1 - Math.sin(th))]);
+  }
+  // suelo llano (de 3 a 9)
+  for (let i = 1; i <= 24; i++) pts.push([3 + (6 * i) / 24, suelo]);
+  // rampa en S hasta la repisa de la meta
+  for (let i = 1; i <= 20; i++) pts.push([9 + (repisa - 9) * (i / 20), suelo + (hm - suelo) * suave(i / 20)]);
+  // repisa plana y sin rozamiento hasta el precipicio
+  for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);
+  return pts;
+}
+
+const TRAZADOS = { u: pistaU, colina: pistaColina, escaleras: pistaEscaleras, travesia: pistaTravesia, larga: pistaLarga };
 
 export function celdaDe(x, h, cols = 3) {
   const c = Math.min(Math.max(Math.floor(x / 3), 0), cols - 1);
@@ -205,7 +245,7 @@ export function prepararRecorrido(nivel, colocadas) {
   const largo = {};
   for (let i = 0; i < celdas.length; i++) largo[celdas[i]] = (largo[celdas[i]] ?? 0) + (s[i + 1] - s[i]);
   // densidad de pérdida (julitos por cuadrito recorrido) de cada tramo; negativa si los da
-  const dens = celdas.map((c) => cambioDe(pieza(c)) / largo[c]);
+  const dens = celdas.map((c) => cambioPorCasilla(pieza(c)) / largo[c]);
   const mats = celdas.map(material);
   const motor = celdas.map((c) => conMotor(pieza(c)));
   return { pts, s, dens, celdas, mats, motor, total: s[s.length - 1] };
@@ -243,7 +283,7 @@ export function sDeX(rec, x) {
 
 // ---------- resultado esperado (cuentas con julitos enteros) ----------
 export function analizar(nivel, colocadas) {
-  const piezas = Object.values(colocadas).filter(Boolean);
+  const piezas = [...new Set(Object.values(colocadas).filter(Boolean))];   // una doble ocupa dos huecos
   const perdidas = piezas.reduce((a, p) => a + Math.max(cambioDe(p), 0), 0);
   const ganancias = piezas.reduce((a, p) => a + Math.max(-cambioDe(p), 0), 0);
   const llegada = nivel.energia + ganancias - nivel.meta.altura - perdidas;   // Ec al llegar a la meta

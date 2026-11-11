@@ -89,6 +89,8 @@ El cuaderno tiene **10 niveles**.
 
 **Nombres de las piezas:** las que bajan son **bajadas** y las que suben, **rampas** (además de suelos, colinas y escaleras mecánicas). Todas las bajadas de un nivel aceptan las mismas piezas, aunque su forma cambie un poco de un hueco a otro.
 
+**Piezas dobles.** Ocupan dos huecos contiguos de la misma forma: en vertical (`doble: 'v'`, el hueco y el de debajo) o en horizontal (`doble: 'h'`, el hueco y el de su derecha). Una zona de dos huecos se puede rellenar con una doble o con dos simples. No traen física nueva, pero enseñan que **el rozamiento depende de la longitud**: cada material quita sus julitos por casilla, así que una pieza doble de madera quita 2 (su pegatina lo dice: −2). Se colocan igual que las simples (tocando cualquiera de sus dos huecos, o arrastrándolas: el imán engancha la pareja de huecos). Si una pieza nueva cae sobre una doble, la doble vuelve entera a la bandeja. En la bandeja, su miniatura muestra las dos casillas.
+
 **La «U»** (niveles 1 a 3, 3 columnas): plataforma de salida y bajada (casillas 1, 4 y 7), suelo (casilla 8) y rampa en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **bajada** (casilla 4), **suelo** (casilla 8) y **rampa** (casilla 6). Perfiles del suelo: plano, hondonada y montañitas de 1 y 2 cuadritos de alto. Los niveles están en `js/nivel.js` y el validador los comprueba todos.
 
 **Continuidad del camino.** Cada nivel es un tramo del camino de Eme y **empieza donde acabó el anterior**: la altura de salida de un nivel es la de la meta del anterior (el validador lo comprueba). Más adelante, elementos decorativos reforzarán esa continuidad espacial.
@@ -210,6 +212,17 @@ Las **dos bajadas** (antes y después de la colina) **aceptan las mismas piezas*
 
 La hoja de resultado escribe las alturas con coma decimal y dibuja medio cuadradito en el balance para las mitades («8 = 5,5 (cima) + 2,5 (margen)»).
 
+### Nivel 7 · «Piezas dobles»
+
+Tablero de 3 filas y 4 columnas. Empieza donde acabó el nivel 6, a altura 6, y la meta está a altura 4: hay que perder 2. Trazado de **bajada larga y suelo largo**: la bajada atraviesa dos filas (casillas 5 y 9: pareja vertical), el suelo llano ocupa dos casillas (10 y 11: pareja horizontal) y una rampa en S sube a la meta.
+
+Introduce las **piezas dobles**. Piezas (9 para 4 huecos): bajadas simples de hielo y asfalto; suelos simples de hielo, madera y arena; bajadas dobles de hielo y madera; suelos dobles de madera y asfalto. De las 32 formas de rellenar los huecos:
+
+- **Una solución:** bajada doble de hielo y suelo doble de madera (6 = 4 + 2): el suelo doble de madera quita 2, uno por casilla.
+- Con dos piezas simples en una zona, el orden daría dos soluciones (intercambiarlas no cambia nada), así que el nivel está pensado para que la solución use dos dobles y ninguna combinación de simples sume justo 2.
+
+La bajada simple se dibuja en la bandeja con la forma de la casilla 9 (`miniatura` en los datos del nivel), que se ve mejor que el tramo casi vertical de la casilla 5.
+
 ## Diseño de niveles
 
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
@@ -301,6 +314,6 @@ De arriba abajo: barra superior (nivel y su estrella) · línea del objetivo · 
 
 ## Pendiente
 
-- Niveles 7 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Niveles 8 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.
