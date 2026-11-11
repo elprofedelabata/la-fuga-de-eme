@@ -108,7 +108,7 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
   8. «Cuando la pista esté completa, pulsa LANZAR y allá que voy.» (se ilumina LANZAR)
   9. «Y si quieres empezar de cero, este botón quita todas las piezas de la pista.» (se ilumina el botón de reiniciar)
 
-  Se recuerda en `fuga-eme-charla-vista`. Después llega la guía del primer movimiento.
+  Se recuerda en `fuga-eme-charla-1-vista`. Después llega la guía del primer movimiento.
 - **Bocadillos de Eme** (`js/escritura.js`). El del tablero se coloca solo para que su pico salga de la **boca de Eme**, esté donde esté la salida; si Eme está muy arriba, el bocadillo no se sale del tablero y el pico baja hasta la boca. Al escribirse letra a letra, el texto entero ya está puesto (lo que falta, invisible), así que ninguna palabra salta de línea. Nada se corta feo: un número va siempre con su palabra («7 julitos»), las citas cortas entre comillas no se parten («sin rozamiento») y las dos últimas palabras van juntas, para que la última línea nunca se quede con una palabra suelta.
 - **Guía del primer movimiento.** Con la pantalla oscurecida (tras la charla o, si ya se vio, al segundo de empezar el nivel, con un fundido suave), Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco», escrito letra a letra mientras Eme mira la bandeja) quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
 - Mientras dura, **todo lo demás está bloqueado**: las otras piezas tiemblan si se tocan, los otros huecos no responden y LANZAR y Vaciar están desactivados.
@@ -139,6 +139,17 @@ Empieza donde acabó el nivel 2, a altura 7 (7 julitos); suelo a altura 1, meta 
 | Rampa de arena | Suelo de madera | 4 | — | No llega |
 | Rampa de arena | Suelo de asfalto | 5 | — | No llega |
 | **Rampa de arena** | **Hondonada de hielo** | **3** | **0** | **Victoria** |
+
+**Charla del rozamiento** (primer nivel con rozamiento; solo la primera vez, se recuerda en `fuga-eme-charla-3-vista`). Al segundo de empezar, con todo oscurecido y bloqueado, Eme lo explica desde la salida con el mismo sistema de bocadillos que en el nivel 1:
+
+1. «Uy… Aquí ya no todo es hielo.» (cara de susto; se ilumina la bandeja)
+2. «Cada material roza, y al rozar me quita julitos. El número de cada pieza es lo que me quita.» (se iluminan las pegatinas −0, −1, −2, −3 de las piezas)
+3. «El hielo, nada. La madera, 1. El asfalto, 2. Y la arena… ¡3!» (las pegatinas)
+4. «Esos julitos no desaparecen: se convierten en calor. ¡Por eso la arena quema!» (cara de esfuerzo)
+5. «Salgo con 7 julitos y tengo que pararme a altura 4.» (se iluminan «Sale con 7 julitos» y la meta)
+6. «¿Cuántos julitos tengo que perder por el camino? ¡Ni más, ni menos!» (deja la cuenta al jugador)
+
+Después se va el oscurecimiento y se juega con normalidad. Cualquier nivel puede tener su `charla`.
 
 La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/validar-nivel.mjs` comprueba esta tabla con la simulación real.
 

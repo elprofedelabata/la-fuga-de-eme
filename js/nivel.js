@@ -35,7 +35,8 @@ export const NIVELES = {
       { texto: 'Ven, que te enseño cómo se hace.', py: 0.9 },
     ],
     // Después, Eme habla desde su sitio en el tablero (solo la primera vez).
-    // zonas: lo que se ilumina mientras lo dice (regla, salida, bandera, meta, huecos, bandeja, lanzar, vaciar)
+    // zonas: lo que se ilumina mientras lo dice (regla, salida, bandera, meta, huecos, bandeja,
+    // pegatinas, lanzar, vaciar)
     charla: [
       { texto: '¡Aquí estoy! Arriba del todo, en la salida.', expr: 'win' },
       { texto: 'Mira la regla: estoy a 7 cuadritos de altura.', zonas: ['regla'], px: -0.95, py: 0.2 },
@@ -94,6 +95,15 @@ export const NIVELES = {
     numero: 3,
     titulo: 'Ni más, ni menos',
     frase: '«Desprecie el rozamiento», dicen. Ojalá.',
+    // Primer nivel con rozamiento: Eme lo explica desde la salida (solo la primera vez)
+    charla: [
+      { texto: 'Uy… Aquí ya no todo es hielo.', expr: 'gulp', zonas: ['bandeja'] },
+      { texto: 'Cada material roza, y al rozar me quita julitos. El número de cada pieza es lo que me quita.', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
+      { texto: 'El hielo, nada. La madera, 1. El asfalto, 2. Y la arena… ¡3!', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
+      { texto: 'Esos julitos no desaparecen: se convierten en calor. ¡Por eso la arena quema!', expr: 'effort' },
+      { texto: 'Salgo con 7 julitos y tengo que pararme a altura 4.', zonas: ['salida', 'meta'], px: 0.3, py: -0.95 },
+      { texto: '¿Cuántos julitos tengo que perder por el camino? ¡Ni más, ni menos!', expr: 'win' },
+    ],
     energia: 7,            // empieza donde acabó el nivel 2: a altura 7
     salidaX: 1.0,
     meta: { altura: 4, bandera: 8.55 },   // hay que perder 3 y llegar con 0 julitos de Ec

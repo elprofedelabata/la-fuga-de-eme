@@ -1,6 +1,6 @@
 // La fuga de Eme · boceto jugable del nivel 1.
 
-import { NIVEL, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
+import { NIVEL, NIVELES, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
 import { prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida } from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
@@ -942,15 +942,24 @@ function ponerEncima(si) {
   $('tablero').classList.toggle('guiado', si);
 }
 
-function empezarGuia() {
+/** ¿Tiene este nivel algo que contar o enseñar al empezar? */
+const hayGuia = (n) => !!NIVELES[n].guia && !estrellasDe(n);
+const hayCharla = (n) => !!NIVELES[n].charla && !visto(`charla-${n}`);
+
+/**
+ * Ayuda al empezar un nivel, por orden y solo cuando toca: la bienvenida de Eme en primer
+ * plano, su charla desde el tablero y la guía del primer movimiento.
+ */
+function empezarAyuda() {
   const tapado = ['inicio', 'niveles', 'historia'].some((id) => !$(id).hidden) || $('cargando') || document.querySelector('dialog[open]');
   if (estado.modo !== 'montaje' || estado.arrastre || estado.vuelos || tapado) {
-    temporizadorGuia = setTimeout(empezarGuia, 500);   // aún no se ve el nivel: esperar
+    temporizadorGuia = setTimeout(empezarAyuda, 500);   // aún no se ve el nivel: esperar
     return;
   }
   if (Object.values(estado.colocadas).some(Boolean)) return;   // ya ha empezado solo: no hace falta
-  // La primera vez, Eme se presenta en primer plano y luego habla desde su sitio en el tablero
-  const charlaYGuia = () => (NIVEL.charla && !visto('charla') ? charlar(NIVEL.charla, guiarPrimerMovimiento) : guiarPrimerMovimiento());
+  const n = NIVEL.numero;
+  const guia = () => (hayGuia(n) ? guiarPrimerMovimiento() : terminarGuia());
+  const charlaYGuia = () => (hayCharla(n) ? charlar(NIVEL.charla, guia) : guia());
   if (NIVEL.bienvenida && !bienvenidaVista()) {
     mostrarBienvenida({ frases: NIVEL.bienvenida, alTerminar: charlaYGuia });
     return;
@@ -964,6 +973,7 @@ const marcarVisto = (k) => { try { localStorage.setItem(`fuga-eme-${k}-vista`, '
 /** Lo que se puede iluminar mientras Eme habla (uno o varios rectángulos de pantalla). */
 function zona(nombre) {
   if (nombre === 'huecos') return Object.keys(NIVEL.huecos).map((c) => rectHueco(c));
+  if (nombre === 'pegatinas') return [...$('piezas').querySelectorAll('.pegatina')].map((el) => el.getBoundingClientRect());
   if (nombre === 'bandera') {
     // la repisa de la meta con su bandera
     const v = vistaTablero(W()), r = lienzo.getBoundingClientRect();
@@ -996,7 +1006,7 @@ function charlar(frases, alTerminar) {
     n++;
     if (n >= frases.length) {
       estado.huecosEnFoco = false;
-      marcarVisto('charla');
+      marcarVisto(`charla-${NIVEL.numero}`);
       alTerminar();
       return;
     }
@@ -1070,11 +1080,11 @@ function cargarNivel(n) {
   terminarGuia();
   clearTimeout(temporizadorGuia);
   $('bocadillo').textContent = sinCortes(NIVEL.frase);
-  // Con guía, el nivel arranca limpio (sin bocadillo) y al segundo llega la bienvenida
-  // (la primera vez) y la guía
-  const conGuia = NIVEL.guia && !estrellasDe(n);
-  $('bocadillo').classList.toggle('oculto', !!conGuia);
-  if (conGuia) temporizadorGuia = setTimeout(empezarGuia, 1000);
+  // Con algo que contar, el nivel arranca limpio (sin bocadillo) y al segundo llega la ayuda:
+  // la bienvenida (la primera vez), la charla de Eme y la guía del primer movimiento
+  const conAyuda = hayGuia(n) || hayCharla(n);
+  $('bocadillo').classList.toggle('oculto', conAyuda);
+  if (conAyuda) temporizadorGuia = setTimeout(empezarAyuda, 1000);
   $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b>&nbsp;julitos`;
   $('objetivo-meta').innerHTML = `Meta: pararse a altura&nbsp;<b class="meta">${NIVEL.meta.altura}</b>`;
   $('directo-pie').textContent = `Total: ${NIVEL.energia} julitos. Siempre.`;
