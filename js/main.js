@@ -25,7 +25,10 @@ const $ = (id) => document.getElementById(id);
 const app = $('app');
 const lienzo = $('lienzo');
 const ctx = lienzo.getContext('2d');
-// Capa solo para Eme, por encima del oscurecimiento de la guía
+// Capa de Eme (y la bandera y las etiquetas): sobresale CABEZA cuadritos por encima del
+// tablero, para que con la meta muy alta no se corten la bandera ni los saltos de la
+// celebración. En la guía, además, queda por encima del oscurecimiento.
+const CABEZA = 1.4;
 const lienzoEme = $('lienzo-eme');
 const ctxEme = lienzoEme.getContext('2d');
 const marcador = $('regla-eme');
@@ -70,7 +73,7 @@ function ajustar() {
   lienzo.width = Math.round(w * dpr);
   lienzo.height = Math.round(H() * dpr);
   lienzoEme.width = lienzo.width;
-  lienzoEme.height = lienzo.height;
+  lienzoEme.height = Math.round(H() * (1 + CABEZA / 9) * dpr);
   rehacerTablero();
 }
 
@@ -812,7 +815,13 @@ function pintar() {
   const pose = poseEme(w);
   if (!estado.sim) bocadilloEnLaBoca(pose);
   marcador.style.setProperty('--h', Math.max(-0.4, Math.min(CUADRITOS + 0.4, pose.h)).toFixed(3));
-  if (!pose.o.bandera) dibujarBandera(ctx, w, NIVEL);
+  // capa de Eme: el origen, en la esquina de arriba del tablero (por encima queda la «cabeza»)
+  const cabeza = (H() * CABEZA) / 9;
+  ctxEme.setTransform(dpr, 0, 0, dpr, 0, cabeza * dpr);
+  ctxEme.clearRect(0, -cabeza, w, H() + cabeza);
+  // la bandera, en la capa de Eme (puede asomar por arriba), salvo en la guía, en la que esa
+  // capa queda por encima del oscurecimiento
+  if (!pose.o.bandera) dibujarBandera(estado.encima ? ctx : ctxEme, w, NIVEL);
 
   // líneas de velocidad
   const s = estado.sim;
@@ -833,33 +842,29 @@ function pintar() {
     ctx.restore();
   }
 
-  // Durante la guía, Eme se pinta en su capa, que queda por encima del oscurecimiento
-  if (estado.encima || lienzoEme.dataset.sucio) {
-    ctxEme.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctxEme.clearRect(0, 0, w, H());
-    lienzoEme.dataset.sucio = estado.encima ? '1' : '';
-  }
-  dibujarEme(estado.encima ? ctxEme : ctx, pose.cx, pose.cy, pose.B, { ...pose.o, ang: pose.ang });
+  dibujarEme(ctxEme, pose.cx, pose.cy, pose.B, { ...pose.o, ang: pose.ang });
 
+  // partículas y etiquetas ±1, también en la capa de Eme
+  const ce = ctxEme;
   for (const p of particulas) {
-    ctx.globalAlpha = Math.max(0, 1 - p.t / p.vida);
+    ce.globalAlpha = Math.max(0, 1 - p.t / p.vida);
     if (p.forma === 'cambio') {
-      dibujarCambio(p);
+      dibujarCambio(ce, p);
       continue;
     }
     if (p.forma === 'polvo') {
-      ctx.fillStyle = p.color;
-      ctx.strokeStyle = 'rgba(110,104,98,0.6)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.lado / 2, 0, 6.29);
-      ctx.fill();
-      ctx.stroke();
+      ce.fillStyle = p.color;
+      ce.strokeStyle = 'rgba(110,104,98,0.6)';
+      ce.lineWidth = 1;
+      ce.beginPath();
+      ce.arc(p.x, p.y, p.lado / 2, 0, 6.29);
+      ce.fill();
+      ce.stroke();
     } else {
-      cuadradito(ctx, p.x, p.y, p.lado, p.color, p.ang);
+      cuadradito(ce, p.x, p.y, p.lado, p.color, p.ang);
     }
   }
-  ctx.globalAlpha = 1;
+  ce.globalAlpha = 1;
 
   if (s && s.estado === 'cayendo') gritar(w, s, pose);
   return pose;
@@ -874,7 +879,7 @@ function cambioJulitos(n, pose, dir = 1) {
   });
 }
 
-function dibujarCambio(p) {
+function dibujarCambio(ctx, p) {
   // aparece con un «pop», se mantiene y se desvanece suavemente
   const entrada = Math.min(1, p.t / 0.18);
   const pop = 0.6 + 0.4 * (1 - (1 - entrada) ** 3) + 0.12 * Math.sin(Math.min(1, p.t / 0.3) * Math.PI);
