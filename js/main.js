@@ -48,6 +48,7 @@ const estado = {
   guia: null,                 // guía del primer movimiento: { pieza, celda }
   encima: false,              // Eme y su bocadillo, por encima del oscurecimiento
   cara: null,                 // cara de Eme mientras habla en el tablero: { expr, px, py }
+  huecosEnFoco: false,        // Eme está hablando de los huecos: laten todos
 };
 
 const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
@@ -415,7 +416,9 @@ function soltar(ev) {
 function estadosHuecos() {
   const out = {};
   if (estado.guia && !estado.arrastre) {
-    for (const c of Object.keys(NIVEL.huecos)) out[c] = Number(c) === estado.guia.celda ? 'activo' : 'apagado';
+    for (const c of Object.keys(NIVEL.huecos)) {
+      out[c] = Number(c) === estado.guia.celda || estado.huecosEnFoco ? 'activo' : 'apagado';
+    }
     return out;
   }
   const forma = estado.arrastre?.pieza.forma ?? (estado.seleccion ? pieza(estado.seleccion).forma : null);
@@ -958,9 +961,21 @@ function empezarGuia() {
 const visto = (k) => { try { return localStorage.getItem(`fuga-eme-${k}-vista`) === '1'; } catch { return false; } };
 const marcarVisto = (k) => { try { localStorage.setItem(`fuga-eme-${k}-vista`, '1'); } catch { /* da igual */ } };
 
-/** Lo que se puede iluminar mientras Eme habla. */
+/** Lo que se puede iluminar mientras Eme habla (uno o varios rectángulos de pantalla). */
 function zona(nombre) {
-  const el = { regla: $('regla'), salida: $('objetivo-salida').parentElement }[nombre];
+  if (nombre === 'huecos') return Object.keys(NIVEL.huecos).map((c) => rectHueco(c));
+  if (nombre === 'bandera') {
+    // la repisa de la meta con su bandera
+    const v = vistaTablero(W()), r = lienzo.getBoundingClientRect();
+    const [x0, y0] = v.px(7.1, NIVEL.meta.altura + 2.6), [x1, y1] = v.px(9, NIVEL.meta.altura - 1.1);
+    return { left: r.left + x0, top: r.top + y0, width: x1 - x0, height: y1 - y0 };
+  }
+  const el = {
+    regla: $('regla'),
+    salida: $('objetivo-salida').parentElement,
+    meta: $('objetivo-meta').parentElement,
+    bandeja: $('piezas'),
+  }[nombre];
   return el ? el.getBoundingClientRect() : null;
 }
 
@@ -978,13 +993,15 @@ function charlar(frases, alTerminar) {
   const siguiente = () => {
     n++;
     if (n >= frases.length) {
+      estado.huecosEnFoco = false;
       marcarVisto('charla');
       alTerminar();
       return;
     }
     const f = frases[n];
     estado.cara = { expr: f.expr ?? 'idle', px: f.px ?? 0.3, py: f.py ?? 0.3 };
-    mostrarFoco(() => (f.zonas ?? []).map(zona));
+    estado.huecosEnFoco = !!f.zonas?.includes('huecos');   // los huecos laten mientras se habla de ellos
+    mostrarFoco(() => (f.zonas ?? []).flatMap(zona));
     decir(f.texto, { alTocar: siguiente });
   };
   siguiente();
@@ -1032,7 +1049,7 @@ function cargarNivel(n) {
   $('titulo-nivel').textContent = `Nivel ${NIVEL.numero} · ${NIVEL.titulo}`;
   terminarGuia();
   clearTimeout(temporizadorGuia);
-  $('bocadillo').textContent = NIVEL.frase;
+  $('bocadillo').textContent = sinCortes(NIVEL.frase);
   // Con guía, el nivel arranca limpio (sin bocadillo) y al segundo llega la bienvenida
   // (la primera vez) y la guía
   const conGuia = NIVEL.guia && !estrellasDe(n);

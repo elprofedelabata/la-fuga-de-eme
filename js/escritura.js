@@ -6,12 +6,14 @@
 
 /**
  * Une lo que no debe quedar en líneas distintas: cada número con la palabra que le sigue
- * («7 julitos») y las citas cortas entre comillas («sin rozamiento»).
+ * («7 julitos»), las citas cortas entre comillas («sin rozamiento») y las dos últimas
+ * palabras, para que la última línea nunca se quede con una palabra suelta.
  */
 export function sinCortes(texto) {
   return texto
     .replace(/(\d+) /g, '$1 ')
-    .replace(/«[^»]{1,24}»/g, (cita) => cita.replace(/ /g, ' '));
+    .replace(/«[^»]{1,24}»/g, (cita) => cita.replace(/ /g, ' '))
+    .replace(/ (\S{1,14})$/, ' $1');
 }
 
 /** Prepara `el` para escribir `texto` (aún sin ninguna letra a la vista). */

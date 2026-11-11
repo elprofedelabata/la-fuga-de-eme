@@ -147,7 +147,7 @@ button { font: inherit; color: inherit; }
 .bocadillo {
   --top: max(4px, calc(var(--by, 70px) - 21px));
   position: absolute; left: var(--bx, 37%); top: var(--top);
-  width: min(54%, calc(100% - var(--bx, 37%) - 6px));
+  width: min(64%, calc(100% - var(--bx, 37%) - 6px));
   margin: 0; padding: 8px 12px; font-size: clamp(14px, 4cqw, 18px); line-height: 1.2;
   background: #fff; border: 2px solid var(--lapiz); border-radius: var(--mano);
   cursor: pointer; transition: opacity 0.3s;
