@@ -215,7 +215,7 @@ La hoja de resultado escribe las alturas con coma decimal y dibuja medio cuadrad
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
 - Como la energía final solo depende de la suma de pérdidas, intercambiar dos suelos da lo mismo. Para que el orden importe, usar piezas con condiciones locales: jorobas, paredes de papel, loops y saltos.
 - Cada mundo introduce sus mecánicas de una en una y luego las combina (ver el catálogo).
-- Estrellas por intentos (3 a la primera, 2 a la segunda, 1 después): se puede ir probando, pero el juego premia calcular. Tras dos fallos aparece una pista con el balance incompleto (en el nivel 3, «7 = 4 + ¿?»).
+- **Una estrella por nivel superado.** Con estrellas por intentos (3 a la primera, 2 a la segunda…) bastaba con fallar una vez, ver la solución y repetir «a la primera» para tener 3, así que no tenían sentido. Ahora la estrella dice solo si el nivel está superado, y **reintentar después de ganar** sirve para trastear y ver otras posibilidades. «¡A la primera!» sale solo la primera vez que se supera un nivel sin fallar. Tras dos fallos aparece una pista con el balance incompleto (en el nivel 3, «7 = 4 + ¿?»).
 
 ## Simulación
 
@@ -254,16 +254,16 @@ De momento solo «Borrar progreso» tiene efecto; el resto se recuerda en `local
 
 ## Selección de niveles
 
-`js/niveles.js`. Cabecera con ← (vuelve a la portada), «Elige nivel» y las estrellas totales. Debajo, los mundos como tarjetas, cada una con su estilo:
+`js/niveles.js`. Cabecera con ← (vuelve a la portada), «Elige nivel» y las estrellas conseguidas sobre el total (una por nivel). Debajo, los mundos como tarjetas, cada una con su estilo:
 
 - **I · El cuaderno:** papel cuadriculado, margen rojo y anillas.
 - **II · El libro de texto:** página con renglones, títulos en letra de imprenta y esquina doblada.
 - **III · La pizarra:** tiza sobre verde y marco de madera.
 - **Final · Fuera del libro:** cielo y sol, un único nivel.
 
-Los niveles de cada mundo (10 en el cuaderno, 6 en el libro y en la pizarra, y 1 el final; numerados de forma correlativa) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con sus estrellas debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior que ya existe (los que aún no están hechos aparecen con candado y se saltan). Los mundos bloqueados se ven apagados con «Termina el mundo anterior». Al superar un nivel, «Siguiente» lleva al siguiente que exista.
+Los niveles de cada mundo (10 en el cuaderno, 6 en el libro y en la pizarra, y 1 el final; numerados de forma correlativa) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con su estrella debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior que ya existe (los que aún no están hechos aparecen con candado y se saltan). Los mundos bloqueados se ven apagados con «Termina el mundo anterior». Al superar un nivel, «Siguiente» lleva al siguiente que exista.
 
-Las mejores estrellas de cada nivel se guardan en `localStorage` (`js/progreso.js`). Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → (historia, la primera vez) → niveles → nivel. La historia termina contando el plan de los mundos, que es justo lo que muestra el mapa de niveles a continuación. Al cambiar de pantalla, la siguiente se coloca debajo y la anterior se **arranca** (ver «Transiciones»).
+Los niveles superados (su estrella) se guardan en `localStorage` (`js/progreso.js`); el progreso guardado con el sistema antiguo de 1 a 3 estrellas cuenta como superado. Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → (historia, la primera vez) → niveles → nivel. La historia termina contando el plan de los mundos, que es justo lo que muestra el mapa de niveles a continuación. Al cambiar de pantalla, la siguiente se coloca debajo y la anterior se **arranca** (ver «Transiciones»).
 
 ## Transiciones: arrancar la hoja
 
@@ -285,7 +285,7 @@ Los textos van **dentro del dibujo**, no en una franja aparte, para leer y ver l
 
 ## Interfaz (móvil en vertical primero)
 
-De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tablero cuadrado con la regla de alturas · bandeja de piezas deslizable · botones grandes al alcance del pulgar.
+De arriba abajo: barra superior (nivel y su estrella) · línea del objetivo · tablero cuadrado con la regla de alturas · bandeja de piezas deslizable · botones grandes al alcance del pulgar.
 
 - **Arrastrar:** la pieza sale de la bandeja (queda su silueta discontinua) y flota con sombra, con inercia y una ligera inclinación según la velocidad; en móvil va por encima del dedo. Cerca de un hueco compatible se **engancha** (imán, borde naranja); los huecos que no la admiten se apagan. Al soltar encaja con rebote, polvo y una vibración corta; si se suelta fuera, vuelve volando a su sitio. Las piezas del tablero también se pueden sacar arrastrando. Eme sigue la pieza con la mirada.
 - En la bandeja táctil, deslizar en horizontal la desplaza; tirar de una pieza hacia arriba la arrastra.
@@ -295,7 +295,7 @@ De arriba abajo: barra superior (nivel, estrellas) · línea del objetivo · tab
 - **Hover de los botones (ratón):** se levantan un poco con una ligera inclinación, como un papel, con más sombra y color más claro.
 - **Sin textos de ayuda:** la interfaz se explica sola con lo visual. Un hueco donde la pieza no encaja, o los huecos vacíos al pulsar Lanzar, parpadean en rojo.
 - **Lanzamiento:** la bandeja se cambia por la energía en directo; cámara lenta ×0,5, pausa y parar. Cada tramo de la barra lleva su icono: montaña para Ep (altura), velocímetro para Ec (rapidez) y llama para el calor. Los mismos iconos, en el color de cada energía, acompañan al balance del resultado.
-- **Resultado:** panel inferior con estrellas, balance agrupado (8 = 4 + 3 + 1) y la frase de Eme.
+- **Resultado:** panel inferior con la estrella, balance agrupado (8 = 4 + 3 + 1) y la frase de Eme.
 - Rejilla 3 × 3 en gris claro sobre el terreno; cuadritos de altura en azul muy suave.
 - **Regla de alturas** fuera del tablero, a la izquierda: un número por cuadrito, todos con el mismo estilo (escala uniforme). El tamaño de letra se adapta al número de cuadritos, pensando en niveles con cuadritos más pequeños. Un marcador naranja sigue la altura de Eme en directo: es su Ep.
 

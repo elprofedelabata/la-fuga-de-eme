@@ -581,11 +581,14 @@ function mostrarResultado() {
   $('hoja-titulo').textContent = t.titulo;
   $('cita').textContent = t.cita;
 
+  // Una estrella por nivel superado. «¡A la primera!» solo cuenta la primera vez que se supera:
+  // después, reintentar sirve para trastear y ver otras posibilidades.
+  const aLaPrimera = tipo === 'meta' && estado.fallos === 0 && !estado.mejor;
   let estrellas = 0;
   if (tipo === 'meta') {
-    estrellas = estado.fallos === 0 ? 3 : estado.fallos === 1 ? 2 : 1;
-    estado.mejor = Math.max(estado.mejor, estrellas);
-    guardarEstrellas(NIVEL.numero, estrellas);
+    estrellas = 1;
+    estado.mejor = 1;
+    guardarEstrellas(NIVEL.numero);
   } else {
     estado.fallos++;
   }
@@ -603,7 +606,7 @@ function mostrarResultado() {
   const entra = [E, ...conGanancia.map((p) => p.gana)].join(' + ');   // lado izquierdo del balance
   let msg, ecu;
   if (tipo === 'meta') {
-    msg = `Llega a la meta con 0 julitos de ${EC} y se queda justo en la bandera. ${estado.fallos === 0 ? '¡A la primera!' : ''}`;
+    msg = `Llega a la meta con 0 julitos de ${EC} y se queda justo en la bandera. ${aLaPrimera ? '¡A la primera!' : ''}`;
     gananciasGrupos();
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
@@ -654,7 +657,7 @@ function mostrarResultado() {
 
 function pintarEstrellas(cont, n) {
   [...cont.children].forEach((s, i) => s.classList.toggle('llena', i < n));
-  cont.setAttribute?.('aria-label', `${n} de 3 estrellas`);
+  cont.setAttribute?.('aria-label', n ? 'Nivel superado' : 'Nivel sin superar');
 }
 
 // Vueltas (cambios de sentido) tras las que, si no se ha parado, se da por mareado:

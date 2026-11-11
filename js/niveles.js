@@ -24,8 +24,9 @@ function estadoNivel(n, progreso) {
   return progreso[n] ? 'completado' : 'siguiente';
 }
 
+// Una estrella por nivel: llena si está superado
 function estrellasHtml(n) {
-  return [0, 1, 2].map((i) => `<i class="${i < n ? 'llena' : ''}"></i>`).join('');
+  return `<i class="${n ? 'llena' : ''}"></i>`;
 }
 
 function construir(progreso) {
@@ -38,7 +39,7 @@ function construir(progreso) {
       const est = estadoNivel(num, progreso);
       const e = progreso[num] ?? 0;
       const etiqueta = m.id === 'fuera' ? '★' : num;
-      const aria = est === 'bloqueado' ? `Nivel ${num}, bloqueado` : `Nivel ${num}${e ? `, ${e} de 3 estrellas` : ''}`;
+      const aria = est === 'bloqueado' ? `Nivel ${num}, bloqueado` : `Nivel ${num}${e ? ', superado' : ''}`;
       return `<button class="nivel-btn ${est}" style="left:${x}%;top:${y}%" data-n="${num}" aria-label="${aria}">
           <span class="nivel-num">${est === 'bloqueado' ? CANDADO : etiqueta}</span>
           ${est === 'bloqueado' ? '' : `<span class="mini-estrellas" aria-hidden="true">${estrellasHtml(e)}</span>`}
@@ -65,8 +66,8 @@ export function mostrarNiveles({ alElegir, alVolver } = {}) {
   const $ = (id) => document.getElementById(id);
   const raiz = $('niveles');
   const progreso = leerProgreso();
-  const total = MUNDOS.reduce((a, m) => a + m.niveles, 0) * 3;
-  const conseguidas = Object.values(progreso).reduce((a, b) => a + b, 0);
+  const total = MUNDOS.reduce((a, m) => a + m.niveles, 0);          // una estrella por nivel
+  const conseguidas = Object.values(progreso).filter(Boolean).length;
   $('niveles-total').innerHTML = `<i class="estrella-mini"></i>${conseguidas} / ${total}`;
   $('mundos').innerHTML = construir(progreso);
   restaurar(raiz);
