@@ -154,7 +154,7 @@ export const NIVELES = {
     frase: 'Ocho cuadritos de subida… y yo con 1 julito.',
     columnas: 4,
     trazado: 'escaleras',
-    soluciones: 2,         // +3 y +4, en un orden o en el otro
+    // una solución: las escaleras de +3 y +4 (en un orden o en el otro, da igual)
     energia: 1,            // empieza donde acabó el nivel 4: a altura 1
     salidaX: 1.0,
     meta: { altura: 8, bandera: 11.55 },
@@ -231,6 +231,35 @@ export const NIVELES = {
       { id: 'bajada-doble-madera', forma: 'bajada', doble: 'v', material: 'madera', nombre: ['Bajada doble', 'de madera'] },
       { id: 'suelo-doble-madera', forma: 'suelo', doble: 'h', material: 'madera', nombre: ['Suelo doble', 'de madera'] },
       { id: 'suelo-doble-asfalto', forma: 'suelo', doble: 'h', material: 'asfalto', nombre: ['Suelo doble', 'de asfalto'] },
+    ],
+  },
+
+  // Tablero de 5 columnas con dos huecos de suelo seguidos, donde caben suelos dobles. Pero la
+  // solución va con simples: las bajadas y las dobles quitan un número par de julitos y las
+  // colinas, impar, así que con una doble el total siempre es impar y nunca da los 2 que hacen falta.
+  8: {
+    numero: 8,
+    titulo: 'Par o impar',
+    frase: 'Un suelo doble de madera quita justo 2… ¿tan fácil?',
+    columnas: 5,
+    trazado: 'colina',
+    suelo: 0.5,
+    cima: 2,
+    energia: 4,            // empieza donde acabó el nivel 7: a altura 4
+    salidaX: 1.0,
+    meta: { altura: 2, bandera: 14.55 },
+    huecos: { 11: 'bajada', 12: 'suelo', 13: 'suelo', 14: 'colina' },
+    miniatura: { bajada: 11 },
+    piezas: [
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-asfalto', forma: 'bajada', material: 'asfalto', nombre: ['Bajada', 'de asfalto'] },
+      { id: 'suelo-hielo', forma: 'suelo', material: 'hielo', nombre: ['Suelo', 'de hielo'] },
+      { id: 'suelo-madera', forma: 'suelo', material: 'madera', nombre: ['Suelo', 'de madera'] },
+      { id: 'suelo-asfalto', forma: 'suelo', material: 'asfalto', nombre: ['Suelo', 'de asfalto'] },
+      { id: 'suelo-doble-hielo', forma: 'suelo', doble: 'h', material: 'hielo', nombre: ['Suelo doble', 'de hielo'] },
+      { id: 'suelo-doble-madera', forma: 'suelo', doble: 'h', material: 'madera', nombre: ['Suelo doble', 'de madera'] },
+      { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
+      { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
     ],
   },
 };

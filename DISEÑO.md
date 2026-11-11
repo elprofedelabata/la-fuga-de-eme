@@ -185,7 +185,7 @@ Si Eme se queda en la colina, la hoja de resultado lo explica: «Su cima está a
 
 Tablero de 3 filas y 4 columnas. Empieza donde acabó el nivel 4, a altura 1, y la meta está a altura 8, arriba a la derecha. Introduce las **piezas que dan julitos**: dos huecos para **escaleras mecánicas** (casillas 10 y 7) que suben en diagonal. Eme baja un poco hasta el pie de la primera, sube por las dos y una rampa en S lo lleva a la repisa.
 
-Piezas: escaleras mecánicas de **+3, +4 y +5** y una **averiada (+0)**. Hay que conseguir 1 + ¿? = 8: entre las dos tienen que dar **7** (la de +3 y la de +4, en cualquier orden: dos soluciones). Con más se pasa; con la averiada no llega (se queda arriba de la otra escalera o no consigue subir).
+Piezas: escaleras mecánicas de **+3, +4 y +5** y una **averiada (+0)**. Hay que conseguir 1 + ¿? = 8: entre las dos tienen que dar **7** (la de +3 y la de +4, en cualquier orden: una solución). Con más se pasa; con la averiada no llega (se queda arriba de la otra escalera o no consigue subir).
 
 **Charla de las escaleras** (solo la primera vez, `fuga-eme-charla-5-vista`):
 
@@ -223,9 +223,18 @@ Introduce las **piezas dobles**. Piezas (9 para 4 huecos): bajadas simples de hi
 
 La bajada simple se dibuja en la bandeja con la forma de la casilla 9 (`miniatura` en los datos del nivel), que se ve mejor que el tramo casi vertical de la casilla 5.
 
+### Nivel 8 · «Par o impar»
+
+Primer **valle y colina de 5 columnas**: el trazado del nivel 4, con el suelo alargado a dos casillas. Empieza donde acabó el nivel 7, a altura 4, y la meta está a altura 2: hay que perder 2. Fila de abajo: bajada (casilla 11), suelo (12 y 13: pareja horizontal), colina con la cima a 2 (14) y rampa hasta la meta. Las dos filas de arriba quedan libres.
+
+Hay **suelos dobles horizontales**, pero la solución va con **piezas simples**. Piezas (9 para 4 huecos): bajadas de hielo y asfalto; suelos simples de hielo, madera y asfalto; suelos dobles de hielo y madera; colinas de madera y arena.
+
+- **Solución:** bajada de hielo, suelos de hielo y madera (en cualquier orden) y colina de madera (4 = 2 + 1 + 1).
+- **Por qué no sirven las dobles:** las bajadas y las dobles quitan un número **par** de julitos (0 o 2) y las colinas, **impar** (1 o 3). Con una doble, el total siempre sale impar y nunca da 2. La trampa tentadora es el suelo doble de madera, que quita justo 2… pero la colina quita al menos 1 más (y con él, además, Eme no llega a la cima: pierde 2,5 antes de coronarla).
+
 ## Diseño de niveles
 
-- Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
+- Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Una solución es un **juego de piezas** que gana: colocar las mismas piezas en otro orden con el mismo resultado no cuenta como otra (si el orden importa, como en el nivel 6, el otro orden no gana y no se cuenta). Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
 - Como la energía final solo depende de la suma de pérdidas, intercambiar dos suelos da lo mismo. Para que el orden importe, usar piezas con condiciones locales: jorobas, paredes de papel, loops y saltos.
 - Cada mundo introduce sus mecánicas de una en una y luego las combina (ver el catálogo).
 - **Una estrella por nivel superado.** Con estrellas por intentos (3 a la primera, 2 a la segunda…) bastaba con fallar una vez, ver la solución y repetir «a la primera» para tener 3, así que no tenían sentido. Ahora la estrella dice solo si el nivel está superado, y **reintentar después de ganar** sirve para trastear y ver otras posibilidades. «¡A la primera!» sale solo la primera vez que se supera un nivel sin fallar. Tras dos fallos aparece una pista con el balance incompleto (en el nivel 3, «7 = 4 + ¿?»).
@@ -314,6 +323,6 @@ De arriba abajo: barra superior (nivel y su estrella) · línea del objetivo · 
 
 ## Pendiente
 
-- Niveles 8 a 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Niveles 9 y 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

@@ -97,9 +97,10 @@ function pistaU(nivel, colocadas) {
 }
 
 /**
- * Valle y colina (tablero de 4 columnas): bajada hasta el suelo del valle, un tramo llano,
- * una colina y una rampa suave hasta la repisa de la meta.
- *   casillas de la fila de abajo: bajada | suelo | colina | rampa y meta
+ * Valle y colina: bajada hasta el suelo del valle, un tramo llano (de una o más casillas,
+ * según el ancho del tablero), una colina y una rampa suave hasta la repisa de la meta.
+ *   fila de abajo (4 columnas): bajada | suelo | colina | rampa y meta
+ *   fila de abajo (5 columnas): bajada | suelo | suelo | colina | rampa y meta
  */
 function pistaColina(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
@@ -111,17 +112,19 @@ function pistaColina(nivel) {
     const th = (i / 48) * Math.PI / 2;
     pts.push([1.2 + 1.8 * (1 - Math.cos(th)), suelo + (hs - suelo) * (1 - Math.sin(th))]);
   }
-  // suelo llano (de 3 a 6)
-  for (let i = 1; i <= 12; i++) pts.push([3 + (3 * i) / 12, suelo]);
-  // colina (de 6 a 9): sube y baja con suavidad, con la cima en el centro
+  // suelo llano (de 3 hasta la colina, que ocupa la penúltima columna)
+  const x0 = fin - 6;
+  const n = Math.round(((x0 - 3) / 3) * 12);
+  for (let i = 1; i <= n; i++) pts.push([3 + ((x0 - 3) * i) / n, suelo]);
+  // colina: sube y baja con suavidad, con la cima en el centro
   for (let i = 1; i <= 36; i++) {
-    const x = 6 + (3 * i) / 36;
-    pts.push([x, suelo + ((cima - suelo) * (1 - Math.cos((2 * Math.PI * (x - 6)) / 3))) / 2]);
+    const x = x0 + (3 * i) / 36;
+    pts.push([x, suelo + ((cima - suelo) * (1 - Math.cos((2 * Math.PI * (x - x0)) / 3))) / 2]);
   }
-  // subida suave en S hasta la repisa de la meta
+  // rampa suave en S hasta la repisa de la meta
   for (let i = 1; i <= 20; i++) {
     const u = i / 20;
-    pts.push([9 + (repisa - 9) * u, suelo + (hm - suelo) * u * u * (3 - 2 * u)]);
+    pts.push([x0 + 3 + (repisa - x0 - 3) * u, suelo + (hm - suelo) * u * u * (3 - 2 * u)]);
   }
   // repisa plana y sin rozamiento hasta el precipicio
   for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);

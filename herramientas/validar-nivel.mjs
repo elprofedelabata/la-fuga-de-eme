@@ -1,6 +1,7 @@
 // Validador de niveles: para cada nivel, prueba todas las combinaciones de piezas, simula
 // cada una y comprueba que el final de la simulación coincide con las cuentas en julitos
-// que hay exactamente una solución (o las que diga el nivel en `soluciones`) y que cada
+// que hay exactamente una solución, es decir, un juego de piezas que gana (o las que diga el
+// nivel en `soluciones`), y que cada
 // nivel empieza a la altura a la que acabó el anterior.
 // Uso: node herramientas/validar-nivel.mjs        (todos los niveles)
 //      node herramientas/validar-nivel.mjs 3      (solo el nivel 3)
@@ -53,14 +54,17 @@ let fallos = 0;
 for (const nivel of Object.values(NIVELES)) {
   if (pedido && nivel.numero !== pedido) continue;
   usarNivel(nivel.numero);
-  let errores = 0, soluciones = 0;
+  // Una solución es un juego de piezas: colocarlas en otro orden con el mismo resultado no cuenta
+  // como otra (si el orden importa, el otro orden no gana y no se cuenta)
+  let errores = 0;
+  const juegos = new Set();
   console.log(`\nNivel ${nivel.numero} · ${nivel.titulo}  (sale con ${nivel.energia}, meta a altura ${nivel.meta.altura})`);
   for (const comb of combinaciones(nivel)) {
     const a = analizar(nivel, comb);
     const r = simular(nivel, comb);
     const ok = a.tipo === r.fin;
     if (!ok) errores++;
-    if (a.tipo === 'meta') soluciones++;
+    if (a.tipo === 'meta') juegos.add([...new Set(Object.values(comb))].map((p) => p.id).sort().join('+'));
     const nombres = [...new Set(Object.values(comb))].map((p) => p.nombre.join(' ')).join(' + ');
     console.log(`${ok ? '✓' : '✗'} ${nombres.padEnd(48)} ${a.ganancias ? `gana ${a.ganancias} · ` : ''}pierde ${a.perdidas} · llega con ${String(a.llegada).padStart(2)} → ${a.tipo.padEnd(8)} simulación: ${r.fin} (t=${r.sim.t.toFixed(1)} s${r.x ? `, se para en x=${r.x.toFixed(2)}` : ''})`);
   }
@@ -68,6 +72,7 @@ for (const nivel of Object.values(NIVELES)) {
   const anterior = NIVELES[nivel.numero - 1];
   const continua = !anterior || anterior.meta.altura === nivel.energia;
   if (!continua) console.log(`✗ No empieza donde acabó el nivel ${anterior.numero}: sale de ${nivel.energia} y aquel acababa en ${anterior.meta.altura}`);
+  const soluciones = juegos.size;
   const esperadas = nivel.soluciones ?? 1;
   const bien = errores === 0 && soluciones === esperadas && continua;
   if (!bien) fallos++;
