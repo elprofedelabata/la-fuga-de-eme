@@ -13,7 +13,7 @@ import { arrancar } from './transicion.js';
 import { abrirOpciones } from './opciones.js';
 import { iniciarTutorial } from './tutorial.js';
 import { mostrarFoco, quitarFoco } from './foco.js';
-import { mostrarBienvenida, bienvenidaVista } from './bienvenida.js';
+import { mostrarBienvenida, mostrarPrimerPlano, bienvenidaVista } from './bienvenida.js';
 import { sinCortes, prepararEscritura, mostrarLetras } from './escritura.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
@@ -256,7 +256,7 @@ async function colocar(celda, p, f = null) {
   const previa = estado.colocadas[celda];
   if (previa && previa.id !== p.id) devolver(previa, nuevoFantasma(previa, rectHueco(celda)));
   estado.colocadas[celda] = p;
-  if (estado.guia && p.id === estado.guia.pieza) terminarGuia();   // primer movimiento aprendido
+  if (estado.guia && p.id === estado.guia.pieza) primerMovimientoHecho(celda);
   // La pieza ya está en su sitio: se libera la interacción sin esperar al rebote, para que
   // una animación congelada (pestaña en segundo plano) nunca deje el tablero bloqueado.
   estado.vuelos--;
@@ -1022,6 +1022,24 @@ function guiarPrimerMovimiento() {
   ponerEncima(true);
   mostrarFoco(() => [rectHueco(estado.guia?.celda ?? 4),
     estado.guia ? tarjeta(estado.guia.pieza).getBoundingClientRect() : null]);
+}
+
+/** El jugador ha colocado la pieza de la guía: Eme vuelve en primer plano a felicitarlo. */
+function primerMovimientoHecho(celda) {
+  if (!NIVEL.felicitacion) { terminarGuia(); return; }
+  // Todo sigue bloqueado; se ve un momento cómo encaja la pieza y llega Eme
+  estado.guia = { pieza: null, celda: null };
+  estado.cara = null;
+  manoTutorial?.parar();
+  $('bocadillo').classList.add('oculto');
+  ponerEncima(false);
+  refrescar();
+  mostrarFoco(() => [rectHueco(celda)]);
+  setTimeout(() => mostrarPrimerPlano({
+    frases: NIVEL.felicitacion,
+    etiqueta: 'Eme te felicita',
+    alTerminar: terminarGuia,     // se va el oscurecimiento y el juego sigue
+  }), 700);
 }
 
 function terminarGuia() {

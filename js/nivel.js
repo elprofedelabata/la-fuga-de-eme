@@ -47,6 +47,12 @@ export const NIVELES = {
       { texto: 'Cuando la pista esté completa, pulsa LANZAR y allá que voy.', zonas: ['lanzar'], px: 0.4, py: 0.95 },
       { texto: 'Y si quieres empezar de cero, este botón quita todas las piezas de la pista.', zonas: ['vaciar'], px: -0.3, py: 0.95 },
     ],
+    // Al colocar la pieza de la guía, Eme vuelve en primer plano a felicitar al jugador
+    felicitacion: [
+      { texto: '¡Eso es! ¡Lo has hecho genial!', expr: 'win' },
+      { texto: 'Ahora sigue tú: coloca las otras dos piezas y pulsa LANZAR.' },
+      { texto: 'Yo te espero en la salida. ¡Tú puedes!', expr: 'win' },
+    ],
     // Guía del primer movimiento: a los 2 s se oscurece todo salvo Eme, este hueco y esta pieza
     guia: { pieza: 'rampa-hielo', texto: '¡Empecemos! Arrastra la rampa de hielo hasta su hueco.' },
     energia: 7,            // sale desde altura 7 y en reposo: 7 julitos

@@ -1,8 +1,10 @@
-// Bienvenida del primer nivel: la pantalla se oscurece y Eme, en primer plano, se presenta.
+// Eme en primer plano: la pantalla se oscurece y Eme sube a hablar con el jugador.
+// Se usa para la bienvenida del primer nivel (Eme se presenta) y para felicitarlo cuando
+// hace su primer movimiento.
 //
 // Habla con bocadillos que se escriben letra a letra (mientras, mueve la boca). Al tocar el
-// bocadillo se completa el texto o se pasa al siguiente. Se recuerda en localStorage para
-// no repetirla (el «Restablecer datos» de las opciones la borra con lo demás).
+// bocadillo se completa el texto o se pasa al siguiente. La bienvenida se recuerda en
+// localStorage para no repetirla (el «Restablecer datos» de las opciones la borra con lo demás).
 
 import { dibujarEme } from './dibujo.js';
 import { mostrarFoco } from './foco.js';
@@ -33,11 +35,20 @@ function pose(t, frase, hablando) {
   return o;
 }
 
+/** La bienvenida: Eme se presenta (solo la primera vez). */
+export function mostrarBienvenida({ frases, alTerminar }) {
+  mostrarPrimerPlano({
+    frases,
+    etiqueta: 'Eme te da la bienvenida',
+    alTerminar: () => { marcarVista(); alTerminar?.(); },
+  });
+}
+
 /**
- * Muestra la bienvenida. `frases` es una lista de { texto, expr?, px?, py? }.
+ * Eme en primer plano. `frases` es una lista de { texto, expr?, px?, py? }.
  * Al terminar, llama a `alTerminar` con la pantalla aún oscurecida.
  */
-export function mostrarBienvenida({ frases, alTerminar }) {
+export function mostrarPrimerPlano({ frases, alTerminar, etiqueta = 'Eme te habla' }) {
   const $ = (id) => document.getElementById(id);
   const raiz = $('bienvenida');
   const lienzo = $('bienvenida-eme');
@@ -73,7 +84,6 @@ export function mostrarBienvenida({ frases, alTerminar }) {
     if (n < frases.length - 1) { ponerFrase(n + 1); return; }
     // Fin: Eme baja del primer plano y la pantalla sigue oscura para lo que venga
     saliendo = true;
-    marcarVista();
     raiz.classList.remove('dentro');
     raiz.classList.add('fuera');
     setTimeout(() => {
@@ -90,6 +100,7 @@ export function mostrarBienvenida({ frases, alTerminar }) {
 
   // Entrada: se oscurece todo y Eme sube al primer plano
   mostrarFoco(() => []);
+  raiz.setAttribute('aria-label', etiqueta);
   $('app').inert = true;
   raiz.hidden = false;
   ajustar();

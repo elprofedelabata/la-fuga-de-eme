@@ -110,7 +110,12 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
 - **Bocadillos de Eme** (`js/escritura.js`). El del tablero se coloca solo para que su pico salga de la **boca de Eme**, esté donde esté la salida; si Eme está muy arriba, el bocadillo no se sale del tablero y el pico baja hasta la boca. Al escribirse letra a letra, el texto entero ya está puesto (lo que falta, invisible), así que ninguna palabra salta de línea. Nada se corta feo: un número va siempre con su palabra («7 julitos»), las citas cortas entre comillas no se parten («sin rozamiento») y las dos últimas palabras van juntas, para que la última línea nunca se quede con una palabra suelta.
 - **Guía del primer movimiento.** Con la pantalla oscurecida (tras la charla o, si ya se vio, al segundo de empezar el nivel, con un fundido suave), Eme y su bocadillo («¡Empecemos! Arrastra la rampa de hielo hasta su hueco», escrito letra a letra mientras Eme mira la bandeja) quedan **por encima del oscurecimiento**, sin aura (Eme se pinta en una capa propia del lienzo). Además se iluminan el hueco de la rampa (latiendo) y la rampa en la bandeja, con una **mano fantasma** (`js/tutorial.js`) que hace el gesto de llevarla a su hueco, en bucle.
 - Mientras dura, **todo lo demás está bloqueado**: las otras piezas tiemblan si se tocan, los otros huecos no responden y LANZAR y Vaciar están desactivados.
-- Al colocar la rampa se va el foco y se libera todo: el resto lo hace el jugador solo. La guía solo aparece mientras el nivel 1 no está superado.
+- **Felicitación.** Al colocar la rampa, se ve un momento cómo encaja (solo su hueco iluminado) y Eme vuelve en **primer plano**, como en la bienvenida, a felicitar al jugador (datos `felicitacion` del nivel):
+  1. «¡Eso es! ¡Lo has hecho genial!»
+  2. «Ahora sigue tú: coloca las otras dos piezas y pulsa LANZAR.»
+  3. «Yo te espero en la salida. ¡Tú puedes!»
+
+  Después Eme baja, se va el oscurecimiento y se libera todo: el resto lo hace el jugador solo. La guía (y con ella la felicitación) solo aparece mientras el nivel 1 no está superado.
 
 ### Nivel 2
 
