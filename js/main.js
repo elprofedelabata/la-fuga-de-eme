@@ -658,16 +658,29 @@ function mostrarResultado() {
     bal.append(grupo(llegada, 'ec', 'sobran'));
     ecu = `${entra} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
   } else if (atasco) {
-    // se quedó en una colina: perdió demasiado antes de llegar a la cima
+    // se quedó en una cuesta por el camino (una colina, o una escalera averiada que no subió)
     const num = (x) => String(Math.round(x * 100) / 100).replace('.', ',');   // decimales con coma
     const julitos = (x) => `${num(x)} ${x === 1 ? 'julito' : 'julitos'}`;
-    const margen = E - atasco.cima;   // (atasco.antes ya descuenta lo que haya dado una escalera antes)
-    msg = `No pudo subir la colina. Su cima está a altura ${num(atasco.cima)}: para pasarla tenía que llegar arriba ` +
-      `habiendo perdido menos de ${julitos(margen)}, y perdió ${julitos(atasco.antes)}.` +
-      (llegada === 0 ? ' Las cuentas cuadraban… ¡pero el orden de las piezas importa!' : '');
-    bal.append(grupo(atasco.cima, 'ep', 'cima'));
-    bal.append(grupo(margen, 'ec', 'margen'));
-    ecu = `${E} = ${num(atasco.cima)} (cima) + ${num(margen)} (margen)`;
+    const forma = NIVEL.huecos[atasco.celda];
+    const nombre = { colina: 'la colina', escalera: 'la escalera' }[forma] ?? 'la cuesta';
+    const margen = E - atasco.cima;      // lo que podía perder antes de la cima (sin escaleras de por medio)
+    const tenia = E - atasco.antes;      // la energía que tenía al llegar arriba (atasco.antes ya descuenta lo ganado)
+    const orden = llegada === 0 ? ' Las cuentas cuadraban… ¡pero el orden de las piezas importa!' : '';
+    if (margen > 0 && atasco.antes >= 0) {
+      msg = `No pudo subir ${nombre}. Su cima está a altura ${num(atasco.cima)}: para pasarla tenía que llegar arriba ` +
+        `habiendo perdido menos de ${julitos(margen)}, y perdió ${julitos(atasco.antes)}.` + orden;
+      bal.append(grupo(atasco.cima, 'ep', 'cima'));
+      bal.append(grupo(margen, 'ec', 'margen'));
+      ecu = `${E} = ${num(atasco.cima)} (cima) + ${num(margen)} (margen)`;
+    } else {
+      const averiada = forma === 'escalera' && estado.colocadas[atasco.celda]?.gana === 0;
+      msg = `No pudo subir ${nombre}: para llegar arriba, a altura ${num(atasco.cima)}, necesitaba más de ` +
+        `${julitos(atasco.cima)}, y solo tenía ${julitos(tenia)}.` +
+        (averiada ? ' La averiada no da julitos: hay que llegar a ella con impulso.' : '') + orden;
+      bal.append(grupo(atasco.cima, 'ep', 'altura'));
+      bal.append(grupo(Math.max(tenia, 0), 'ec', 'tenía'));
+      ecu = `${num(tenia)} < ${num(atasco.cima)}`;
+    }
   } else {
     const tiene = E + ganancias - perdidas;   // la energía con la que podía subir
     msg = ganancias

@@ -218,7 +218,44 @@ function pistaLarga(nivel) {
   return pts;
 }
 
-const TRAZADOS = { u: pistaU, colina: pistaColina, escaleras: pistaEscaleras, travesia: pistaTravesia, larga: pistaLarga };
+/**
+ * Ascenso (tablero de 5 columnas): Eme cae al fondo, sube por una escalera mecánica larga que
+ * atraviesa dos filas, baja en S otras dos filas, pasa una colina y sube en S hasta la meta.
+ *   columna 2: escalera (casillas 12 y 7: pareja vertical)
+ *   columna 3: bajada (casillas 8 y 13: pareja vertical)
+ *   columna 4: colina (casilla 14) · columna 5: rampa y meta
+ */
+function pistaAscenso(nivel) {
+  const hs = nivel.energia, hm = nivel.meta.altura;
+  const fondo = nivel.suelo ?? 0.5, alto = nivel.alto ?? 5.5, cima = nivel.cima ?? 2;
+  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const suave = (u) => u * u * (3 - 2 * u);
+  const pts = [[0, hs], [1.2, hs]];
+  // caída de la salida al fondo (de 1.2 a 3)
+  for (let i = 1; i <= 24; i++) {
+    const th = (i / 24) * Math.PI / 2;
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), fondo + (hs - fondo) * (1 - Math.sin(th))]);
+  }
+  // escalera: recta, del fondo hasta lo alto (de 3 a 6)
+  for (let i = 1; i <= 24; i++) pts.push([3 + (3 * i) / 24, fondo + ((alto - fondo) * i) / 24]);
+  // bajada en S de lo alto al fondo (de 6 a 9)
+  for (let i = 1; i <= 36; i++) pts.push([6 + (3 * i) / 36, alto - (alto - fondo) * suave(i / 36)]);
+  // colina (de 9 a 12)
+  for (let i = 1; i <= 36; i++) {
+    const x = 9 + (3 * i) / 36;
+    pts.push([x, fondo + ((cima - fondo) * (1 - Math.cos((2 * Math.PI * (x - 9)) / 3))) / 2]);
+  }
+  // rampa en S hasta la repisa de la meta
+  for (let i = 1; i <= 24; i++) pts.push([12 + (repisa - 12) * (i / 24), fondo + (hm - fondo) * suave(i / 24)]);
+  // repisa plana y sin rozamiento hasta el precipicio
+  for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);
+  return pts;
+}
+
+const TRAZADOS = {
+  u: pistaU, colina: pistaColina, escaleras: pistaEscaleras, travesia: pistaTravesia, larga: pistaLarga,
+  ascenso: pistaAscenso,
+};
 
 export function celdaDe(x, h, cols = 3) {
   const c = Math.min(Math.max(Math.floor(x / 3), 0), cols - 1);

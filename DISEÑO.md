@@ -232,6 +232,17 @@ Hay **suelos dobles horizontales**, pero la solución va con **piezas simples**.
 - **Solución:** bajada de hielo, suelos de hielo y madera (en cualquier orden) y colina de madera (4 = 2 + 1 + 1).
 - **Por qué no sirven las dobles:** las bajadas y las dobles quitan un número **par** de julitos (0 o 2) y las colinas, **impar** (1 o 3). Con una doble, el total siempre sale impar y nunca da 2. La trampa tentadora es el suelo doble de madera, que quita justo 2… pero la colina quita al menos 1 más (y con él, además, Eme no llega a la cima: pierde 2,5 antes de coronarla).
 
+### Nivel 9 · «Cuesta arriba» (difícil)
+
+Tablero de 3 filas y 5 columnas con un trazado de **ascenso**. Empieza donde acabó el nivel 8, a altura 2, y la meta está a altura 3. Eme cae al fondo, sube por una **escalera mecánica de dos filas** (casillas 12 y 7: pareja vertical, de 0,5 a 5,5), baja en S otras dos filas (casillas 8 y 13: pareja vertical), pasa una **colina** (cima a 2, casilla 14) y sube a la meta. Junta casi todo lo anterior: rozamiento, escaleras (y la averiada), piezas dobles y una condición local.
+
+Piezas (10 para 5 huecos): escaleras mecánicas de +3 y +5, la averiada (+0) y una escalera doble de +6; bajadas simples de hielo, madera y asfalto y una bajada doble de madera; colinas de hielo y madera. De las 98 colocaciones:
+
+- **Una solución:** escalera de +5 **abajo** y la **averiada arriba**, bajadas de asfalto y madera (en cualquier orden) y colina de madera (2 + 5 = 3 + 2 + 1 + 1). La averiada no da nada, pero Eme llega a ella con 4 julitos de impulso y la sube solo (necesita 2,5).
+- **Trampas:** doce colocaciones cuadran la suma pero fallan. La más clara es la solución con la averiada **abajo**: Eme llega a ella con 2 julitos y no puede subirla. La hoja de resultado lo explica: «No pudo subir la escalera: para llegar arriba, a altura 3, necesitaba más de 3 julitos, y solo tenía 2. La averiada no da julitos: hay que llegar a ella con impulso».
+
+El mensaje de los atascos vale ya para cualquier cuesta: si no hay escaleras de por medio, habla de lo que se podía perder antes de la cima; si las hay, de la energía que tenía al llegar arriba.
+
 ## Diseño de niveles
 
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Una solución es un **juego de piezas** que gana: colocar las mismas piezas en otro orden con el mismo resultado no cuenta como otra (si el orden importa, como en el nivel 6, el otro orden no gana y no se cuenta). Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
@@ -323,6 +334,6 @@ De arriba abajo: barra superior (nivel y su estrella) · línea del objetivo · 
 
 ## Pendiente
 
-- Niveles 9 y 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Nivel 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

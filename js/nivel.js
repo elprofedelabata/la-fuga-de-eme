@@ -262,6 +262,38 @@ export const NIVELES = {
       { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
     ],
   },
+
+  // Nivel difícil: todo a la vez. Eme sale abajo y tiene que subir por una escalera de dos
+  // filas (doble o dos simples, una de ellas puede ser la averiada), bajar otras dos filas,
+  // pasar una colina y llegar a la meta. La solución usa la escalera averiada: arriba, donde
+  // Eme llega con impulso de sobra para subirla solo; abajo no podría.
+  9: {
+    numero: 9,
+    titulo: 'Cuesta arriba',
+    frase: 'Escaleras, bajadas, una colina… Esto hay que pensarlo bien.',
+    columnas: 5,
+    trazado: 'ascenso',
+    suelo: 0.5,            // el fondo
+    alto: 5.5,             // altura a la que llega la escalera
+    cima: 2,               // cima de la colina
+    energia: 2,            // empieza donde acabó el nivel 8: a altura 2
+    salidaX: 1.0,
+    meta: { altura: 3, bandera: 14.55 },
+    huecos: { 7: 'escalera', 12: 'escalera', 8: 'bajada', 13: 'bajada', 14: 'colina' },
+    miniatura: { bajada: 13 },
+    piezas: [
+      { id: 'escalera-3', forma: 'escalera', material: 'escalera', gana: 3, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-5', forma: 'escalera', material: 'escalera', gana: 5, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-averiada', forma: 'escalera', material: 'escalera', gana: 0, nombre: ['Escalera', 'averiada'] },
+      { id: 'escalera-doble-6', forma: 'escalera', doble: 'v', material: 'escalera', gana: 6, nombre: ['Escalera doble', 'mecánica'] },
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-madera', forma: 'bajada', material: 'madera', nombre: ['Bajada', 'de madera'] },
+      { id: 'bajada-asfalto', forma: 'bajada', material: 'asfalto', nombre: ['Bajada', 'de asfalto'] },
+      { id: 'bajada-doble-madera', forma: 'bajada', doble: 'v', material: 'madera', nombre: ['Bajada doble', 'de madera'] },
+      { id: 'colina-hielo', forma: 'colina', material: 'hielo', nombre: ['Colina', 'de hielo'] },
+      { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
+    ],
+  },
 };
 
 /**
