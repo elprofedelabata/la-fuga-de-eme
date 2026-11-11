@@ -81,7 +81,9 @@ Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El 
 
 ## Niveles del Mundo I
 
-El cuaderno tiene **10 niveles**. Todos usan la misma pista en «U»: plataforma de salida y rampa de bajada (casillas 1, 4 y 7), suelo (casilla 8) y subida en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **rampa** (casilla 4), **suelo** (casilla 8) y **subida** (casilla 6). Los niveles están en `js/nivel.js` y el validador los comprueba todos.
+El cuaderno tiene **10 niveles**. Todos usan la misma pista en «U»: plataforma de salida y rampa de bajada (casillas 1, 4 y 7), suelo (casilla 8) y subida en S hasta la repisa de la meta (casillas 9, 6 y 3). Cada nivel elige la altura de salida, la de la meta, qué casillas están vacías y qué piezas hay. Formas de hueco: **rampa** (casilla 4), **suelo** (casilla 8) y **subida** (casilla 6). Perfiles del suelo: plano, hondonada y montañitas de 1 y 2 cuadritos de alto. Los niveles están en `js/nivel.js` y el validador los comprueba todos.
+
+**Continuidad del camino.** Cada nivel es un tramo del camino de Eme y **empieza donde acabó el anterior**: la altura de salida de un nivel es la de la meta del anterior (el validador lo comprueba). Más adelante, elementos decorativos reforzarán esa continuidad espacial.
 
 ### Nivel 1 · «Lo que baja, sube» (tutorial)
 
@@ -119,15 +121,15 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
 
 ### Nivel 2 · «Todos los caminos»
 
-Sale a altura 6 y la meta está a altura 6. Los mismos tres huecos que el nivel 1 (rampa, suelo y subida), pero **cuatro piezas, todas de hielo**: rampa, subida y dos para el suelo, una plana y una hondonada. Como no hay rozamiento, las dos sirven: hay **dos soluciones**. Enseña que, sin rozamiento, **la forma del camino no importa**: Eme sube siempre hasta la altura de la que salió (balance 6 = 6).
+Empieza donde acabó el nivel 1, a altura 7, y la meta está también a altura 7. Los mismos tres huecos que el nivel 1 (rampa, suelo y subida), pero **cinco piezas, todas de hielo**: rampa, subida y tres para el suelo, una hondonada y dos montañitas (de 1 y de 2 cuadritos de alto). Como no hay rozamiento, las tres sirven: hay **tres soluciones**. Enseña que, sin rozamiento, **la forma del camino no importa**: lo que Eme gasta en subir una montaña lo recupera al bajarla, y llega siempre hasta la altura de la que salió (balance 7 = 7).
 
 - Es el primer nivel con más piezas que huecos: hay que elegir, aunque aquí cualquier elección que encaje vale.
-- El bocadillo lo insinúa: «¿Recto o con curva? Sin rozamiento, ¿qué más da?».
-- En los datos, `soluciones: 2` le dice al validador cuántas soluciones debe haber.
+- El bocadillo lo insinúa: «Subir una montaña me cuesta julitos… pero bajarla me los devuelve».
+- En los datos, `soluciones: 3` le dice al validador cuántas soluciones debe haber.
 
 ### Nivel 3 · «Ni más, ni menos»
 
-Salida a altura 8 (8 julitos), suelo a altura 1, meta a altura 5. Huecos: casilla 4 (rampa) y casilla 8 (suelo). Hay que perder exactamente 3.
+Empieza donde acabó el nivel 2, a altura 7 (7 julitos); suelo a altura 1, meta a altura 4. Huecos: casilla 4 (rampa) y casilla 8 (suelo). Hay que perder exactamente 3.
 
 | Hueco 4 | Hueco 8 | Pierde | Llega con | Resultado |
 |---|---|---|---|---|
@@ -145,7 +147,7 @@ La hondonada enseña que **la forma no frena; el material, sí**. `herramientas/
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
 - Como la energía final solo depende de la suma de pérdidas, intercambiar dos suelos da lo mismo. Para que el orden importe, usar piezas con condiciones locales: jorobas, paredes de papel, loops y saltos.
 - Cada mundo introduce sus mecánicas de una en una y luego las combina (ver el catálogo).
-- Estrellas por intentos (3 a la primera, 2 a la segunda, 1 después): se puede ir probando, pero el juego premia calcular. Tras dos fallos aparece una pista con el balance incompleto («8 = 5 + ¿?»).
+- Estrellas por intentos (3 a la primera, 2 a la segunda, 1 después): se puede ir probando, pero el juego premia calcular. Tras dos fallos aparece una pista con el balance incompleto (en el nivel 3, «7 = 4 + ¿?»).
 
 ## Simulación
 

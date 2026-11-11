@@ -22,11 +22,18 @@ export function construirPista(perfilB = 'plano', alturaMeta = NIVEL.meta.altura
     const th = (i / 48) * Math.PI / 2;
     pts.push([1.2 + 1.8 * (1 - Math.cos(th)), 1 + (alturaSalida - 1) * (1 - Math.sin(th))]);
   }
-  // Casilla 8: suelo plano u hondonada
+  // Casilla 8: suelo plano, hondonada o montañita (de 1 o 2 cuadritos de alto)
+  const montana = { montana1: 1, montana2: 2 }[perfilB];
   if (perfilB === 'hondonada') {
     for (let i = 1; i <= 36; i++) {
       const x = 3 + (3 * i) / 36;
       pts.push([x, 1 - 0.75 * Math.sin((Math.PI * (x - 3)) / 3)]);
+    }
+  } else if (montana) {
+    // sube y baja con suavidad (sin esquinas al empezar ni al acabar); la cima, en el centro
+    for (let i = 1; i <= 36; i++) {
+      const x = 3 + (3 * i) / 36;
+      pts.push([x, 1 + (montana * (1 - Math.cos((2 * Math.PI * (x - 3)) / 3))) / 2]);
     }
   } else {
     for (let i = 1; i <= 12; i++) pts.push([3 + (3 * i) / 12, 1]);

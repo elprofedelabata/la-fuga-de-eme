@@ -1,5 +1,8 @@
 // Datos de los niveles.
 //
+// Continuidad: cada nivel es un tramo del camino de Eme y empieza donde acabó el anterior
+// (la altura de salida de un nivel es la de la meta del anterior).
+//
 // Unidades: el tablero mide 9 x 9 cuadritos (3 x 3 casillas de 3 x 3 cuadritos).
 // 1 cuadrito de altura = 1 julito de energía potencial.
 //
@@ -66,21 +69,23 @@ export const NIVELES = {
     ],
   },
 
-  // Sin rozamiento, la forma del camino da igual: Eme sube siempre hasta la altura de salida.
-  // Hay más piezas que huecos y todas son de hielo, así que hay más de una solución.
+  // Sin rozamiento, la forma del camino da igual: lo que sube una montaña lo devuelve al
+  // bajarla, y Eme llega siempre hasta la altura de salida. Hay más piezas que huecos y todas
+  // son de hielo, así que hay más de una solución.
   2: {
     numero: 2,
     titulo: 'Todos los caminos',
-    frase: '¿Recto o con curva? Sin rozamiento, ¿qué más da?',
-    soluciones: 2,         // el validador comprueba que haya justo estas
-    energia: 6,            // sale desde altura 6 y en reposo: 6 julitos
+    frase: 'Subir una montaña me cuesta julitos… pero bajarla me los devuelve.',
+    soluciones: 3,         // el validador comprueba que haya justo estas
+    energia: 7,            // empieza donde acabó el nivel 1: a altura 7
     salidaX: 1.0,
-    meta: { altura: 6, bandera: 8.55 },
+    meta: { altura: 7, bandera: 8.55 },
     huecos: { 4: 'rampa', 8: 'suelo', 6: 'subida' },
     piezas: [
       { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
-      { id: 'suelo-hielo', forma: 'suelo', perfil: 'plano', material: 'hielo', nombre: ['Suelo', 'de hielo'] },
       { id: 'hondonada-hielo', forma: 'suelo', perfil: 'hondonada', material: 'hielo', nombre: ['Hondonada', 'de hielo'] },
+      { id: 'montanita-hielo', forma: 'suelo', perfil: 'montana1', material: 'hielo', nombre: ['Montañita', 'de hielo'] },
+      { id: 'montana-hielo', forma: 'suelo', perfil: 'montana2', material: 'hielo', nombre: ['Montaña', 'de hielo'] },
       { id: 'subida-hielo', forma: 'subida', material: 'hielo', nombre: ['Subida', 'de hielo'] },
     ],
   },
@@ -89,9 +94,9 @@ export const NIVELES = {
     numero: 3,
     titulo: 'Ni más, ni menos',
     frase: '«Desprecie el rozamiento», dicen. Ojalá.',
-    energia: 8,            // sale desde altura 8 y en reposo: 8 julitos
+    energia: 7,            // empieza donde acabó el nivel 2: a altura 7
     salidaX: 1.0,
-    meta: { altura: 5, bandera: 8.55 },   // hay que llegar con 0 julitos de Ec
+    meta: { altura: 4, bandera: 8.55 },   // hay que perder 3 y llegar con 0 julitos de Ec
     huecos: { 4: 'rampa', 8: 'suelo' },
     piezas: [
       { id: 'rampa-hielo', forma: 'rampa', material: 'hielo', nombre: ['Rampa', 'de hielo'] },
