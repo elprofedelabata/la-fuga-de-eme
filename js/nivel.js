@@ -32,7 +32,7 @@ export const NIVELES = {
       { texto: 'Ven, que te enseño cómo se hace.', py: 0.9 },
     ],
     // Después, Eme habla desde su sitio en el tablero (solo la primera vez).
-    // zonas: lo que se ilumina mientras lo dice (regla, salida, bandera, meta, huecos, bandeja)
+    // zonas: lo que se ilumina mientras lo dice (regla, salida, bandera, meta, huecos, bandeja, lanzar, vaciar)
     charla: [
       { texto: '¡Aquí estoy! Arriba del todo, en la salida.', expr: 'win' },
       { texto: 'Mira la regla: estoy a 7 cuadritos de altura.', zonas: ['regla'], px: -0.95, py: 0.2 },
@@ -43,6 +43,9 @@ export const NIVELES = {
       // las piezas
       { texto: 'Pero a la pista le faltan trozos: estos huecos.', zonas: ['huecos'], px: 0.5, py: 0.95 },
       { texto: 'Tú los rellenas con las piezas de abajo. Cada una encaja en el hueco que tiene su misma forma.', zonas: ['bandeja'], px: 0.2, py: 0.95 },
+      // los botones
+      { texto: 'Cuando la pista esté completa, pulsa LANZAR y allá que voy.', zonas: ['lanzar'], px: 0.4, py: 0.95 },
+      { texto: 'Y si quieres empezar de cero, este botón quita todas las piezas de la pista.', zonas: ['vaciar'], px: -0.3, py: 0.95 },
     ],
     // Guía del primer movimiento: a los 2 s se oscurece todo salvo Eme, este hueco y esta pieza
     guia: { pieza: 'rampa-hielo', texto: '¡Empecemos! Arrastra la rampa de hielo hasta su hueco.' },

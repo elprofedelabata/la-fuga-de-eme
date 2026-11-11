@@ -975,6 +975,8 @@ function zona(nombre) {
     salida: $('objetivo-salida').parentElement,
     meta: $('objetivo-meta').parentElement,
     bandeja: $('piezas'),
+    lanzar: $('btn-lanzar'),
+    vaciar: $('btn-vaciar'),
   }[nombre];
   return el ? el.getBoundingClientRect() : null;
 }

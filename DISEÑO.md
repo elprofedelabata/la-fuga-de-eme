@@ -103,6 +103,8 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
   5. «Tengo que llegar sin nada de energía cinética. Si llego con velocidad, me paso de largo… ¡y me caigo!» (cara de susto)
   6. «Pero a la pista le faltan trozos: estos huecos.» (se iluminan los tres huecos, latiendo)
   7. «Tú los rellenas con las piezas de abajo. Cada una encaja en el hueco que tiene su misma forma.» (se ilumina la bandeja)
+  8. «Cuando la pista esté completa, pulsa LANZAR y allá que voy.» (se ilumina LANZAR)
+  9. «Y si quieres empezar de cero, este botón quita todas las piezas de la pista.» (se ilumina el botón de reiniciar)
 
   Se recuerda en `fuga-eme-charla-vista`. Después llega la guía del primer movimiento.
 - **Bocadillos de Eme** (`js/escritura.js`). El del tablero se coloca solo para que su pico salga de la **boca de Eme**, esté donde esté la salida; si Eme está muy arriba, el bocadillo no se sale del tablero y el pico baja hasta la boca. Al escribirse letra a letra, el texto entero ya está puesto (lo que falta, invisible), así que ninguna palabra salta de línea. Nada se corta feo: un número va siempre con su palabra («7 julitos»), las citas cortas entre comillas no se parten («sin rozamiento») y las dos últimas palabras van juntas, para que la última línea nunca se quede con una palabra suelta.
