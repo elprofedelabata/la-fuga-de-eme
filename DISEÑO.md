@@ -79,7 +79,7 @@ La meta es una repisa plana a la altura objetivo, con la bandera en su borde y u
 - **1 o más** → le sobra energía: cruza la repisa y cae por el precipicio gritando un «¡Aaaaah!» que se alarga, tiembla y se desvanece («¡Te pasaste!»).
 - Si no tiene energía para subir hasta la repisa, se da la vuelta («¡No llega!»). Se muestra todo el vaivén hasta que se para y, entonces, el resultado. Si no se va a parar nunca (sin rozamiento que lo frene), tras dos ciclos completos de ida y vuelta se marea (ojos en espiral y estrellitas) y sale el resultado mientras sigue balanceándose.
 
-Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El objetivo se muestra siempre: una línea bajo el título que dice de dónde sale y adónde llega («Sale con **8** julitos · Meta: pararse a altura **5**», el 8 en naranja como Eme y su marcador, el 5 en rojo), el número de la meta en rojo en la regla y una línea discontinua roja a esa altura que llega hasta la bandera. No hay barra de julitos fija: la energía se ve en directo durante el lanzamiento y en el balance final.
+Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El objetivo se lee **en el propio tablero**: de dónde sale Eme (su plataforma y su marcador naranja en la regla) y adónde tiene que llegar (la bandera, el número de la meta en rojo en la regla y una línea discontinua roja a esa altura que llega hasta la bandera). No hay una línea de texto con el objetivo: se quitó para dar más espacio al tablero (para lectores de pantalla, el tablero lo dice en su descripción). No hay barra de julitos fija: la energía se ve en directo durante el lanzamiento y en el balance final.
 
 ## Niveles del Mundo I
 
@@ -110,8 +110,8 @@ Enseña los controles básicos sin física que calcular. Sale a altura 7 y la me
 - **Charla en el tablero** (solo la primera vez, datos `charla` del nivel). Con todo oscurecido y bloqueado, Eme habla **desde su sitio en la salida**, con su bocadillo de siempre, ambos por encima del oscurecimiento. Mismo sistema: el texto se escribe letra a letra mientras mueve la boca, «Haz clic para continuar» y tocar el bocadillo para avanzar. Cada frase puede iluminar una zona de la interfaz y Eme la mira:
   1. «¡Aquí estoy! Arriba del todo, en la salida.»
   2. «Mira la regla: estoy a 7 cuadritos de altura.» (se ilumina la regla)
-  3. «Cada cuadrito de altura es 1 julito de energía potencial. Así que salgo con 7 julitos.» (se ilumina «Sale con 7 julitos»)
-  4. «Mi objetivo: llegar a esa bandera y pararme justo ahí, a altura 7.» (se iluminan la repisa con la bandera y «Meta: pararse a altura 7»)
+  3. «Cada cuadrito de altura es 1 julito de energía potencial. Así que salgo con 7 julitos.» (se iluminan Eme en la salida y el 7 de la regla)
+  4. «Mi objetivo: llegar a esa bandera y pararme justo ahí, a altura 7.» (se iluminan la repisa con la bandera y el 7 de la regla)
   5. «Tengo que llegar sin nada de energía cinética. Si llego con velocidad, me paso de largo… ¡y me caigo!» (cara de susto)
   6. «Pero a la pista le faltan trozos: estos huecos.» (se iluminan los tres huecos, latiendo)
   7. «Tú los rellenas con las piezas de abajo. Cada una encaja en el hueco que tiene su misma forma.» (se ilumina la bandeja)
@@ -156,7 +156,7 @@ Empieza donde acabó el nivel 2, a altura 7 (7 julitos); suelo a altura 1, meta 
 2. «Cada material roza, y al rozar me quita julitos. El número de cada pieza es lo que me quita.» (se iluminan las pegatinas −0, −1, −2, −3 de las piezas)
 3. «El hielo, nada. La madera, 1. El asfalto, 2. Y la arena… ¡3!» (las pegatinas)
 4. «Esos julitos no desaparecen: se convierten en calor. ¡Por eso la arena quema!» (cara de esfuerzo)
-5. «Salgo con 7 julitos y tengo que pararme a altura 4.» (se iluminan «Sale con 7 julitos» y la meta)
+5. «Salgo con 7 julitos y tengo que pararme a altura 4.» (se iluminan Eme en la salida, la bandera y sus alturas en la regla)
 6. «¿Cuántos julitos tengo que perder por el camino? ¡Ni más, ni menos!» (deja la cuenta al jugador)
 
 Después se va el oscurecimiento y se juega con normalidad. Cualquier nivel puede tener su `charla`.
@@ -318,7 +318,7 @@ Los textos van **dentro del dibujo**, no en una franja aparte, para leer y ver l
 
 ## Interfaz (móvil en vertical primero)
 
-De arriba abajo: barra superior (nivel y su estrella) · línea del objetivo · tablero cuadrado con la regla de alturas · bandeja de piezas deslizable · botones grandes al alcance del pulgar.
+De arriba abajo: barra superior (nivel y su estrella) · tablero con la regla de alturas · bandeja de piezas deslizable · botones grandes al alcance del pulgar.
 
 - **Arrastrar:** la pieza sale de la bandeja (queda su silueta discontinua) y flota con sombra, con inercia y una ligera inclinación según la velocidad; en móvil va por encima del dedo. Cerca de un hueco compatible se **engancha** (imán, borde naranja); los huecos que no la admiten se apagan. Al soltar encaja con rebote, polvo y una vibración corta; si se suelta fuera, vuelve volando a su sitio. Las piezas del tablero también se pueden sacar arrastrando. Eme sigue la pieza con la mirada.
 - En la bandeja táctil, deslizar en horizontal la desplaza; tirar de una pieza hacia arriba la arrastra.

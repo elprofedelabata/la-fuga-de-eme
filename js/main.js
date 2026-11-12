@@ -1088,16 +1088,22 @@ const marcarVisto = (k) => { try { localStorage.setItem(`fuga-eme-${k}-vista`, '
 function zona(nombre) {
   if (nombre === 'huecos') return Object.keys(NIVEL.huecos).map((c) => rectHueco(c));
   if (nombre === 'pegatinas') return [...$('piezas').querySelectorAll('.pegatina')].map((el) => el.getBoundingClientRect());
-  if (nombre === 'bandera') {
-    // la repisa de la meta con su bandera
-    const v = vistaTablero(W()), r = lienzo.getBoundingClientRect();
-    const [x0, y0] = v.px(inicioRepisa() - 0.3, NIVEL.meta.altura + 2.6), [x1, y1] = v.px(anchoTablero(), NIVEL.meta.altura - 1.1);
+  const v = vistaTablero(W()), r = lienzo.getBoundingClientRect();
+  const enTablero = (xa, ha, xb, hb) => {
+    const [x0, y0] = v.px(xa, ha), [x1, y1] = v.px(xb, hb);
     return { left: r.left + x0, top: r.top + y0, width: x1 - x0, height: y1 - y0 };
-  }
+  };
+  // el número de una altura en la regla
+  const enRegla = (h) => [...$('regla').querySelectorAll('.regla-n')]
+    .find((el) => Number(el.style.getPropertyValue('--h')) === h)?.getBoundingClientRect() ?? null;
+  // la repisa de la meta con su bandera
+  const bandera = () => enTablero(inicioRepisa() - 0.3, NIVEL.meta.altura + 2.6, anchoTablero(), NIVEL.meta.altura - 1.1);
+  if (nombre === 'bandera') return bandera();
+  // salida: Eme en su plataforma y su altura en la regla; meta: la bandera y su altura en la regla
+  if (nombre === 'salida') return [enTablero(0, NIVEL.energia + 1.4, NIVEL.salidaX + 0.8, NIVEL.energia - 0.4), enRegla(NIVEL.energia)];
+  if (nombre === 'meta') return [bandera(), enRegla(NIVEL.meta.altura)];
   const el = {
     regla: $('regla'),
-    salida: $('objetivo-salida').parentElement,
-    meta: $('objetivo-meta').parentElement,
     bandeja: $('piezas'),
     lanzar: $('btn-lanzar'),
     vaciar: $('btn-vaciar'),
@@ -1200,9 +1206,9 @@ function cargarNivel(n) {
   const conAyuda = hayGuia(n) || hayCharla(n);
   $('bocadillo').classList.toggle('oculto', conAyuda);
   if (conAyuda) temporizadorGuia = setTimeout(empezarAyuda, 1000);
-  $('objetivo-salida').innerHTML = `Sale con <b class="salida">${NIVEL.energia}</b>&nbsp;julitos`;
-  $('objetivo-meta').innerHTML = `Meta: pararse a altura&nbsp;<b class="meta">${NIVEL.meta.altura}</b>`;
-  $('objetivo').setAttribute('aria-label', `Eme sale con ${NIVEL.energia} julitos. Meta: que se pare en la bandera, a altura ${NIVEL.meta.altura}`);
+  // (de dónde sale y adónde llega se ve en el tablero y la regla; para lectores de pantalla, aquí)
+  lienzo.setAttribute('aria-label', `Tablero del nivel: Eme sale a altura ${NIVEL.energia} (${NIVEL.energia} julitos) `
+    + `y tiene que pararse en la bandera, a altura ${NIVEL.meta.altura}`);
   for (const r of $('regla').querySelectorAll('.regla-n')) {
     r.classList.toggle('meta', Number(r.style.getPropertyValue('--h')) === NIVEL.meta.altura);
   }

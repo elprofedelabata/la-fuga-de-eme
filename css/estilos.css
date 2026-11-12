@@ -70,23 +70,6 @@ button { font: inherit; color: inherit; }
 .estrellas span.llena { background: var(--lapiz); }
 .estrellas span.llena::after { background: var(--julito); }
 
-/* ---------- objetivo del nivel: de dónde sale Eme y adónde tiene que llegar ----------
-   Discreto: texto gris y pequeño; solo los dos números conservan su color. */
-.objetivo {
-  margin: -6px 0 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 7px;
-  font-size: 14.5px; line-height: 1.1; text-align: center; color: var(--suave);
-}
-.obj-parte { display: inline-flex; align-items: center; gap: 4px; }
-.obj-sep { opacity: 0.6; }
-.obj-eme {
-  width: 9px; height: 9px; display: inline-block; flex: none;
-  background: var(--naranja); border: 1px solid var(--suave); border-radius: 2px;
-}
-.objetivo svg { width: 10px; height: 13px; flex: none; fill: none; stroke: var(--suave); stroke-width: 1.6; stroke-linejoin: round; }
-.objetivo svg path:last-child { fill: var(--calor); stroke-width: 1; }
-.objetivo b { font-weight: normal; font-size: 15.5px; }
-.objetivo .salida { color: var(--naranja-o); }
-.objetivo .meta { color: var(--calor); }
 
 /* ---------- julitos (fichas del balance de energía) ---------- */
 .ficha {

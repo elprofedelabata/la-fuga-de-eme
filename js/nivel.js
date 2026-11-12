@@ -44,7 +44,7 @@ export const NIVELES = {
     charla: [
       { texto: '¡Aquí estoy! Arriba del todo, en la salida.', expr: 'win' },
       { texto: 'Mira la regla: estoy a 7 cuadritos de altura.', zonas: ['regla'], px: -0.95, py: 0.2 },
-      { texto: 'Cada cuadrito de altura es 1 julito de energía potencial. Así que salgo con 7 julitos.', zonas: ['salida'], px: -0.3, py: -0.95 },
+      { texto: 'Cada cuadrito de altura es 1 julito de energía potencial. Así que salgo con 7 julitos.', zonas: ['salida'], px: -0.95, py: 0.2 },
       // el objetivo
       { texto: 'Mi objetivo: llegar a esa bandera y pararme justo ahí, a altura 7.', zonas: ['bandera', 'meta'], px: 0.95, py: 0 },
       { texto: 'Tengo que llegar sin nada de energía cinética. Si llego con velocidad, me paso de largo… ¡y me caigo!', expr: 'gulp' },
@@ -105,7 +105,7 @@ export const NIVELES = {
       { texto: 'Cada material roza, y al rozar me quita julitos. El número de cada pieza es lo que me quita.', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
       { texto: 'El hielo, nada. La madera, 1. El asfalto, 2. Y la arena… ¡3!', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
       { texto: 'Esos julitos no desaparecen: se convierten en calor. ¡Por eso la arena quema!', expr: 'effort' },
-      { texto: 'Salgo con 7 julitos y tengo que pararme a altura 4.', zonas: ['salida', 'meta'], px: 0.3, py: -0.95 },
+      { texto: 'Salgo con 7 julitos y tengo que pararme a altura 4.', zonas: ['salida', 'meta'], px: 0.95, py: 0.3 },
       { texto: '¿Cuántos julitos tengo que perder por el camino? ¡Ni más, ni menos!', expr: 'win' },
     ],
     energia: 7,            // empieza donde acabó el nivel 2: a altura 7
@@ -161,7 +161,7 @@ export const NIVELES = {
     huecos: { 10: 'escalera', 7: 'escalera' },
     // Primer nivel con piezas que dan julitos: Eme lo explica (solo la primera vez)
     charla: [
-      { texto: 'Uf… Estoy a altura 1 y la meta está a altura 8.', expr: 'gulp', zonas: ['salida', 'meta'], px: 0.95, py: -0.6 },
+      { texto: 'Uf… Estoy a altura 1 y la meta está a altura 8.', expr: 'gulp', zonas: ['salida', 'meta'], px: 0.95, py: -0.7 },
       { texto: 'Con 1 julito no subo ni un escalón. ¡Necesito más energía!' },
       { texto: 'Por suerte, hay escaleras mecánicas: tienen motor y, al subirme, me dan julitos.', zonas: ['bandeja'], px: 0.2, py: 0.95 },
       { texto: 'Esos julitos salen de la electricidad del motor. El número verde es lo que me da cada una.', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
