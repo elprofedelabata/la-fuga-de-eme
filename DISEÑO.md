@@ -413,6 +413,10 @@ Con **`?dev`** en la dirección (por ejemplo, `https://elprofedelabata.github.io
 - Generales: superar todos, quitar todas las estrellas, volver a ver todas las ayudas, abrir el mapa, ver la historia, ver el final del cuaderno y ver la llegada al libro.
 - Sirve para repetir partes concretas (y hacer capturas) sin «Restablecer datos», que lo borra todo.
 
+### Versiones de los archivos (caché)
+
+GitHub Pages guarda los archivos en caché hasta 10 minutos y los navegadores también, así que tras publicar se podía seguir jugando con código viejo. `node herramientas/versionar.mjs` pone en `index.html` la versión de cada archivo (un trozo del hash de su contenido): `?v=…` en la hoja de estilos, los `modulepreload` y `main.js`, y un *import map* que traduce cada `js/x.js` a `js/x.js?v=…` para que los `import` entre módulos también pidan la versión nueva. **Hay que ejecutarlo antes de cada commit que toque `js/` o `css/`.**
+
 ## Pendiente
 
 - Los 8 niveles del Mundo II (11 a 18), con julios y decimales (decidir cómo se ven los números en la regla, las pegatinas y la barra de energía): ver «Historia: mundos II y III».

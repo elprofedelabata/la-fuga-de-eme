@@ -21,22 +21,48 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/estilos.css?v=710f4171">
   <link rel="preload" as="image" href="img/logo.svg">
-  <link rel="modulepreload" href="js/nivel.js">
-  <link rel="modulepreload" href="js/pista.js">
-  <link rel="modulepreload" href="js/dibujo.js">
-  <link rel="modulepreload" href="js/arrastre.js">
-  <link rel="modulepreload" href="js/historia.js">
-  <link rel="modulepreload" href="js/bienvenida.js">
-  <link rel="modulepreload" href="js/escritura.js">
-  <link rel="modulepreload" href="js/fin-cuaderno.js">
-  <link rel="modulepreload" href="js/llegada-libro.js">
-  <link rel="modulepreload" href="js/inicio.js">
-  <link rel="modulepreload" href="js/niveles.js">
-  <link rel="modulepreload" href="js/progreso.js">
-  <link rel="modulepreload" href="js/opciones.js">
-  <script type="module" src="js/main.js"></script>
+  <!-- versiones: lo escribe herramientas/versionar.mjs -->
+  <script type="importmap">
+  {
+    "imports": {
+      "./js/arrastre.js": "./js/arrastre.js?v=ebaf139f",
+      "./js/bienvenida.js": "./js/bienvenida.js?v=6a0dfa88",
+      "./js/dev.js": "./js/dev.js?v=76bae093",
+      "./js/dibujo.js": "./js/dibujo.js?v=e52f0383",
+      "./js/escritura.js": "./js/escritura.js?v=d96bef86",
+      "./js/fin-cuaderno.js": "./js/fin-cuaderno.js?v=9559b692",
+      "./js/foco.js": "./js/foco.js?v=0a150992",
+      "./js/historia.js": "./js/historia.js?v=70bc1437",
+      "./js/inicio.js": "./js/inicio.js?v=7fcb3ae0",
+      "./js/llegada-libro.js": "./js/llegada-libro.js?v=e3803735",
+      "./js/main.js": "./js/main.js?v=d66976e3",
+      "./js/nivel.js": "./js/nivel.js?v=8eee7495",
+      "./js/niveles.js": "./js/niveles.js?v=f84b8f81",
+      "./js/opciones.js": "./js/opciones.js?v=d62a3428",
+      "./js/pista.js": "./js/pista.js?v=59de9360",
+      "./js/progreso.js": "./js/progreso.js?v=2889ee73",
+      "./js/transicion.js": "./js/transicion.js?v=c6c6e9f1",
+      "./js/tutorial.js": "./js/tutorial.js?v=2c476a29"
+    }
+  }
+  </script>
+  <!-- /versiones -->
+  <link rel="modulepreload" href="js/nivel.js?v=8eee7495">
+  <link rel="modulepreload" href="js/pista.js?v=59de9360">
+  <link rel="modulepreload" href="js/dibujo.js?v=e52f0383">
+  <link rel="modulepreload" href="js/arrastre.js?v=ebaf139f">
+  <link rel="modulepreload" href="js/historia.js?v=70bc1437">
+  <link rel="modulepreload" href="js/bienvenida.js?v=6a0dfa88">
+  <link rel="modulepreload" href="js/escritura.js?v=d96bef86">
+  <link rel="modulepreload" href="js/fin-cuaderno.js?v=9559b692">
+  <link rel="modulepreload" href="js/llegada-libro.js?v=e3803735">
+  <link rel="modulepreload" href="js/inicio.js?v=7fcb3ae0">
+  <link rel="modulepreload" href="js/niveles.js?v=f84b8f81">
+  <link rel="modulepreload" href="js/progreso.js?v=2889ee73">
+  <link rel="modulepreload" href="js/opciones.js?v=d62a3428">
+  <script type="module" src="js/main.js?v=d66976e3"></script>
 </head>
 <body>
   <!-- Pantalla de carga: tapa el juego al menos 2 s, mientras se cargan fuentes y módulos -->
