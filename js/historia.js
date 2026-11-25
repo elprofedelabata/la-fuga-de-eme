@@ -90,10 +90,13 @@ function flecha(ctx, x0, y0, x1, y1, etiqueta) {
 }
 
 /**
- * Bocadillo con el pico abajo a la izquierda (o a la derecha, con `derecha`: entonces x es su
- * borde derecho). Con `max`, el texto se parte en líneas de ese ancho como mucho. y es el centro.
+ * Bocadillo. x es su borde izquierdo (o el derecho, con `derecha`) e y su centro. Con `max`, el
+ * texto se parte en líneas de ese ancho como mucho. Con `a: [x, y]` (la boca de quien habla), el
+ * pico sale del lado del bocadillo que mira a esa boca y apunta hacia ella; `largo` es lo que mide
+ * el pico como mucho (se queda corto para no meterse en la cara). Sin `a`, el pico sale de abajo,
+ * en la esquina izquierda (o en la derecha).
  */
-export function bocadillo(ctx, x, y, s, alfa = 1, { derecha = false, max = Infinity } = {}) {
+export function bocadillo(ctx, x, y, s, alfa = 1, { derecha = false, max = Infinity, a = null, largo = 18 } = {}) {
   if (alfa <= 0) return;
   ctx.save();
   ctx.globalAlpha = alfa;
@@ -110,14 +113,44 @@ export function bocadillo(ctx, x, y, s, alfa = 1, { derecha = false, max = Infin
   }
   lineas.push(actual);
   const w = Math.max(...lineas.map((l) => ctx.measureText(l).width)) + 20, h = 10 + 18 * lineas.length;
-  const x0 = derecha ? x - w : x, x1 = x0 + w, ar = y - h / 2, ab = y + h / 2, ty = ab - 4;
-  // contorno y pico (el pico sale del borde izquierdo o del derecho, por abajo)
-  const pico = derecha
-    ? [[x1 - 4, ty - 8], [x1 + 10, ty], [x1 - 12, ty]]
-    : [[x0 + 4, ty - 8], [x0 - 10, ty], [x0 + 12, ty]];
-  const contorno = derecha
-    ? [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1 - 2, ty - 6], [x1 + 10, ty], [x1 - 12, ab], [x0 + 10, ab], [x0, ab - 10], [x0, ar + 10]]
-    : [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1, ab - 10], [x1 - 10, ab], [x0 + 12, ab], [x0 - 10, ty], [x0 + 2, ty - 6], [x0, ar + 10]];
+  const x0 = derecha ? x - w : x, x1 = x0 + w, ar = y - h / 2, ab = y + h / 2;
+  // el pico: [base 1, punta, base 2], en el orden del contorno (que va en el sentido del reloj)
+  const lim = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  let lado, pico;
+  if (!a) {
+    const ty = ab - 4;
+    lado = 'abajo';
+    pico = derecha ? [[x1 - 4, ty - 8], [x1 + 10, ty], [x1 - 12, ab]] : [[x0 + 12, ab], [x0 - 10, ty], [x0 + 4, ty - 8]];
+  } else {
+    const [mx, my] = a;
+    let base;
+    if (my >= ab) { lado = 'abajo'; base = [lim(mx, x0 + 16, x1 - 16), ab]; }
+    else if (my <= ar) { lado = 'arriba'; base = [lim(mx, x0 + 16, x1 - 16), ar]; }
+    else if (mx < x0) { lado = 'izq'; base = [x0, lim(my, ar + 10, ab - 10)]; }
+    else { lado = 'der'; base = [x1, lim(my, ar + 10, ab - 10)]; }
+    const dx = mx - base[0], dy = my - base[1], d = Math.hypot(dx, dy) || 1;
+    const L = Math.max(6, Math.min(largo, d - 6));
+    const punta = [base[0] + (dx / d) * L, base[1] + (dy / d) * L];
+    const m = 6;   // media anchura de la base
+    pico = lado === 'abajo' ? [[base[0] + m, ab], punta, [base[0] - m, ab]]
+      : lado === 'arriba' ? [[base[0] - m, ar], punta, [base[0] + m, ar]]
+      : lado === 'izq' ? [[x0, base[1] + m], punta, [x0, base[1] - m]]
+      : [[x1, base[1] - m], punta, [x1, base[1] + m]];
+  }
+  // contorno: las esquinas redondeadas, con el pico metido en su lado
+  const lados = {
+    arriba: [[x0 + 10, ar], [x1 - 10, ar]],
+    der: [[x1, ar + 10], [x1, ab - 10]],
+    abajo: [[x1 - 10, ab], [x0 + 10, ab]],
+    izq: [[x0, ab - 10], [x0, ar + 10]],
+  };
+  const contorno = [];
+  for (const k of ['arriba', 'der', 'abajo', 'izq']) {
+    const [p1, p2] = lados[k];
+    contorno.push(p1);
+    if (k === lado) contorno.push(...pico);
+    contorno.push(p2);
+  }
   ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.roundRect(x0, ar, w, h, 10); ctx.fill();
   ctx.beginPath(); pico.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py))); ctx.closePath(); ctx.fill();
@@ -125,6 +158,9 @@ export function bocadillo(ctx, x, y, s, alfa = 1, { derecha = false, max = Infin
   lineas.forEach((l, i) => texto(ctx, l, x0 + 10, y - (lineas.length - 1) * 9 + i * 18, { tam: 15, color: C.lapiz }));
   ctx.restore();
 }
+
+/** Dónde tiene la boca un bloque dibujado con `dibujarEme(ctx, x, y, B, { sy })` (sin girar). */
+export const boca = (x, y, B, sy = 1) => [x, y + 0.18 * B * sy];
 
 export function estrella(ctx, x, y, r, color) {
   ctx.beginPath();
@@ -274,7 +310,7 @@ const ESCENAS = [
         const lid = t < 1.7 ? 1 - suave(1.1, 1.7, t) * 0.88 : (t > 2.3 && t < 2.45 ? 1 : 0.12);
         const harto = t > 2.6;
         dibujarEme(ctx, x, y, B, harto ? { expr: 'bored', seed: 2 } : { expr: 'idle', lid, px: 0, py: 0.1, seed: 2 });
-        bocadillo(ctx, 252, 128, '¿Otra vez?', suave(2.8, 3.1, t));
+        bocadillo(ctx, 252, 128, '¿Otra vez?', suave(2.8, 3.1, t), { a: boca(x, y, B) });
       }
     },
   },

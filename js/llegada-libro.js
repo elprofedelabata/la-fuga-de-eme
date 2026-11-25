@@ -6,7 +6,7 @@
 // historia; se recuerda en localStorage.
 
 import { C, dibujarEme, lapiz, trazar, cuadradito } from './dibujo.js';
-import { reproducir, suave, bocadillo, IMPRENTA } from './historia.js';
+import { reproducir, suave, bocadillo, boca, IMPRENTA } from './historia.js';
 import { mesa, libro } from './fin-cuaderno.js';
 
 const CLAVE = 'fuga-eme-llegada-libro-vista';
@@ -25,7 +25,7 @@ const NOTA = '#3b2c1c';
 /** La página del libro donde ocurre todo (sin las fórmulas del final, para que se lean los bocadillos). */
 function pagina(ctx) {
   mesa(ctx);
-  libro(ctx, 20, 40, 360, 250);
+  libro(ctx, 20, 40, 360, 250, { tenue: true });
 }
 
 /** Texto impreso del libro. */
@@ -42,6 +42,11 @@ const habla = (t, desde, dura = 1.2) => (!reducido && t > desde && t < desde + d
 function eme(ctx, t, o = {}) {
   const respira = reducido ? 0 : Math.sin(t * 2.2) * 0.015;
   dibujarEme(ctx, o.x ?? 300, o.y ?? 196, o.B ?? 132, { primo: true, expr: 'serio', px: -0.6, py: 0.15, seed: 8, sy: 1 + respira, sx: 1 - respira, ...o });
+}
+/** Bocadillo de EME: encima de su cabeza, con el pico hacia su boca. */
+const BOCA_EME = boca(300, 196, 132);
+function diceEme(ctx, s, alfa, max = 130) {
+  bocadillo(ctx, 236, 86, s, alfa, { max, a: BOCA_EME });
 }
 /** Eme, pequeño, a la izquierda. */
 function emePeque(ctx, t, o = {}) {
@@ -67,7 +72,7 @@ const ESCENAS = [
         ctx.fillRect(160, 60, 240, 240);
       }
       emePeque(ctx, t, { expr: 'gulp' });
-      bocadillo(ctx, 236, 92, 'Soy EME: el bloque de masa M.', suave(1.6, 1.9, t), { max: 130 });
+      diceEme(ctx, 'Soy EME: el bloque de masa M.', suave(1.6, 1.9, t));
     },
   },
   {   // 2 · las reglas del libro
@@ -78,8 +83,8 @@ const ESCENAS = [
       const segunda = t > 2.6;
       eme(ctx, t, { expr: segunda ? 'enfado' : 'serio', habla: habla(t, 0.4) + habla(t, 2.6, 0.8) });
       emePeque(ctx, t, { expr: segunda ? 'fast' : 'gulp', susto: segunda });
-      if (!segunda) bocadillo(ctx, 236, 92, 'En este libro, los bloques no se escapan.', suave(0.4, 0.7, t), { max: 130 });
-      else bocadillo(ctx, 236, 92, 'Se resuelven.', suave(2.6, 2.8, t), { max: 130 });
+      if (!segunda) diceEme(ctx, 'En este libro, los bloques no se escapan.', suave(0.4, 0.7, t));
+      else diceEme(ctx, 'Se resuelven.', suave(2.6, 2.8, t));
     },
   },
   {   // 3 · julios, no julitos
@@ -89,7 +94,7 @@ const ESCENAS = [
       pagina(ctx);
       eme(ctx, t, { habla: habla(t, 0.4) });
       emePeque(ctx, t, { expr: t > 2.6 ? 'gulp' : 'idle', px: 0.2, py: -0.9 });
-      bocadillo(ctx, 236, 92, 'Aquí no hay julitos. Hay julios.', suave(0.4, 0.7, t), { max: 130 });
+      diceEme(ctx, 'Aquí no hay julitos. Hay julios.', suave(0.4, 0.7, t));
       // los julitos de Eme… tachados
       for (let i = 0; i < 3; i++) cuadradito(ctx, 66 + i * 26, 70, 18, C.julito);
       const tacha = reducido ? 1 : suave(1.4, 2.1, t);
@@ -114,9 +119,9 @@ const ESCENAS = [
       pagina(ctx);
       eme(ctx, t, { habla: habla(t, 0.6) });
       const mareo = t > 4.4;
-      emePeque(ctx, t, mareo ? { expr: 'mareado', giro: t * 3 } : { expr: 'idle', px: -0.2, py: -0.9 });
-      bocadillo(ctx, 236, 92, 'Y todo lleva decimales.', suave(0.6, 0.9, t), { max: 130 });
-      bocadillo(ctx, 70, 196, '¿Veintinueve coma cuatro…?', suave(4.6, 4.9, t), { max: 150 });
+      emePeque(ctx, t, { x: 74, ...(mareo ? { expr: 'mareado', giro: t * 3 } : { expr: 'idle', px: -0.2, py: -0.9 }) });
+      diceEme(ctx, 'Y todo lleva decimales.', suave(0.6, 0.9, t));
+      bocadillo(ctx, 112, 232, '¿Veintinueve coma cuatro…?', suave(4.6, 4.9, t), { max: 110, a: boca(74, 242, 40), largo: 14 });
     },
   },
   {   // 5 · la amenaza
@@ -138,8 +143,8 @@ const ESCENAS = [
       const segunda = t > 2.9;
       eme(ctx, t, { expr: 'enfado', px: -0.95, py: -0.3, habla: habla(t, 0.4, 1.5) });
       emePeque(ctx, t, segunda ? { expr: 'effort' } : { expr: 'gulp', px: -0.3, py: -0.9 });
-      bocadillo(ctx, 236, 92, 'Vuelve a tu problema. O te devuelvo yo.', suave(0.4, 0.7, t), { max: 120 });
-      bocadillo(ctx, 128, 206, 'Ni hablar.', suave(3, 3.3, t));
+      diceEme(ctx, 'Vuelve a tu problema. O te devuelvo yo.', suave(0.4, 0.7, t), 120);
+      bocadillo(ctx, 128, 206, 'Ni hablar.', suave(3, 3.3, t), { a: boca(104, 242, 40) });
     },
   },
   {   // 6 · el reto

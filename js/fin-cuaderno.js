@@ -6,7 +6,7 @@
 // Usa el reproductor de la historia; se recuerda en localStorage para ofrecerla en el menú.
 
 import { C, FUENTE, dibujarEme, lapiz, trazar, cuadradito } from './dibujo.js';
-import { reproducir, suave, texto, bocadillo, IMPRENTA } from './historia.js';
+import { reproducir, suave, texto, bocadillo, boca, IMPRENTA } from './historia.js';
 
 const CLAVE = 'fuga-eme-fin-cuaderno-visto';
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -87,7 +87,7 @@ function hoja(ctx, { rasgado = 0 } = {}) {
 }
 
 /** El libro de texto abierto: dos páginas impresas, ordenadas, con fórmulas. */
-export function libro(ctx, x, y, w, h, { detalle = false } = {}) {
+export function libro(ctx, x, y, w, h, { detalle = false, tenue = false } = {}) {
   ctx.save();
   ctx.fillStyle = 'rgba(60,45,30,0.25)';
   ctx.fillRect(x + 5, y + 6, w, h);
@@ -99,10 +99,12 @@ export function libro(ctx, x, y, w, h, { detalle = false } = {}) {
   ctx.restore();
   lapiz(ctx, [[x + w / 2, y], [x + w / 2, y + h]], { ancho: 1.2, doble: false, amp: 0.2 });
   if (!detalle) {
-    ctx.fillStyle = '#d9d3c7';
-    for (let k = 0; k < Math.floor(h / 9) - 1; k++) {
-      ctx.fillRect(x + 6, y + 8 + k * 9, w / 2 - 14, 2.5);
-      ctx.fillRect(x + w / 2 + 6, y + 8 + k * 9, w / 2 - 14, 2.5);
+    // renglones de texto: de lejos se marcan; de cerca (`tenue`) apenas, para que no distraigan
+    const paso = tenue ? 11 : 9, grosor = tenue ? 1.6 : 2.5;
+    ctx.fillStyle = tenue ? '#efebe4' : '#d9d3c7';
+    for (let k = 0; k < Math.floor(h / paso) - 1; k++) {
+      ctx.fillRect(x + 6, y + 8 + k * paso, w / 2 - 14, grosor);
+      ctx.fillRect(x + w / 2 + 6, y + 8 + k * paso, w / 2 - 14, grosor);
     }
     return;
   }
@@ -216,7 +218,7 @@ const ESCENAS = [
       dibujarEme(ctx, 262, 128, 44, mira
         ? { expr: 'gulp', px: 0.7, py: 0.8, seed: 2, bandera: true }
         : { expr: 'win', bandera: true, seed: 2 });
-      bocadillo(ctx, 236, 76, 'Uf… Está demasiado lejos.', suave(1.6, 2, t), { derecha: true });
+      bocadillo(ctx, 236, 76, 'Uf… Está demasiado lejos.', suave(1.6, 2, t), { derecha: true, a: boca(262, 128, 44) });
     },
   },
   {   // 2 · la idea
@@ -356,7 +358,7 @@ const ESCENAS = [
         const ex = 228 - 120 * s, ey = 230 - 30 * Math.sin(Math.PI * s);
         const mira = t < 3 ? 0.9 : t < 3.8 ? -0.9 : 0.4;
         dibujarEme(ctx, ex, ey, 40, { expr: t > 4.2 ? 'gulp' : 'idle', px: mira, py: -0.2, seed: 4 });
-        bocadillo(ctx, 96, 194, 'Uy… Aquí los números llevan decimales.', suave(4.2, 4.6, t));
+        bocadillo(ctx, 96, 190, 'Uy… Aquí los números llevan decimales.', suave(4.2, 4.6, t), { a: boca(ex, ey, 40), largo: 8 });
       }
     },
   },
@@ -376,7 +378,7 @@ const ESCENAS = [
       ctx.fillRect(0, 0, 400, 300);
       primo(ctx, 470 - 160 * llega, 200, 170, -1);
       dibujarEme(ctx, 108, 230, 40, { expr: llega > 0.5 ? 'fast' : 'idle', susto: llega > 0.5, px: 0.95, py: -0.3, seed: 4 });
-      if (llega >= 1) bocadillo(ctx, 140, 192, '¿Q-quién eres tú?', suave(2.6, 3, t));
+      if (llega >= 1) bocadillo(ctx, 140, 192, '¿Q-quién eres tú?', suave(2.6, 3, t), { a: boca(108, 230, 40) });
       // el cartel del rótulo «Mundo II · El libro de texto» (el texto se escribe encima)
       const cartel = suave(3.2, 3.5, t);
       if (cartel > 0) {
