@@ -34,7 +34,7 @@ const niveles = () => [...NIVELES_JUGABLES].sort((a, b) => a - b);
  * Pone el botón y el panel. Recibe del juego cómo jugar un nivel, abrir el mapa y ver las
  * escenas, y avisa con `alCambiar` cuando cambia el progreso (para repintar lo que haga falta).
  */
-export function iniciarDev({ jugar, abrirMapa, verHistoria, verFin }) {
+export function iniciarDev({ jugar, abrirMapa, verHistoria, verFin, verLlegada }) {
   const boton = document.createElement('button');
   boton.className = 'dev-boton';
   boton.textContent = 'DEV';
@@ -75,6 +75,7 @@ export function iniciarDev({ jugar, abrirMapa, verHistoria, verFin }) {
         <button data-accion="mapa">Abrir el mapa</button>
         <button data-accion="historia">Ver la historia</button>
         <button data-accion="fin">Ver el final del cuaderno</button>
+        <button data-accion="llegada">Ver la llegada al libro</button>
       </div>
       <p class="dev-aviso" aria-live="polite"></p>`;
   };
@@ -100,6 +101,7 @@ export function iniciarDev({ jugar, abrirMapa, verHistoria, verFin }) {
       case 'mapa': panel.close(); abrirMapa(); return;
       case 'historia': panel.close(); verHistoria(); return;
       case 'fin': panel.close(); verFin(); return;
+      case 'llegada': panel.close(); verLlegada(); return;
       default:
     }
   });

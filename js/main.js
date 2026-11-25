@@ -12,6 +12,7 @@ import {
 import { Fantasma } from './arrastre.js';
 import { mostrarHistoria, historiaVista } from './historia.js';
 import { mostrarFinCuaderno, finCuadernoVisto } from './fin-cuaderno.js';
+import { mostrarLlegadaLibro, llegadaLibroVista } from './llegada-libro.js';
 import { mostrarInicio } from './inicio.js';
 import { arrancar } from './transicion.js';
 import { abrirOpciones } from './opciones.js';
@@ -1295,6 +1296,7 @@ function iniciar() {
       abrirMapa: () => { despejar(); abrirNiveles(); },
       verHistoria: () => { despejar(); mostrarHistoria(); },
       verFin: () => { despejar(); mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) }); },
+      verLlegada: () => { despejar(); mostrarLlegadaLibro({ alTerminar: () => abrirNiveles() }); },
     }));
   }
   $('bocadillo').addEventListener('click', tocarBocadillo);
@@ -1321,11 +1323,13 @@ function iniciar() {
   $('btn-menu').addEventListener('click', () => {
     $('acerca').returnValue = '';
     $('btn-ver-fin1').hidden = !finCuadernoVisto();   // solo cuando ya se ha visto
+    $('btn-ver-libro').hidden = !llegadaLibroVista();
     $('acerca').showModal();
   });
   $('acerca').addEventListener('close', () => {
     if ($('acerca').returnValue === 'historia') mostrarHistoria();
     if ($('acerca').returnValue === 'fin1') mostrarFinCuaderno();
+    if ($('acerca').returnValue === 'libro') mostrarLlegadaLibro();
     if ($('acerca').returnValue === 'niveles') abrirNiveles();
     if ($('acerca').returnValue === 'opciones') abrirOpciones();
   });
@@ -1352,11 +1356,20 @@ function abrirInicio() {
 }
 
 function abrirNiveles({ recien } = {}) {
-  mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio, recien });
+  mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio, alEscena: verEscenaMundo, recien });
 }
 
-/** Entra en un nivel. */
+/** La escena de entrada de un mundo (desde su tarjeta del mapa); al acabar, vuelta al mapa. */
+function verEscenaMundo(id) {
+  if (id === 'libro') mostrarLlegadaLibro({ alTerminar: () => abrirNiveles() });
+}
+
+/** Entra en un nivel. Al primer nivel del libro se llega, la primera vez, por su escena de entrada. */
 function entrarNivel(n) {
+  if (n === 11 && !llegadaLibroVista()) {
+    mostrarLlegadaLibro({ alTerminar: () => cargarNivel(n) });
+    return;
+  }
   cargarNivel(n);
 }
 

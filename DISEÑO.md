@@ -347,7 +347,18 @@ Arco del personaje: **rival en todo el Mundo II**, haciendo lo posible por devol
 
 ### Mundo II · El libro de texto (niveles 11 a 18): números serios
 
-**Escena de entrada.** EME se presenta y planta cara: «En este libro, los bloques no se escapan: se resuelven». Cambia las reglas: «Aquí no hay julitos. Hay julios. Y todo lleva decimales». A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, longitudes con decimales). EME es el antagonista de todo el mundo: va por delante y deja trampas «reglamentarias» para devolver a Eme a su problema. Cada nivel es un problema del libro («Problema 7.11»…).
+**Escena de entrada: «La llegada al libro»** (`js/llegada-libro.js`). Sigue justo donde acaba el final del cuaderno, en la página del libro, con el mismo reproductor (tocar para avanzar, «Saltar»):
+
+1. **La presentación.** «—¿Quién eres tú?». EME sale de la sombra (una sombra redonda que se aclara): grande, granate, con su «M» naranja y cara seria. «Soy EME: el bloque de masa M.» Eme, pequeño, traga saliva.
+2. **Las reglas del libro.** «En este libro, los bloques no se escapan.» Y, enfadado: «Se resuelven.» Eme se asusta.
+3. **Julios, no julitos.** Los tres julitos de Eme se tachan en rojo y aparece, impreso, «2,45 J». «Aquí no hay julitos. Hay julios.»
+4. **Decimales.** Se escribe un ejemplo: Eₚ = m · g · h con m = 2,0 kg, g = 9,8 m/s², h = 1,5 m → **Eₚ = 29,4 J**. «Y todo lleva decimales.» Eme, mareado: «¿Veintinueve coma cuatro…?»
+5. **La amenaza.** En la página está el «Problema 7.3», con el hueco punteado del bloque en su plano inclinado: el sitio de Eme. EME, enfadado: «Vuelve a tu problema. O te devuelvo yo.» Eme, apretando los dientes: «Ni hablar.»
+6. **El reto.** Cartel «Mundo II · El libro de texto» y «Problemas 11 a 18». Botón **«¡A resolver!»**, que lleva al mapa.
+
+Sale la primera vez que se entra en el nivel 11 (se recuerda en `fuga-eme-llegada-libro-vista`) y se puede volver a ver con el botón «▶ La llegada al libro» de la tarjeta del Mundo II en el mapa, desde el menú y desde el panel de desarrollo.
+
+A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, longitudes con decimales). EME es el antagonista de todo el mundo: va por delante y deja trampas «reglamentarias» para devolver a Eme a su problema. Cada nivel es un problema del libro («Problema 7.11»…).
 
 1. **«Exprese el resultado en julios»** (11). El primer problema con datos reales, sin rozamiento. EME vigila: «Compruebe sus unidades».
 2. **«Datos del problema»** (12). Rozamiento en llano con μ: W = μ·m·g·d. La pérdida ya depende de la longitud del tramo y de la masa.
@@ -399,12 +410,12 @@ De arriba abajo: barra superior (nivel y su estrella) · tablero con la regla de
 Con **`?dev`** en la dirección (por ejemplo, `https://elprofedelabata.github.io/la-fuga-de-eme/?dev`) aparece un botón «DEV» abajo a la izquierda, por encima de todo, que abre un panel (`js/dev.js`). Sin `?dev` no se carga nada.
 
 - Por cada nivel: **▶** jugarlo directamente (desde cualquier pantalla), **★** marcarlo o desmarcarlo como superado y **↺** dejarlo **como nuevo**: sin estrella y con sus ayudas (su charla y, en el nivel 1, la bienvenida y la guía).
-- Generales: superar todos, quitar todas las estrellas, volver a ver todas las ayudas, abrir el mapa, ver la historia y ver el final del cuaderno.
+- Generales: superar todos, quitar todas las estrellas, volver a ver todas las ayudas, abrir el mapa, ver la historia, ver el final del cuaderno y ver la llegada al libro.
 - Sirve para repetir partes concretas (y hacer capturas) sin «Restablecer datos», que lo borra todo.
 
 ## Pendiente
 
-- Escena de entrada del Mundo II (EME y las reglas nuevas) y sus 8 niveles (11 a 18), con julios y decimales: ver «Historia: mundos II y III».
+- Los 8 niveles del Mundo II (11 a 18), con julios y decimales (decidir cómo se ven los números en la regla, las pegatinas y la barra de energía): ver «Historia: mundos II y III».
 - Mecánicas del catálogo aún sin usar (muelles, rebotadores, paredes de papel, agua) para los mundos siguientes.
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

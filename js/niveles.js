@@ -60,6 +60,7 @@ function construir(progreso, recien) {
           ${bloqueado ? `<span class="mundo-candado" aria-label="bloqueado">${CANDADO}</span>` : ''}</h3>
         ${bloqueado ? '<p class="mundo-aviso">Termina el mundo anterior</p>' : ''}
         ${pronto ? '<p class="mundo-aviso">¡Desbloqueado! Sus niveles llegan pronto.</p>' : ''}
+        ${!bloqueado && m.escena ? `<button class="mundo-escena" data-mundo="${m.id}">▶ ${m.escena}</button>` : ''}
         <div class="camino camino-${m.niveles}">
           ${m.niveles > 1 ? `<svg class="camino-linea" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <polyline points="${linea}" vector-effect="non-scaling-stroke"/></svg>` : ''}
@@ -70,7 +71,7 @@ function construir(progreso, recien) {
 }
 
 /** `recien`: id de un mundo que se acaba de desbloquear (se destaca con una animación). */
-export function mostrarNiveles({ alElegir, alVolver, recien } = {}) {
+export function mostrarNiveles({ alElegir, alVolver, alEscena, recien } = {}) {
   const $ = (id) => document.getElementById(id);
   const raiz = $('niveles');
   const progreso = leerProgreso();
@@ -93,6 +94,8 @@ export function mostrarNiveles({ alElegir, alVolver, recien } = {}) {
 
   $('btn-niveles-volver').onclick = () => salir(alVolver);
   $('mundos').onclick = (e) => {
+    const esc = e.target.closest('.mundo-escena');     // la escena de entrada de un mundo
+    if (esc) { salir(() => alEscena?.(esc.dataset.mundo)); return; }
     const b = e.target.closest('.nivel-btn');
     if (!b) return;
     if (b.classList.contains('bloqueado')) {

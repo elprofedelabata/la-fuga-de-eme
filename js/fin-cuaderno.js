@@ -22,7 +22,7 @@ function marcarVisto() {
 const MADERA = '#c8ad84';
 
 /** La mesa: madera con vetas. */
-function mesa(ctx) {
+export function mesa(ctx) {
   ctx.fillStyle = MADERA;
   ctx.fillRect(0, 0, 400, 300);
   ctx.strokeStyle = 'rgba(120,85,45,0.22)';
@@ -87,7 +87,7 @@ function hoja(ctx, { rasgado = 0 } = {}) {
 }
 
 /** El libro de texto abierto: dos páginas impresas, ordenadas, con fórmulas. */
-function libro(ctx, x, y, w, h, { detalle = false } = {}) {
+export function libro(ctx, x, y, w, h, { detalle = false } = {}) {
   ctx.save();
   ctx.fillStyle = 'rgba(60,45,30,0.25)';
   ctx.fillRect(x + 5, y + 6, w, h);

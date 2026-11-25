@@ -89,26 +89,40 @@ function flecha(ctx, x0, y0, x1, y1, etiqueta) {
   ctx.restore();
 }
 
-/** Bocadillo con el pico abajo a la izquierda (o a la derecha, con `derecha`: entonces x es su borde derecho). */
-export function bocadillo(ctx, x, y, s, alfa = 1, { derecha = false } = {}) {
+/**
+ * Bocadillo con el pico abajo a la izquierda (o a la derecha, con `derecha`: entonces x es su
+ * borde derecho). Con `max`, el texto se parte en líneas de ese ancho como mucho. y es el centro.
+ */
+export function bocadillo(ctx, x, y, s, alfa = 1, { derecha = false, max = Infinity } = {}) {
   if (alfa <= 0) return;
   ctx.save();
   ctx.globalAlpha = alfa;
   ctx.font = `15px ${FUENTE}`;
-  const w = ctx.measureText(s).width + 20, h = 28;
-  const x0 = derecha ? x - w : x, x1 = x0 + w, ar = y - h / 2, ab = y + h / 2;
+  // líneas
+  const lineas = [];
+  let actual = '';
+  // las dos últimas palabras, siempre juntas (que la última línea no se quede con una sola)
+  const palabras = s.split(' ');
+  if (palabras.length > 2) palabras.splice(-2, 2, `${palabras[palabras.length - 2]} ${palabras[palabras.length - 1]}`);
+  for (const p of palabras) {
+    const prueba = actual ? `${actual} ${p}` : p;
+    if (actual && ctx.measureText(prueba).width > max) { lineas.push(actual); actual = p; } else actual = prueba;
+  }
+  lineas.push(actual);
+  const w = Math.max(...lineas.map((l) => ctx.measureText(l).width)) + 20, h = 10 + 18 * lineas.length;
+  const x0 = derecha ? x - w : x, x1 = x0 + w, ar = y - h / 2, ab = y + h / 2, ty = ab - 4;
   // contorno y pico (el pico sale del borde izquierdo o del derecho, por abajo)
   const pico = derecha
-    ? [[x1 - 4, y + 2], [x1 + 10, y + 10], [x1 - 12, y + 10]]
-    : [[x0 + 4, y + 2], [x0 - 10, y + 10], [x0 + 12, y + 10]];
+    ? [[x1 - 4, ty - 8], [x1 + 10, ty], [x1 - 12, ty]]
+    : [[x0 + 4, ty - 8], [x0 - 10, ty], [x0 + 12, ty]];
   const contorno = derecha
-    ? [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1 - 2, y + 4], [x1 + 10, y + 10], [x1 - 12, ab], [x0 + 10, ab], [x0, ab - 10], [x0, ar + 10]]
-    : [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1, ab - 10], [x1 - 10, ab], [x0 + 12, ab], [x0 - 10, y + 10], [x0 + 2, y + 4], [x0, ar + 10]];
+    ? [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1 - 2, ty - 6], [x1 + 10, ty], [x1 - 12, ab], [x0 + 10, ab], [x0, ab - 10], [x0, ar + 10]]
+    : [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1, ab - 10], [x1 - 10, ab], [x0 + 12, ab], [x0 - 10, ty], [x0 + 2, ty - 6], [x0, ar + 10]];
   ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.roundRect(x0, ar, w, h, 10); ctx.fill();
   ctx.beginPath(); pico.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py))); ctx.closePath(); ctx.fill();
   lapiz(ctx, contorno, { ancho: 1.4, cerrado: true, doble: false, amp: 0.3 });
-  texto(ctx, s, x0 + 10, y, { tam: 15, color: C.lapiz });
+  lineas.forEach((l, i) => texto(ctx, l, x0 + 10, y - (lineas.length - 1) * 9 + i * 18, { tam: 15, color: C.lapiz }));
   ctx.restore();
 }
 

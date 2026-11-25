@@ -506,8 +506,15 @@ export function dibujarMiniatura(ctx, lado, celda, pieza, nivel = NIVEL) {
  * Dibuja a Eme centrado en (cx, cy) con lado B.
  * o.expr: idle | gulp | fast | effort | ice | edge | win | bored
  */
+// Colores de Eme y de su primo EME (granate, como las tapas del libro de texto)
+const TONOS = {
+  eme: { base: C.naranja, sombra: C.naranjaO, brillo: C.naranjaC, rayas: 'rgba(190,105,30,0.45)', letra: C.tatuaje },
+  primo: { base: '#B4503F', sombra: '#93392C', brillo: '#DB8C79', rayas: 'rgba(110,30,22,0.45)', letra: C.naranja },
+};
+
 export function dibujarEme(ctx, cx, cy, B, o = {}) {
-  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1, giro = 0, susto = false, sinCara = false, habla = 0 } = o;
+  const { expr = 'idle', ang = 0, sx = 1, sy = 1, lid = 0, px = 0, py = 0, bandera = false, seed = 1, giro = 0, susto = false, sinCara = false, habla = 0, primo = false } = o;
+  const T = primo ? TONOS.primo : TONOS.eme;   // primo: EME, el bloque de masa M del libro
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(ang);
@@ -520,18 +527,18 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.save();
   trazar(ctx, cuerpo, true);
   ctx.clip();
-  ctx.fillStyle = C.naranja;
+  ctx.fillStyle = T.base;
   ctx.fillRect(x0 - 2, y0 - 2, bw + 4, bh + 4);
-  ctx.fillStyle = C.naranjaO;
+  ctx.fillStyle = T.sombra;
   ctx.beginPath(); ctx.ellipse(0.625 * bw, 0.725 * bh, 0.675 * bw, 0.675 * bh, 0, 0, 6.29); ctx.fill();
   ctx.beginPath(); ctx.ellipse(0.775 * bw, 0.25 * bh, 0.525 * bw, 1.15 * bh, 0, 0, 6.29); ctx.fill();
-  ctx.strokeStyle = 'rgba(190,105,30,0.45)';
+  ctx.strokeStyle = T.rayas;
   ctx.lineWidth = Math.max(0.6, B * 0.009);
   for (let i = 0; i < 7; i++) {
     const t = bw * (0.12 + 0.07 * i);
     ctx.beginPath(); ctx.moveTo(x1 - t, y1); ctx.lineTo(x1, y1 - t); ctx.stroke();
   }
-  ctx.strokeStyle = C.naranjaC;
+  ctx.strokeStyle = T.brillo;
   ctx.lineWidth = B * 0.045;
   ctx.lineCap = 'round';
   ctx.beginPath();
@@ -541,14 +548,14 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.stroke();
   ctx.restore();
 
-  // la "m" que odia
-  ctx.fillStyle = C.tatuaje;
-  ctx.font = `${B * 0.32}px ${FUENTE}`;
+  // la "m" que odia (EME lleva con orgullo una M mayúscula de imprenta)
+  ctx.fillStyle = T.letra;
+  ctx.font = primo ? `bold ${B * 0.34}px Georgia, "Times New Roman", serif` : `${B * 0.32}px ${FUENTE}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('m', 0.27 * bw, 0.25 * bh);
+  ctx.fillText(primo ? 'M' : 'm', 0.27 * bw, 0.25 * bh);
 
-  if (!sinCara) cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, habla });   // sinCara: el bloque anónimo de los problemas
+  if (!sinCara) cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, habla, piel: T.base });   // sinCara: el bloque anónimo de los problemas
 
   ctx.strokeStyle = C.lapiz;
   ctx.lineWidth = lw * 1.3;
@@ -593,7 +600,7 @@ export function dibujarEme(ctx, cx, cy, B, o = {}) {
   ctx.restore();
 }
 
-function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, habla }) {
+function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, habla, piel = C.naranja }) {
   const ey = -0.1 * bh, rx = 0.12 * bw, ry = 0.15 * bh;
   const lx = -0.2 * bw, rxx = 0.2 * bw;
   const mx = 0, my = 0.18 * bh;
@@ -620,7 +627,7 @@ function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, 
       const yl = ey - b + 2 * b * plid;
       ctx.save();
       ctx.beginPath(); ctx.ellipse(x, ey, a, b, 0, 0, 6.29); ctx.clip();
-      ctx.fillStyle = C.naranja;
+      ctx.fillStyle = piel;
       ctx.fillRect(x - a - 1, ey - b - 1, 2 * a + 2, yl - (ey - b) + 1);
       ctx.restore();
       const xr = a * Math.sqrt(Math.max(0, 1 - ((yl - ey) / b) ** 2));
@@ -719,6 +726,16 @@ function cara(ctx, { expr, bw, bh, B, lid, px, py, lw, x0, y0, x1, giro, susto, 
   };
 
   switch (expr) {
+    case 'serio':     // cejas de reglamento: algo caídas hacia el centro
+      ojo(lx, 1, px, py, 0.4, Math.max(lid, 0.3)); ojo(rxx, 1, px, py, 0.4, Math.max(lid, 0.3));
+      ceja(lx - 0.9 * rx, ey - 1.5 * ry, lx + 0.9 * rx, ey - 1.15 * ry);
+      ceja(rxx - 0.9 * rx, ey - 1.15 * ry, rxx + 0.9 * rx, ey - 1.5 * ry);
+      boca(habla ? 'habla' : 'plana'); break;
+    case 'enfado':
+      ojo(lx, 1, px, py, 0.36, 0.2); ojo(rxx, 1, px, py, 0.36, 0.2);
+      ceja(lx - 0.95 * rx, ey - 1.8 * ry, lx + 0.9 * rx, ey - 0.95 * ry);
+      ceja(rxx - 0.9 * rx, ey - 0.95 * ry, rxx + 0.95 * rx, ey - 1.8 * ry);
+      boca(habla ? 'habla' : 'dientes'); break;
     case 'mareado':
       espiral(lx, 1); espiral(rxx, -1); boca('ondas');
       rubor('rgba(150,200,120,0.45)');   // un poco verde
