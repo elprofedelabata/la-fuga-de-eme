@@ -1286,6 +1286,18 @@ function siguienteNivel() {
 }
 
 function iniciar() {
+  // Herramientas de desarrollo: solo con «?dev» en la dirección
+  if (new URLSearchParams(location.search).has('dev')) {
+    import('./dev.js').then((m) => m.iniciarDev({
+      jugar: (n) => {                     // directo al nivel, desde cualquier pantalla
+        for (const id of ['inicio', 'niveles']) $(id).hidden = true;
+        cargarNivel(n);
+      },
+      abrirMapa: () => abrirNiveles(),
+      verHistoria: () => mostrarHistoria(),
+      verFin: () => mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) }),
+    }));
+  }
   $('bocadillo').addEventListener('click', tocarBocadillo);
   $('btn-lanzar').addEventListener('click', lanzar);
   $('btn-vaciar').addEventListener('click', vaciar);

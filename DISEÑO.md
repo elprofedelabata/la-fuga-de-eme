@@ -367,6 +367,14 @@ De arriba abajo: barra superior (nivel y su estrella) · tablero con la regla de
 - Rejilla 3 × 3 en gris claro sobre el terreno; cuadritos de altura en azul muy suave.
 - **Regla de alturas** fuera del tablero, a la izquierda: un número por cuadrito, todos con el mismo estilo (escala uniforme). El tamaño de letra se adapta al número de cuadritos, pensando en niveles con cuadritos más pequeños. Un marcador naranja sigue la altura de Eme en directo: es su Ep.
 
+## Herramientas de desarrollo
+
+Con **`?dev`** en la dirección (por ejemplo, `https://elprofedelabata.github.io/la-fuga-de-eme/?dev`) aparece un botón «DEV» abajo a la izquierda, por encima de todo, que abre un panel (`js/dev.js`). Sin `?dev` no se carga nada.
+
+- Por cada nivel: **▶** jugarlo directamente (desde cualquier pantalla), **★** marcarlo o desmarcarlo como superado y **↺** dejarlo **como nuevo**: sin estrella y con sus ayudas (su charla y, en el nivel 1, la bienvenida y la guía).
+- Generales: superar todos, quitar todas las estrellas, volver a ver todas las ayudas, abrir el mapa, ver la historia y ver el final del cuaderno.
+- Sirve para repetir partes concretas (y hacer capturas) sin «Restablecer datos», que lo borra todo.
+
 ## Pendiente
 
 - Niveles del Mundo II (el libro de texto): números con decimales y EME, el primo grande.
