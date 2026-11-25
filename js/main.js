@@ -657,6 +657,13 @@ function mostrarResultado() {
     piezasGrupos();
     bal.append(grupo(llegada, 'ec', 'sobran'));
     ecu = `${entra} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
+  } else if (atasco?.frenado) {
+    // se quedó frenado en una bajada: roza más de lo que baja
+    msg = 'Se quedó frenado en una bajada: el rozamiento le quitaba más julitos de los que ganaba al bajar, ' +
+      'y se le acabó la energía antes de llegar abajo.' + (llegada === 0 ? ' Las cuentas cuadraban… ¡pero el orden de las piezas importa!' : '');
+    gananciasGrupos();
+    piezasGrupos();
+    ecu = `${entra} = ${[hm, ...perdidasPiezas].join(' + ')}`;
   } else if (atasco) {
     // se quedó en una cuesta por el camino (una colina, o una escalera averiada que no subió)
     const num = (x) => String(Math.round(x * 100) / 100).replace('.', ',');   // decimales con coma

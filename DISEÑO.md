@@ -243,6 +243,25 @@ Piezas (10 para 5 huecos): escaleras mecánicas de +3 y +5, la averiada (+0) y u
 
 El mensaje de los atascos vale ya para cualquier cuesta: si no hay escaleras de por medio, habla de lo que se podía perder antes de la cima; si las hay, de la energía que tenía al llegar arriba.
 
+### Nivel 10 · «La última página» (examen final)
+
+El cierre del cuaderno, en un tablero de **3 filas y 6 columnas**. Empieza donde acabó el nivel 9, a altura 3, y la meta está en el **borde de la hoja**, arriba a la derecha, a altura 8. Trazado **final**: caída al fondo, colina baja (cima a 1,5), escalera mecánica de dos filas (casillas 15 y 9), bajada de dos filas (10 y 16), otra escalera de dos filas (17 y 11) y rampa en S hasta la meta. Sin piezas nuevas: es un examen de todo el Mundo I.
+
+**Charla corta** (solo la primera vez): «¡Mira! ¡El borde de la hoja! Es la última página del cuaderno.» (se iluminan la bandera y el 8 de la regla) y «Si llego a esa bandera, ¡me escapo! Pero esta vez no hay pistas: todo lo que has aprendido, junto.»
+
+Piezas (11 para 8 huecos): escaleras de +3, +4 y +5, la averiada y una escalera doble de +8; bajadas de madera, asfalto y arena y una bajada doble de asfalto; colinas de hielo y madera. De las 864 colocaciones:
+
+- **Una solución** (que se puede colocar de cuatro maneras): bajada de madera al principio, colina de hielo, escalera doble de +8 en la primera escalera, bajadas de asfalto y arena en la bajada larga y, en la segunda escalera, la de +3 y la averiada, en cualquier orden (3 + 8 + 3 = 8 + 2 + 1 + 3). Con solo 3 julitos al salir, antes de la cima de la colina no se puede perder casi nada (menos de 1,5): la bajada de madera y la colina de hielo son lo único que cabe.
+- **256 colocaciones** cuadran la suma pero fallan por el camino: no suben la colina, se quedan frenadas en una bajada o no suben la averiada.
+
+En el móvil, el tablero de 6 columnas mide unos 320 × 160 (casillas de unos 53 px): se juega, pero es el más pequeño.
+
+Al hacerlo aparecieron y se corrigieron tres cosas del análisis y la simulación, que no afectaban a los niveles anteriores:
+
+- Una **bajada que roza más de lo que baja** (arena en una caída de solo 2,5) deja a Eme **frenado** en ella: el análisis lo detecta y la hoja lo explica.
+- Llegar a una cima con **0 julitos justos** es quedarse parado arriba (como en la simulación): hace falta algo de sobra.
+- Con muchas piezas, la integración numérica puede dejar a Eme en la repisa con unas centésimas de julito: se queda en la meta en lugar de arrastrarse hasta el precipicio.
+
 ## Diseño de niveles
 
 - Muchas piezas distintas y, en lo posible, **una única solución**: el validador cuenta las soluciones. Una solución es un **juego de piezas** que gana: colocar las mismas piezas en otro orden con el mismo resultado no cuenta como otra (si el orden importa, como en el nivel 6, el otro orden no gana y no se cuenta). Si un nivel tiene varias a propósito (como el 2), lo dice en `soluciones` y el validador comprueba que sean justo esas.
@@ -334,6 +353,7 @@ De arriba abajo: barra superior (nivel y su estrella) · tablero con la regla de
 
 ## Pendiente
 
-- Nivel 10 del Mundo I con las mecánicas del catálogo (muelles, rebotadores, jorobas, paredes de papel, agua).
+- Escena de fin del Mundo I al superar el nivel 10 (Eme salta fuera de la hoja y se ve el libro de texto) y desbloqueo del Mundo II.
+- Mecánicas del catálogo aún sin usar (muelles, rebotadores, paredes de papel, agua) para los mundos siguientes.
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

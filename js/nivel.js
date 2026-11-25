@@ -294,6 +294,46 @@ export const NIVELES = {
       { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
     ],
   },
+
+  // Examen final del cuaderno (6 columnas): todo lo aprendido junto. Eme sale de 3 y tiene que
+  // llegar al borde de la hoja, a altura 8: cae, pasa una colina baja (con muy poco margen), sube
+  // una escalera de dos filas, baja otras dos, sube otra escalera de dos filas y la rampa final.
+  10: {
+    numero: 10,
+    titulo: 'La última página',
+    frase: '¡El borde de la hoja!',
+    columnas: 6,
+    trazado: 'final',
+    suelo: 0.5,            // el fondo
+    alto: 5.5,             // altura a la que llegan las escaleras
+    cima: 1.5,             // cima de la colina (baja, pero con 3 julitos hay muy poco margen)
+    energia: 3,            // empieza donde acabó el nivel 9: a altura 3
+    salidaX: 1.0,
+    meta: { altura: 8, bandera: 17.55 },
+    huecos: {
+      13: 'bajada', 14: 'colina', 9: 'escalera', 15: 'escalera',
+      10: 'bajada', 16: 'bajada', 11: 'escalera', 17: 'escalera',
+    },
+    miniatura: { bajada: 16 },
+    // Charla corta (solo la primera vez): sin explicaciones, es el examen
+    charla: [
+      { texto: '¡Mira! ¡El borde de la hoja! Es la última página del cuaderno.', expr: 'win', zonas: ['meta'], px: 0.95, py: -0.6 },
+      { texto: 'Si llego a esa bandera, ¡me escapo! Pero esta vez no hay pistas: todo lo que has aprendido, junto.' },
+    ],
+    piezas: [
+      { id: 'escalera-3', forma: 'escalera', material: 'escalera', gana: 3, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-4', forma: 'escalera', material: 'escalera', gana: 4, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-5', forma: 'escalera', material: 'escalera', gana: 5, nombre: ['Escalera', 'mecánica'] },
+      { id: 'escalera-averiada', forma: 'escalera', material: 'escalera', gana: 0, nombre: ['Escalera', 'averiada'] },
+      { id: 'escalera-doble-8', forma: 'escalera', doble: 'v', material: 'escalera', gana: 8, nombre: ['Escalera doble', 'mecánica'] },
+      { id: 'bajada-madera', forma: 'bajada', material: 'madera', nombre: ['Bajada', 'de madera'] },
+      { id: 'bajada-asfalto', forma: 'bajada', material: 'asfalto', nombre: ['Bajada', 'de asfalto'] },
+      { id: 'bajada-arena', forma: 'bajada', material: 'arena', nombre: ['Bajada', 'de arena'] },
+      { id: 'bajada-doble-asfalto', forma: 'bajada', doble: 'v', material: 'asfalto', nombre: ['Bajada doble', 'de asfalto'] },
+      { id: 'colina-hielo', forma: 'colina', material: 'hielo', nombre: ['Colina', 'de hielo'] },
+      { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
+    ],
+  },
 };
 
 /**

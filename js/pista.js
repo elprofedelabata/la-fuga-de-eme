@@ -252,9 +252,44 @@ function pistaAscenso(nivel) {
   return pts;
 }
 
+/**
+ * Gran final (tablero de 6 columnas): caída al fondo, colina, escalera mecánica de dos filas,
+ * bajada de dos filas, otra escalera de dos filas y una rampa en S hasta el borde de la hoja.
+ *   fila de abajo: bajada (13) | colina (14) | escalera (15) | bajada (16) | escalera (17) |
+ *   fila del medio:                         | escalera (9)  | bajada (10)  | escalera (11) | rampa
+ */
+function pistaFinal(nivel) {
+  const hs = nivel.energia, hm = nivel.meta.altura;
+  const fondo = nivel.suelo ?? 0.5, alto = nivel.alto ?? 5.5, cima = nivel.cima ?? 2;
+  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const suave = (u) => u * u * (3 - 2 * u);
+  const pts = [[0, hs], [1.2, hs]];
+  // caída de la salida al fondo (de 1.2 a 3)
+  for (let i = 1; i <= 24; i++) {
+    const th = (i / 24) * Math.PI / 2;
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), fondo + (hs - fondo) * (1 - Math.sin(th))]);
+  }
+  // colina (de 3 a 6)
+  for (let i = 1; i <= 36; i++) {
+    const x = 3 + (3 * i) / 36;
+    pts.push([x, fondo + ((cima - fondo) * (1 - Math.cos((2 * Math.PI * (x - 3)) / 3))) / 2]);
+  }
+  // primera escalera: recta, del fondo a lo alto (de 6 a 9)
+  for (let i = 1; i <= 24; i++) pts.push([6 + (3 * i) / 24, fondo + ((alto - fondo) * i) / 24]);
+  // bajada en S de lo alto al fondo (de 9 a 12)
+  for (let i = 1; i <= 36; i++) pts.push([9 + (3 * i) / 36, alto - (alto - fondo) * suave(i / 36)]);
+  // segunda escalera (de 12 a 15)
+  for (let i = 1; i <= 24; i++) pts.push([12 + (3 * i) / 24, fondo + ((alto - fondo) * i) / 24]);
+  // rampa en S hasta la repisa de la meta, en el borde de la hoja
+  for (let i = 1; i <= 24; i++) pts.push([15 + (repisa - 15) * (i / 24), alto + (hm - alto) * suave(i / 24)]);
+  // repisa plana y sin rozamiento hasta el precipicio
+  for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);
+  return pts;
+}
+
 const TRAZADOS = {
   u: pistaU, colina: pistaColina, escaleras: pistaEscaleras, travesia: pistaTravesia, larga: pistaLarga,
-  ascenso: pistaAscenso,
+  ascenso: pistaAscenso, final: pistaFinal,
 };
 
 export function celdaDe(x, h, cols = 3) {
@@ -336,7 +371,8 @@ export function analizar(nivel, colocadas) {
  * ¿Se queda Eme sin energía en una colina antes de la meta? Recorre la pista sumando lo que
  * pierde cada tramo: si en algún punto la energía no le llega para la altura, y después
  * la pista vuelve a bajar (es una colina, no la subida final), se queda atascado ahí.
- * Devuelve { celda, cima, antes } (antes: julitos perdidos al llegar a la cima) o null.
+ * Devuelve { celda, cima, antes } (antes: julitos perdidos al llegar a la cima), { celda, frenado }
+ * si se queda frenado en una bajada que roza más de lo que baja, o null.
  */
 function buscarAtasco(nivel, colocadas) {
   const rec = prepararRecorrido(nivel, colocadas);
@@ -350,8 +386,13 @@ function buscarAtasco(nivel, colocadas) {
     const [x, h] = pts[i + 1];
     if (x >= repisa - 1e-9) break;
     if (h < nivel.energia - 0.05) bajo = true;          // ya ha dejado la salida
-    if (!bajo || nivel.energia - h - perdido >= -1e-9) continue;
-    // sin energía para esta altura: ¿es una colina (luego baja) o la subida final?
+    // (con energía cero justa también se para, como en la simulación: hace falta algo de sobra)
+    if (!bajo || nivel.energia - h - perdido >= 0.01) continue;
+    // Sin energía para seguir. Si está bajando, el rozamiento le quita más de lo que gana al
+    // bajar: se queda frenado en la bajada. Si no, ¿es una colina (luego baja) o la subida final?
+    if (h < pts[i][1] - 1e-9) {
+      return { celda: celdas[i], frenado: true, antes: Math.round(perdido * 100) / 100 };
+    }
     if (!pts.slice(i + 1).some(([, hh]) => hh < h - 0.3)) return null;
     const celda = celdas[i];
     let k = i + 1;
@@ -405,6 +446,13 @@ export function avanzar(sim, rec, nivel, dt) {
     let v = Math.sqrt(2 * G * (Math.max(ec, 0) + 0.02));
     if (rec.motor[m.i]) v = Math.max(v, V_ESCALERA);   // la escalera lo lleva
     sim.v = v;
+    // En la repisa de la meta con una energía insignificante (restos de la integración numérica,
+    // que con muchas piezas pueden pasar de la centésima): se queda. Pasarse de verdad es
+    // llegar con al menos 1 julito.
+    if (sim.dir === 1 && sim.gracia <= 0 && ec < 0.05 && m.x >= inicioRepisa(nivel) - 0.05) {
+      detener(sim, nivel, m);
+      return;
+    }
     const ns = sim.s + sim.dir * v * h;
 
     if (ns >= rec.total) {      // cruza la repisa y se sale por el precipicio
