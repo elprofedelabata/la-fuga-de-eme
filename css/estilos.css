@@ -474,9 +474,9 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .nivel-btn.pronto.avisa::after { animation: avisa 1.8s ease-out; }
 @keyframes avisa { 0% { opacity: 0; transform: translate(-50%, 6px); } 12%, 75% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
 /* un nivel que se acaba de desbloquear: tiembla, se le cae el candado y aparece su número */
-.nivel-btn.abriendo { animation: abre-nivel 1.3s ease-out 0.9s both; }
-.nivel-btn.abriendo .nivel-num { animation: abre-num 0.45s cubic-bezier(0.3, 1.6, 0.6, 1) 1.7s both; }
-.candado-suelto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8d867d; animation: cae-candado 0.75s ease-in 1.15s both; pointer-events: none; }
+.nivel-btn.abriendo { animation: abre-nivel 1.1s ease-out 0.35s both; }
+.nivel-btn.abriendo .nivel-num { animation: abre-num 0.45s cubic-bezier(0.3, 1.6, 0.6, 1) 1s both; }
+.candado-suelto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8d867d; animation: cae-candado 0.7s ease-in 0.55s both; pointer-events: none; }
 @keyframes abre-nivel {
   0% { background: #ece7dc; transform: translate(-50%, -50%); }
   8% { transform: translate(-56%, -50%) rotate(-6deg); } 16% { transform: translate(-44%, -50%) rotate(5deg); }
