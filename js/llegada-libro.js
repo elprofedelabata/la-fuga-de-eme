@@ -150,7 +150,6 @@ const ESCENAS = [
   {   // 6 · el reto
     textos: [
       { s: 'Mundo II · El libro de texto', x: 200, y: 64, tam: 24, estilo: 'mano', color: C.lapiz, alin: 'center', marca: true, desde: 0.6 },
-      { s: 'Problemas 11 a 18', x: 200, y: 100, tam: 16, estilo: 'mano', color: NOTA, alin: 'center' },
     ],
     dur: Infinity,
     dibujar(ctx, t) {

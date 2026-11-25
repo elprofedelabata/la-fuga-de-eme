@@ -354,7 +354,7 @@ Arco del personaje: **rival en todo el Mundo II**, haciendo lo posible por devol
 3. **Julios, no julitos.** Los tres julitos de Eme se tachan en rojo y aparece, impreso, «2,45 J». «Aquí no hay julitos. Hay julios.»
 4. **Decimales.** Se escribe un ejemplo: Eₚ = m · g · h con m = 2,0 kg, g = 9,8 m/s², h = 1,5 m → **Eₚ = 29,4 J**. «Y todo lleva decimales.» Eme, mareado: «¿Veintinueve coma cuatro…?»
 5. **La amenaza.** En la página está el «Problema 7.3», con el hueco punteado del bloque en su plano inclinado: el sitio de Eme. EME, enfadado: «Vuelve a tu problema. O te devuelvo yo.» Eme, apretando los dientes: «Ni hablar.»
-6. **El reto.** Cartel «Mundo II · El libro de texto» y «Problemas 11 a 18». Botón **«¡A resolver!»**, que lleva al mapa.
+6. **El reto.** Cartel «Mundo II · El libro de texto». Botón **«¡A resolver!»**, que lleva al mapa.
 
 Sale la primera vez que se entra en el nivel 11 (se recuerda en `fuga-eme-llegada-libro-vista`) y se puede volver a ver con el botón «▶ La llegada al libro» de la tarjeta del Mundo II en el mapa, desde el menú y desde el panel de desarrollo.
 
