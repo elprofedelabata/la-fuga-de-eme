@@ -29,7 +29,7 @@ function estrellasHtml(n) {
   return `<i class="${n ? 'llena' : ''}"></i>`;
 }
 
-function construir(progreso) {
+function construir(progreso, recien) {
   let n = 0;
   return MUNDOS.map((m) => {
     const primero = n + 1;
@@ -46,13 +46,19 @@ function construir(progreso) {
         </button>`;
     }).join('');
     n += m.niveles;
-    const bloqueado = estadoNivel(primero, progreso) === 'bloqueado';
+    // Un mundo se abre al terminar el anterior (su último nivel). Si aún no tiene niveles
+    // hechos, se ve abierto pero con «Próximamente».
+    const anteriorHecho = primero === 1 || !!progreso[primero - 1];
+    const sinNiveles = ![...NIVELES_JUGABLES].some((k) => k >= primero && k < primero + m.niveles);
+    const bloqueado = !anteriorHecho || (!sinNiveles && estadoNivel(primero, progreso) === 'bloqueado');
+    const pronto = !bloqueado && sinNiveles;
     const linea = pos.map(([x, y]) => `${x},${y}`).join(' ');
     return `
-      <article class="mundo ${m.id}${bloqueado ? ' bloqueado' : ''}">
+      <article class="mundo ${m.id}${bloqueado ? ' bloqueado' : ''}${pronto ? ' pronto' : ''}${m.id === recien ? ' recien' : ''}">
         <h3><span class="mundo-num">${m.id === 'fuera' ? 'Final' : `Mundo ${m.numero}`}</span>${m.nombre}
           ${bloqueado ? `<span class="mundo-candado" aria-label="bloqueado">${CANDADO}</span>` : ''}</h3>
         ${bloqueado ? '<p class="mundo-aviso">Termina el mundo anterior</p>' : ''}
+        ${pronto ? '<p class="mundo-aviso">¡Desbloqueado! Sus niveles llegan pronto.</p>' : ''}
         <div class="camino camino-${m.niveles}">
           ${m.niveles > 1 ? `<svg class="camino-linea" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <polyline points="${linea}" vector-effect="non-scaling-stroke"/></svg>` : ''}
@@ -62,14 +68,16 @@ function construir(progreso) {
   }).join('');
 }
 
-export function mostrarNiveles({ alElegir, alVolver } = {}) {
+/** `recien`: id de un mundo que se acaba de desbloquear (se destaca con una animación). */
+export function mostrarNiveles({ alElegir, alVolver, recien } = {}) {
   const $ = (id) => document.getElementById(id);
   const raiz = $('niveles');
   const progreso = leerProgreso();
   const total = MUNDOS.reduce((a, m) => a + m.niveles, 0);          // una estrella por nivel
   const conseguidas = Object.values(progreso).filter(Boolean).length;
   $('niveles-total').innerHTML = `<i class="estrella-mini"></i>${conseguidas} / ${total}`;
-  $('mundos').innerHTML = construir(progreso);
+  $('mundos').innerHTML = construir(progreso, recien);
+  if (recien) requestAnimationFrame(() => raiz.querySelector('.mundo.recien')?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
   restaurar(raiz);
   raiz.hidden = false;
   raiz.scrollTop = 0;

@@ -1,4 +1,5 @@
 // Historia de primer acceso: quién es Eme y cuál es su plan.
+// El reproductor de escenas (reproducir) lo usan también las escenas de final de mundo.
 //
 // Se reproduce sola, escena a escena, con los textos escribiéndose dentro del propio
 // dibujo (el enunciado en la página, las notas del narrador en los huecos). Tocar la pantalla
@@ -21,9 +22,9 @@ function marcarVista() {
 }
 
 // ---------- utilidades de dibujo ----------
-const suave = (a, b, t) => (t <= a ? 0 : t >= b ? 1 : ((t - a) / (b - a)) ** 2 * (3 - 2 * ((t - a) / (b - a))));
+export const suave = (a, b, t) => (t <= a ? 0 : t >= b ? 1 : ((t - a) / (b - a)) ** 2 * (3 - 2 * ((t - a) / (b - a))));
 
-function texto(ctx, s, x, y, { tam = 12, color = C.suave, alin = 'left', negrita = false } = {}) {
+export function texto(ctx, s, x, y, { tam = 12, color = C.suave, alin = 'left', negrita = false } = {}) {
   ctx.font = `${negrita ? 'bold ' : ''}${tam}px ${FUENTE}`;
   ctx.fillStyle = color;
   ctx.textAlign = alin;
@@ -88,23 +89,30 @@ function flecha(ctx, x0, y0, x1, y1, etiqueta) {
   ctx.restore();
 }
 
-function bocadillo(ctx, x, y, s, alfa = 1) {
+/** Bocadillo con el pico abajo a la izquierda (o a la derecha, con `derecha`: entonces x es su borde derecho). */
+export function bocadillo(ctx, x, y, s, alfa = 1, { derecha = false } = {}) {
   if (alfa <= 0) return;
   ctx.save();
   ctx.globalAlpha = alfa;
   ctx.font = `15px ${FUENTE}`;
   const w = ctx.measureText(s).width + 20, h = 28;
+  const x0 = derecha ? x - w : x, x1 = x0 + w, ar = y - h / 2, ab = y + h / 2;
+  // contorno y pico (el pico sale del borde izquierdo o del derecho, por abajo)
+  const pico = derecha
+    ? [[x1 - 4, y + 2], [x1 + 10, y + 10], [x1 - 12, y + 10]]
+    : [[x0 + 4, y + 2], [x0 - 10, y + 10], [x0 + 12, y + 10]];
+  const contorno = derecha
+    ? [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1 - 2, y + 4], [x1 + 10, y + 10], [x1 - 12, ab], [x0 + 10, ab], [x0, ab - 10], [x0, ar + 10]]
+    : [[x0 + 10, ar], [x1 - 10, ar], [x1, ar + 10], [x1, ab - 10], [x1 - 10, ab], [x0 + 12, ab], [x0 - 10, y + 10], [x0 + 2, y + 4], [x0, ar + 10]];
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.roundRect(x, y - h / 2, w, h, 10); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(x + 4, y + 2); ctx.lineTo(x - 10, y + 10); ctx.lineTo(x + 12, y + 10); ctx.closePath(); ctx.fill();
-  lapiz(ctx, [[x + 10, y - h / 2], [x + w - 10, y - h / 2], [x + w, y - h / 2 + 10], [x + w, y + h / 2 - 10],
-    [x + w - 10, y + h / 2], [x + 12, y + h / 2], [x - 10, y + 10], [x + 2, y + 4], [x, y - h / 2 + 10]],
-  { ancho: 1.4, cerrado: true, doble: false, amp: 0.3 });
-  texto(ctx, s, x + 10, y, { tam: 15, color: C.lapiz });
+  ctx.beginPath(); ctx.roundRect(x0, ar, w, h, 10); ctx.fill();
+  ctx.beginPath(); pico.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py))); ctx.closePath(); ctx.fill();
+  lapiz(ctx, contorno, { ancho: 1.4, cerrado: true, doble: false, amp: 0.3 });
+  texto(ctx, s, x0 + 10, y, { tam: 15, color: C.lapiz });
   ctx.restore();
 }
 
-function estrella(ctx, x, y, r, color) {
+export function estrella(ctx, x, y, r, color) {
   ctx.beginPath();
   for (let i = 0; i < 10; i++) {
     const rr = i % 2 ? r * 0.45 : r, t = -Math.PI / 2 + (i * Math.PI) / 5;
@@ -121,7 +129,7 @@ function estrella(ctx, x, y, r, color) {
 // ---------- textos dentro de la escena ----------
 // Cada escena lleva una lista de textos que se escriben letra a letra, uno tras otro, en su
 // sitio del dibujo: «imprenta» es el enunciado del libro; «mano», las notas del narrador.
-const IMPRENTA = 'Georgia, "Times New Roman", serif';
+export const IMPRENTA = 'Georgia, "Times New Roman", serif';
 
 function lineasDe(ctx, item) {
   if (item._lineas) return item._lineas;
@@ -406,6 +414,15 @@ const ESCENAS = [
 // ---------- reproductor ----------
 
 export function mostrarHistoria({ alTerminar } = {}) {
+  reproducir(ESCENAS, { alTerminar, alVer: marcarVista, etiqueta: 'La historia de Eme', vamos: '¡Vamos!' });
+}
+
+/**
+ * Reproduce una lista de escenas en la capa de la historia: cada escena dibuja su animación y
+ * escribe sus textos; se avanza sola o tocando, y «Saltar» la cierra. Al terminar llama a
+ * `alVer` (para recordarla) y arranca la hoja con `alTerminar` debajo.
+ */
+export function reproducir(ESCENAS, { alTerminar, alVer, etiqueta, vamos: textoVamos = '¡Vamos!' } = {}) {
   const $ = (id) => document.getElementById(id);
   const raiz = $('historia');
   const lienzo = $('historia-lienzo');
@@ -417,6 +434,8 @@ export function mostrarHistoria({ alTerminar } = {}) {
   let escena = 0, t = 0, completo = false, vivo = true, ultimo = performance.now();
   restaurar(raiz);
   raiz.hidden = false;
+  raiz.setAttribute('aria-label', etiqueta ?? 'La historia de Eme');
+  vamos.textContent = textoVamos;
   vamos.hidden = true;
   puntos.innerHTML = ESCENAS.map(() => '<i></i>').join('');
   ESCENAS.forEach(programar);
@@ -442,7 +461,7 @@ export function mostrarHistoria({ alTerminar } = {}) {
   const terminar = () => {
     if (!vivo) return;
     vivo = false;
-    marcarVista();
+    alVer?.();
     window.removeEventListener('resize', ajustar);
     document.removeEventListener('keydown', teclas);
     arrancar(raiz, { antes: alTerminar });

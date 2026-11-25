@@ -323,6 +323,20 @@ Los niveles superados (su estrella) se guardan en `localStorage` (`js/progreso.j
 
 Todos los cambios de pantalla (carga → portada, portada ↔ niveles, niveles → nivel, final de la historia) usan la misma transición, transgresora y de la casa (`js/transicion.js`): la pantalla se tensa, se rasga por una línea irregular junto al borde izquierdo, como una hoja arrancada de un cuaderno de espiral, y sale volando girando mientras debajo ya está la siguiente. A la izquierda queda un momento la tira rota con los agujeros de la espiral. El borde roto se genera al azar cada vez y lleva trazo de lápiz. Dura ~0,7 s; con «reducir movimiento», el cambio es directo. `herramientas/prueba-arrancar.html?t=ms` congela el efecto en un instante para revisarlo.
 
+## Final del Mundo I: «El avión de papel»
+
+Al superar el nivel 10, el botón «Siguiente» de la hoja de resultado pasa a ser **«¡A escapar!»** y lanza la escena de final del cuaderno (`js/fin-cuaderno.js`). Usa el mismo reproductor que la historia de primer acceso (escenas dibujadas en el lienzo, textos que se escriben solos, se avanza tocando y «Saltar» la cierra) y termina arrancando la hoja hacia el mapa de niveles.
+
+1. **Al borde.** Eme, con la bandera de sombrero, en el acantilado de la última página. Abajo, la mesa; al otro lado, el libro de texto. «Uf… Demasiado lejos para saltar.»
+2. **La idea.** Mira la línea de agujeritos del trepado y se le enciende la bombilla. «Pero las hojas del cuaderno tienen un trepado… para arrancarlas.»
+3. **¡Rrriiip!** Arranca la hoja por el trepado. «Y la arrancó.»
+4. **El avión.** La hoja se dobla dos veces y se convierte en un avión de papel (con un trozo de pista del nivel 10 aún dibujado en el ala). «La dobló una vez, y otra… ¡Un avión de papel!»
+5. **El vuelo.** Planea por encima de la mesa dejando una trayectoria punteada, del cuaderno al libro. Debajo, seis julitos pasan de azul (altura) a amarillo (velocidad): «Lo que perdía de altura… lo ganaba en velocidad.»
+6. **El libro de texto.** ¡Plaf! Aterriza en una página impresa con fórmulas (Eₘ = E꜀ + Eₚ, Eₚ = m·g·h) y un ejemplo resuelto con números con decimales (m = 2,5 kg, g = 9,8 m/s², μ = 0,3…). Eme: «Uy… Aquí los números llevan decimales.»
+7. **EME.** Todo se oscurece y entra por la derecha una sombra enorme con una «M» mayúscula y dos ojos: **EME, el primo grande**. Eme, sudando: «¿Q-quién eres tú?». Rótulo: «Mundo II · El libro de texto». Botón «¡Al libro!».
+
+Al terminar se vuelve al mapa: la tarjeta del **Mundo II se desbloquea** con un saltito y un brillo y, mientras no tenga niveles, dice «¡Desbloqueado! Sus niveles llegan pronto». Un mundo se abre al superar el último nivel del anterior. La escena se recuerda (`fuga-eme-fin-cuaderno-visto`) y, una vez vista, se puede volver a ver desde el menú: «Ver el final del cuaderno».
+
 ## Historia de primer acceso
 
 La primera vez que se pulsa JUGAR se reproduce sola una historia de ~30 s en 7 escenas dibujadas con el estilo del juego (`js/historia.js`):
@@ -355,7 +369,7 @@ De arriba abajo: barra superior (nivel y su estrella) · tablero con la regla de
 
 ## Pendiente
 
-- Escena de fin del Mundo I al superar el nivel 10 (Eme salta fuera de la hoja y se ve el libro de texto) y desbloqueo del Mundo II.
+- Niveles del Mundo II (el libro de texto): números con decimales y EME, el primo grande.
 - Mecánicas del catálogo aún sin usar (muelles, rebotadores, paredes de papel, agua) para los mundos siguientes.
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

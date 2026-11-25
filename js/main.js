@@ -11,6 +11,7 @@ import {
 } from './dibujo.js';
 import { Fantasma } from './arrastre.js';
 import { mostrarHistoria, historiaVista } from './historia.js';
+import { mostrarFinCuaderno, finCuadernoVisto } from './fin-cuaderno.js';
 import { mostrarInicio } from './inicio.js';
 import { arrancar } from './transicion.js';
 import { abrirOpciones } from './opciones.js';
@@ -708,6 +709,14 @@ function mostrarResultado() {
   const puedeSeguir = !!sig && (tipo === 'meta' || estrellasDe(NIVEL.numero) > 0);
   $('btn-siguiente').disabled = !puedeSeguir;
   $('btn-siguiente').title = puedeSeguir ? `Ir al nivel ${sig}` : sig ? 'Supera este nivel para seguir' : 'Próximamente';
+  $('siguiente-texto').textContent = 'Siguiente';
+  if (NIVEL.finMundo) {
+    // el último nivel del mundo: «¡A escapar!» lanza la escena del final
+    const puede = tipo === 'meta' || estrellasDe(NIVEL.numero) > 0;
+    $('btn-siguiente').disabled = !puede;
+    $('btn-siguiente').title = puede ? 'Escaparse del cuaderno' : 'Supera este nivel para seguir';
+    $('siguiente-texto').textContent = '¡A escapar!';
+  }
   $('hoja').hidden = false;
   $('btn-reintentar').focus({ preventScroll: true });
 }
@@ -1290,10 +1299,22 @@ function iniciar() {
   $('btn-normal').addEventListener('click', () => ponerVelocidad(1));
   $('btn-parar').addEventListener('click', volverAMontar);
   $('btn-reintentar').addEventListener('click', volverAMontar);
-  $('btn-siguiente').addEventListener('click', () => { const s = siguienteNivel(); if (s) entrarNivel(s); });
-  $('btn-menu').addEventListener('click', () => { $('acerca').returnValue = ''; $('acerca').showModal(); });
+  $('btn-siguiente').addEventListener('click', () => {
+    if (NIVEL.finMundo) {                       // final del mundo: la escena y, después, el mapa
+      mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) });
+      return;
+    }
+    const s = siguienteNivel();
+    if (s) entrarNivel(s);
+  });
+  $('btn-menu').addEventListener('click', () => {
+    $('acerca').returnValue = '';
+    $('btn-ver-fin1').hidden = !finCuadernoVisto();   // solo cuando ya se ha visto
+    $('acerca').showModal();
+  });
   $('acerca').addEventListener('close', () => {
     if ($('acerca').returnValue === 'historia') mostrarHistoria();
+    if ($('acerca').returnValue === 'fin1') mostrarFinCuaderno();
     if ($('acerca').returnValue === 'niveles') abrirNiveles();
     if ($('acerca').returnValue === 'opciones') abrirOpciones();
   });
@@ -1319,8 +1340,8 @@ function abrirInicio() {
   mostrarInicio({ alJugar: () => (historiaVista() ? abrirNiveles() : mostrarHistoria({ alTerminar: abrirNiveles })) });
 }
 
-function abrirNiveles() {
-  mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio });
+function abrirNiveles({ recien } = {}) {
+  mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio, recien });
 }
 
 /** Entra en un nivel. */

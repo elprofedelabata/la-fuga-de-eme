@@ -30,6 +30,7 @@
   <link rel="modulepreload" href="js/historia.js">
   <link rel="modulepreload" href="js/bienvenida.js">
   <link rel="modulepreload" href="js/escritura.js">
+  <link rel="modulepreload" href="js/fin-cuaderno.js">
   <link rel="modulepreload" href="js/inicio.js">
   <link rel="modulepreload" href="js/niveles.js">
   <link rel="modulepreload" href="js/progreso.js">
@@ -148,7 +149,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 9.5A7.5 7.5 0 1 1 5 14"/><path d="M4 4.5v5.5h5.5"/></svg>Reintentar
         </button>
         <button class="btn principal" id="btn-siguiente" disabled title="Próximamente">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Siguiente
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg><span id="siguiente-texto">Siguiente</span>
         </button>
       </div>
     </section>
@@ -164,6 +165,7 @@
       <button class="btn" id="btn-elegir-nivel" value="niveles">Elegir nivel</button>
       <button class="btn" id="btn-menu-opciones" value="opciones">Opciones</button>
       <button class="btn" id="btn-ver-historia" value="historia">Ver la historia</button>
+      <button class="btn" id="btn-ver-fin1" value="fin1" hidden>Ver el final del cuaderno</button>
       <button class="btn principal">¡Vamos!</button>
     </form>
   </dialog>

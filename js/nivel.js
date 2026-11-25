@@ -301,6 +301,7 @@ export const NIVELES = {
   10: {
     numero: 10,
     titulo: 'La última página',
+    finMundo: true,        // al superarlo, «¡A escapar!» lanza el final del cuaderno
     frase: '¡El borde de la hoja!',
     columnas: 5,
     filas: 4,              // el tablero mide 12 de alto
