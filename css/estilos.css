@@ -253,6 +253,8 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn svg { width: 22px; height: 22px; fill: none; stroke: var(--lapiz); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .btn.principal { background: var(--naranja); }
 .btn.principal svg { fill: var(--lapiz); stroke: none; }
+/* iconos de trazo (en la hoja de resultado, cualquiera de los dos puede ser el principal) */
+.hoja-botones .btn svg { fill: none; stroke: var(--lapiz); stroke-width: 2.4; }
 .btn.grande { flex: 1; min-height: 64px; font-size: 26px; letter-spacing: 0.06em; }
 .btn.redondo { width: 64px; min-height: 64px; padding: 0; }
 .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
@@ -460,6 +462,34 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 @keyframes tiembla {
   20% { transform: translate(-58%, -50%) rotate(-6deg); } 40% { transform: translate(-42%, -50%) rotate(5deg); }
   60% { transform: translate(-55%, -50%) rotate(-3deg); } 80% { transform: translate(-46%, -50%); }
+}
+/* «pronto»: ya tocaría jugarlo, pero aún no está hecho; al tocarlo, avisa */
+.nivel-btn.pronto { background: #fbe3bd; }
+.nivel-btn.pronto::after {
+  content: "¡Próximamente!"; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  padding: 3px 9px; white-space: nowrap; font-size: 16px; color: var(--lapiz);
+  background: #fff; border: 2px solid var(--lapiz); border-radius: 10px; box-shadow: 2px 3px 0 rgba(80, 70, 60, 0.18);
+  opacity: 0; pointer-events: none;
+}
+.nivel-btn.pronto.avisa::after { animation: avisa 1.8s ease-out; }
+@keyframes avisa { 0% { opacity: 0; transform: translate(-50%, 6px); } 12%, 75% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+/* un nivel que se acaba de desbloquear: tiembla, se le cae el candado y aparece su número */
+.nivel-btn.abriendo { animation: abre-nivel 1.3s ease-out 0.9s both; }
+.nivel-btn.abriendo .nivel-num { animation: abre-num 0.45s cubic-bezier(0.3, 1.6, 0.6, 1) 1.7s both; }
+.candado-suelto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8d867d; animation: cae-candado 0.75s ease-in 1.15s both; pointer-events: none; }
+@keyframes abre-nivel {
+  0% { background: #ece7dc; transform: translate(-50%, -50%); }
+  8% { transform: translate(-56%, -50%) rotate(-6deg); } 16% { transform: translate(-44%, -50%) rotate(5deg); }
+  24% { transform: translate(-54%, -50%) rotate(-3deg); } 32% { background: #ece7dc; transform: translate(-50%, -50%); }
+  55% { transform: translate(-50%, -50%) scale(1.22); box-shadow: 0 0 0 0 rgba(242, 163, 58, 0.75); }
+  100% { transform: translate(-50%, -50%); box-shadow: 0 0 0 18px rgba(242, 163, 58, 0); }
+}
+@keyframes abre-num { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: none; } }
+@keyframes cae-candado {
+  0% { transform: none; opacity: 1; }
+  25% { transform: translateY(-10px) rotate(-12deg); }
+  70% { opacity: 1; }
+  100% { transform: translate(24px, 62px) rotate(75deg); opacity: 0; }
 }
 .mini-estrellas { position: absolute; top: calc(100% + 3px); left: 50%; transform: translateX(-50%); display: flex; gap: 1px; }
 .mini-estrellas i { width: 14px; height: 14px; background: #cfc8bd; }
@@ -702,7 +732,8 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn.saltar svg { width: 18px; height: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada, .bienvenida.escrita .bienvenida-seguir, .bocadillo.escrito .boc-seguir, .mundo.recien { animation: none; }
+  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada, .bienvenida.escrita .bienvenida-seguir, .bocadillo.escrito .boc-seguir, .mundo.recien, .nivel-btn.abriendo, .nivel-btn.abriendo .nivel-num { animation: none; }
+  .candado-suelto { display: none; }
   .bienvenida-eme, .bienvenida-bocadillo { transition: none !important; }
   .cargando-julitos i { background: var(--ep); }
   .hoja { animation: none; }

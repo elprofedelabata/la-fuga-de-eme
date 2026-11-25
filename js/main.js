@@ -1,6 +1,6 @@
 // La fuga de Eme · boceto jugable del nivel 1.
 
-import { NIVEL, NIVELES, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
+import { NIVEL, NIVELES, MATERIALES, usarNivel } from './nivel.js';
 import {
   prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida,
   columnas, filas, altoTablero, anchoTablero, inicioRepisa, cambioDe, cambioPorCasilla, huecosDe,
@@ -624,6 +624,8 @@ function mostrarResultado() {
   // después, reintentar sirve para trastear y ver otras posibilidades.
   const aLaPrimera = tipo === 'meta' && estado.fallos === 0 && !estado.mejor;
   let estrellas = 0;
+  // superarlo por primera vez desbloquea el siguiente: se verá abrirse al volver al mapa
+  if (tipo === 'meta' && !estrellasDe(NIVEL.numero) && !NIVEL.finMundo) porAbrir = NIVEL.numero + 1;
   if (tipo === 'meta') {
     estrellas = 1;
     estado.mejor = 1;
@@ -706,18 +708,15 @@ function mostrarResultado() {
   pista.textContent = NIVEL.piezas.some((p) => p.gana != null)
     ? `Pista: ${E} + ¿? (lo que tienen que dar las escaleras) = ${hm} (altura de la meta)`
     : `Pista: ${E} = ${hm} (altura de la meta) + ¿? (lo que tienen que perder las piezas)`;
-  const sig = siguienteNivel();
-  const puedeSeguir = !!sig && (tipo === 'meta' || estrellasDe(NIVEL.numero) > 0);
-  $('btn-siguiente').disabled = !puedeSeguir;
-  $('btn-siguiente').title = puedeSeguir ? `Ir al nivel ${sig}` : sig ? 'Supera este nivel para seguir' : 'Próximamente';
-  $('siguiente-texto').textContent = 'Siguiente';
-  if (NIVEL.finMundo) {
-    // el último nivel del mundo: «¡A escapar!» lanza la escena del final
-    const puede = tipo === 'meta' || estrellasDe(NIVEL.numero) > 0;
-    $('btn-siguiente').disabled = !puede;
-    $('btn-siguiente').title = puede ? 'Escaparse del cuaderno' : 'Supera este nivel para seguir';
-    $('siguiente-texto').textContent = '¡A escapar!';
-  }
+  // «Al mapa» (allí se ve desbloquearse el siguiente nivel). Si está superado, es el botón
+  // principal; si no, lo es «Reintentar». En el último nivel de un mundo superado, «¡A escapar!»
+  // lanza la escena del final.
+  const superado = tipo === 'meta' || estrellasDe(NIVEL.numero) > 0;
+  const escapar = NIVEL.finMundo && superado;
+  $('btn-al-mapa').classList.toggle('principal', superado);
+  $('btn-reintentar').classList.toggle('principal', !superado);
+  $('btn-al-mapa').title = escapar ? 'Escaparse del cuaderno' : 'Volver al mapa de niveles';
+  $('al-mapa-texto').textContent = escapar ? '¡A escapar!' : 'Al mapa';
   $('hoja').hidden = false;
   $('btn-reintentar').focus({ preventScroll: true });
 }
@@ -1281,10 +1280,6 @@ function crearHuecos() {
   }
 }
 
-/** Siguiente nivel que ya existe, o null. */
-function siguienteNivel() {
-  return [...NIVELES_JUGABLES].filter((k) => k > NIVEL.numero).sort((a, b) => a - b)[0] ?? null;
-}
 
 function iniciar() {
   // Herramientas de desarrollo: solo con «?dev» en la dirección
@@ -1296,7 +1291,7 @@ function iniciar() {
       abrirMapa: () => { despejar(); abrirNiveles(); },
       verHistoria: () => { despejar(); mostrarHistoria(); },
       verFin: () => { despejar(); mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) }); },
-      verLlegada: () => { despejar(); mostrarLlegadaLibro({ alTerminar: () => abrirNiveles() }); },
+      verLlegada: () => { despejar(); verEscenaMundo('libro'); },
     }));
   }
   $('bocadillo').addEventListener('click', tocarBocadillo);
@@ -1312,13 +1307,12 @@ function iniciar() {
   $('btn-normal').addEventListener('click', () => ponerVelocidad(1));
   $('btn-parar').addEventListener('click', volverAMontar);
   $('btn-reintentar').addEventListener('click', volverAMontar);
-  $('btn-siguiente').addEventListener('click', () => {
-    if (NIVEL.finMundo) {                       // final del mundo: la escena y, después, el mapa
+  $('btn-al-mapa').addEventListener('click', () => {
+    if (NIVEL.finMundo && estrellasDe(NIVEL.numero) > 0) {   // final del mundo: la escena y, después, el mapa
       mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) });
       return;
     }
-    const s = siguienteNivel();
-    if (s) entrarNivel(s);
+    abrirNiveles();
   });
   $('btn-menu').addEventListener('click', () => {
     $('acerca').returnValue = '';
@@ -1355,21 +1349,33 @@ function abrirInicio() {
   mostrarInicio({ alJugar: () => (historiaVista() ? abrirNiveles() : mostrarHistoria({ alTerminar: abrirNiveles })) });
 }
 
-function abrirNiveles({ recien } = {}) {
-  mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio, alEscena: verEscenaMundo, recien });
+/** Las escenas de entrada de los mundos: si ya se han visto y su primer nivel. */
+const ESCENAS_MUNDO = { libro: { vista: llegadaLibroVista, mostrar: mostrarLlegadaLibro, primero: 11 } };
+const escenaVista = (id) => ESCENAS_MUNDO[id]?.vista() ?? true;
+
+/** Nivel recién desbloqueado (al superar el anterior por primera vez): se abre con animación en el mapa. */
+let porAbrir = null;
+
+function abrirNiveles({ recien, abre = porAbrir, ir } = {}) {
+  porAbrir = null;
+  mostrarNiveles({ alElegir: entrarNivel, alVolver: abrirInicio, alEscena: verEscenaMundo, escenaVista, recien, abre, ir });
 }
 
-/** La escena de entrada de un mundo (desde su tarjeta del mapa); al acabar, vuelta al mapa. */
+/**
+ * La escena de entrada de un mundo; al acabar, vuelta al mapa, a ese mundo. La primera vez,
+ * además, se desbloquea su primer nivel (con la animación del candado).
+ */
 function verEscenaMundo(id) {
-  if (id === 'libro') mostrarLlegadaLibro({ alTerminar: () => abrirNiveles() });
+  const esc = ESCENAS_MUNDO[id];
+  if (!esc) return;
+  const primeraVez = !esc.vista();
+  esc.mostrar({ alTerminar: () => abrirNiveles(primeraVez ? { abre: esc.primero } : { ir: id }) });
 }
 
-/** Entra en un nivel. Al primer nivel del libro se llega, la primera vez, por su escena de entrada. */
+/** Entra en un nivel. Al primer nivel de un mundo se llega, la primera vez, por su escena de entrada. */
 function entrarNivel(n) {
-  if (n === 11 && !llegadaLibroVista()) {
-    mostrarLlegadaLibro({ alTerminar: () => cargarNivel(n) });
-    return;
-  }
+  const id = Object.keys(ESCENAS_MUNDO).find((k) => ESCENAS_MUNDO[k].primero === n);
+  if (id && !escenaVista(id)) { verEscenaMundo(id); return; }
   cargarNivel(n);
 }
 

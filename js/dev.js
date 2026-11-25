@@ -75,7 +75,7 @@ export function iniciarDev({ jugar, abrirMapa, verHistoria, verFin, verLlegada }
         <button data-accion="mapa">Abrir el mapa</button>
         <button data-accion="historia">Ver la historia</button>
         <button data-accion="fin">Ver el final del cuaderno</button>
-        <button data-accion="llegada">Ver la llegada al libro</button>
+        <button data-accion="llegada" title="Como la primera vez: al acabar se desbloquea el nivel 11">Ver la llegada al libro</button>
       </div>
       <p class="dev-aviso" aria-live="polite"></p>`;
   };
@@ -101,7 +101,9 @@ export function iniciarDev({ jugar, abrirMapa, verHistoria, verFin, verLlegada }
       case 'mapa': panel.close(); abrirMapa(); return;
       case 'historia': panel.close(); verHistoria(); return;
       case 'fin': panel.close(); verFin(); return;
-      case 'llegada': panel.close(); verLlegada(); return;
+      case 'llegada':                 // como la primera vez: al acabar, se abre el nivel 11
+        quitar('fuga-eme-llegada-libro-vista');
+        panel.close(); verLlegada(); return;
       default:
     }
   });

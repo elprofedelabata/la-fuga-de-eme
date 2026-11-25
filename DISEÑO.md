@@ -315,7 +315,9 @@ De momento solo «Borrar progreso» tiene efecto; el resto se recuerda en `local
 - **III · La pizarra:** tiza sobre verde y marco de madera.
 - **Final · Fuera del libro:** cielo y sol, un único nivel.
 
-Los niveles de cada mundo (10 en el cuaderno, 8 en el libro, 6 en la pizarra y 1 el final: 25 en total; numerados de forma correlativa, así que el libro va del 11 al 18 y la pizarra del 19 al 24) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con su estrella debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior que ya existe (los que aún no están hechos aparecen con candado y se saltan). Los mundos bloqueados se ven apagados con «Termina el mundo anterior». Al superar un nivel, «Siguiente» lleva al siguiente que exista.
+Los niveles de cada mundo (10 en el cuaderno, 8 en el libro, 6 en la pizarra y 1 el final: 25 en total; numerados de forma correlativa, así que el libro va del 11 al 18 y la pizarra del 19 al 24) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con su estrella debajo), siguiente (naranja, late), pronto (naranja claro: ya tocaría, pero aún no está hecho; al tocarlo sale «¡Próximamente!») y bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior. El primer nivel de un mundo con escena de entrada sigue cerrado hasta verla (tocarlo la pone). Los mundos bloqueados se ven apagados con «Termina el mundo anterior».
+
+**Siempre se vuelve al mapa.** La hoja de resultado no tiene «Siguiente»: tiene **«Al mapa»** (el botón principal si el nivel está superado; si no, lo es «Reintentar»). Al superar un nivel por primera vez, en el mapa la vista va hasta el nivel siguiente y se ve **desbloquearse**: tiembla, se le cae el candado y aparece su número con un brillo. Lo mismo pasa con el primer nivel del Mundo II al terminar su escena de entrada («¡A resolver!»). Vale para todos los mundos.
 
 Los niveles superados (su estrella) se guardan en `localStorage` (`js/progreso.js`); el progreso guardado con el sistema antiguo de 1 a 3 estrellas cuenta como superado. Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → (historia, la primera vez) → niveles → nivel. La historia termina contando el plan de los mundos, que es justo lo que muestra el mapa de niveles a continuación. Al cambiar de pantalla, la siguiente se coloca debajo y la anterior se **arranca** (ver «Transiciones»).
 
@@ -325,7 +327,7 @@ Todos los cambios de pantalla (carga → portada, portada ↔ niveles, niveles �
 
 ## Final del Mundo I: «El avión de papel»
 
-Al superar el nivel 10, el botón «Siguiente» de la hoja de resultado pasa a ser **«¡A escapar!»** y lanza la escena de final del cuaderno (`js/fin-cuaderno.js`). Usa el mismo reproductor que la historia de primer acceso (escenas dibujadas en el lienzo, textos que se escriben solos, se avanza tocando y «Saltar» la cierra) y termina arrancando la hoja hacia el mapa de niveles.
+Al superar el nivel 10, el botón «Al mapa» de la hoja de resultado pasa a ser **«¡A escapar!»** y lanza la escena de final del cuaderno (`js/fin-cuaderno.js`). Usa el mismo reproductor que la historia de primer acceso (escenas dibujadas en el lienzo, textos que se escriben solos, se avanza tocando y «Saltar» la cierra) y termina arrancando la hoja hacia el mapa de niveles.
 
 1. **Al borde.** Eme, con la bandera de sombrero, en el acantilado de la última página. Abajo, la mesa; al otro lado, el libro de texto. «Uf… Demasiado lejos para saltar.»
 2. **La idea.** Mira la línea de agujeritos del trepado y se le enciende la bombilla. «Pero las hojas del cuaderno tienen un trepado… para arrancarlas.»
@@ -356,7 +358,7 @@ Arco del personaje: **rival en todo el Mundo II**, haciendo lo posible por devol
 5. **La amenaza.** En la página está el «Problema 7.3», con el hueco punteado del bloque en su plano inclinado: el sitio de Eme. EME, enfadado: «Vuelve a tu problema. O te devuelvo yo.» Eme, apretando los dientes: «Ni hablar.»
 6. **El reto.** Cartel «Mundo II · El libro de texto». Botón **«¡A resolver!»**, que lleva al mapa.
 
-Sale la primera vez que se entra en el nivel 11 (se recuerda en `fuga-eme-llegada-libro-vista`) y se puede volver a ver con el botón «▶ La llegada al libro» de la tarjeta del Mundo II en el mapa, desde el menú y desde el panel de desarrollo.
+Sale al tocar el nivel 11 la primera vez (o con su botón en el mapa); al pulsar «¡A resolver!» se vuelve al mapa y se desbloquea el nivel 11 con su animación. Se recuerda en `fuga-eme-llegada-libro-vista` y se puede volver a ver con el botón «▶ La llegada al libro» de la tarjeta del Mundo II en el mapa, desde el menú y desde el panel de desarrollo.
 
 A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, longitudes con decimales). EME es el antagonista de todo el mundo: va por delante y deja trampas «reglamentarias» para devolver a Eme a su problema. Cada nivel es un problema del libro («Problema 7.11»…).
 
@@ -410,7 +412,7 @@ De arriba abajo: barra superior (nivel y su estrella) · tablero con la regla de
 Con **`?dev`** en la dirección (por ejemplo, `https://elprofedelabata.github.io/la-fuga-de-eme/?dev`) aparece un botón «DEV» abajo a la izquierda, por encima de todo, que abre un panel (`js/dev.js`). Sin `?dev` no se carga nada.
 
 - Por cada nivel: **▶** jugarlo directamente (desde cualquier pantalla), **★** marcarlo o desmarcarlo como superado y **↺** dejarlo **como nuevo**: sin estrella y con sus ayudas (su charla y, en el nivel 1, la bienvenida y la guía).
-- Generales: superar todos, quitar todas las estrellas, volver a ver todas las ayudas, abrir el mapa, ver la historia, ver el final del cuaderno y ver la llegada al libro.
+- Generales: superar todos, quitar todas las estrellas, volver a ver todas las ayudas, abrir el mapa, ver la historia, ver el final del cuaderno y ver la llegada al libro (como la primera vez: al acabar se desbloquea el nivel 11).
 - Sirve para repetir partes concretas (y hacer capturas) sin «Restablecer datos», que lo borra todo.
 
 ### Versiones de los archivos (caché)
