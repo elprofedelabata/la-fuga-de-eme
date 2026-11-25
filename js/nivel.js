@@ -311,7 +311,10 @@ export const NIVELES = {
     cima: 1.5,             // cima de la colina (baja, pero con 3 julitos hay muy poco margen)
     energia: 3,            // empieza donde acabó el nivel 9: a altura 3
     salidaX: 1.0,
-    meta: { altura: 10, bandera: 14.55 },
+    meta: { altura: 10, bandera: 13.6 },
+    // el borde de la hoja: la pista acaba 1 antes (acantilado, trepado y borde rasgado) y la
+    // repisa mide 0,9
+    bordeHoja: { margen: 1.0, repisa: 0.9 },
     huecos: { 16: 'bajada', 17: 'colina', 8: 'escalera', 13: 'escalera', 18: 'escalera', 9: 'bajada', 14: 'bajada' },
     miniatura: { bajada: 14, escalera: 13 },
     // Charla corta (solo la primera vez): sin explicaciones, es el examen

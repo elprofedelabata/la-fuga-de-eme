@@ -1,7 +1,7 @@
 // Dibujo con estilo de cuaderno: trazo de lápiz, texturas de materiales, tablero y Eme.
 // Todas las medidas van en píxeles CSS; el lienzo ya viene escalado por devicePixelRatio.
 
-import { construirPista, celdasTramos, celdaDe, columnas, filas, anchoTablero, inicioRepisa, huecosDe } from './pista.js';
+import { construirPista, celdasTramos, celdaDe, columnas, filas, anchoTablero, inicioRepisa, finPista, huecosDe } from './pista.js';
 import { NIVEL } from './nivel.js';
 
 export const C = {
@@ -287,6 +287,8 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
     lapiz(ctx, [[0, i * 3 * k], [W, i * 3 * k]], { ancho: 2.2, color: C.rejilla, seed: 410 + i, amp: 0.5 });
   }
 
+  if (nivel.bordeHoja) bordeHoja(ctx, v, nivel, W, H);
+
   // altura objetivo: línea discontinua roja desde la regla hasta la meta
   const [, ym] = v.px(0, nivel.meta.altura);
   const [xm] = v.px(inicioRepisa(nivel), nivel.meta.altura);
@@ -331,6 +333,45 @@ function pasamanos(ctx, v, pista, celdas, celda) {
   }
   ctx.restore();
   lapiz(ctx, arriba, { ancho: Math.max(2.5, v.k * 0.16), color: '#3d3a36', doble: false, amp: 0.3 });
+}
+
+/**
+ * El borde de la hoja (la última página del cuaderno): la repisa de la meta acaba en un
+ * acantilado; detrás, una tira de papel con la línea de agujeritos del trepado y el borde
+ * rasgado de la página. Más allá, fuera de la hoja, la mesa.
+ */
+function bordeHoja(ctx, v, nivel, W, H) {
+  const fp = finPista(nivel), hm = nivel.meta.altura, top = 3 * filas(nivel);
+  const xr = fp + 0.55;                 // el borde rasgado
+  const r = azar(77);
+  const roto = [];
+  // dientes irregulares: entra y sale, con algo de azar
+  let i = 0;
+  for (let h = top + 0.3; h >= -0.3; h -= 0.16 + r() * 0.12, i++) roto.push([xr + (i % 2 ? 0.13 : -0.1) + (r() - 0.5) * 0.12, h]);
+  const rotoPx = roto.map(([x, h]) => v.px(x, h));
+  ctx.save();
+  // la mesa, con la sombra de la hoja
+  ctx.beginPath();
+  rotoPx.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  ctx.lineTo(W + 2, H + 2); ctx.lineTo(W + 2, -2); ctx.closePath();
+  const [x0] = v.px(xr, 0);
+  const g = ctx.createLinearGradient(x0, 0, W, 0);
+  g.addColorStop(0, '#8f8068'); g.addColorStop(0.3, '#b8a98e'); g.addColorStop(1, '#c9bba0');
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.restore();
+  // el borde rasgado, a lápiz
+  lapiz(ctx, rotoPx, { ancho: 1.8, color: '#6f675d', doble: false, amp: 0.2 });
+  // el trepado: agujeritos entre el acantilado y el borde
+  const rad = Math.max(2, v.k * 0.11);
+  for (let h = 0.35; h < top; h += 0.55) {
+    const [cx, cy] = v.px(fp + 0.25, h);
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 6.29);
+    ctx.fillStyle = '#b8a98e'; ctx.fill();
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(110,104,98,0.55)'; ctx.stroke();
+  }
+  // el acantilado: la repisa se corta en vertical
+  lapiz(ctx, [v.px(fp, hm), v.px(fp, -0.3)], { ancho: 2.4, seed: 91 });
 }
 
 export function iconoForma(ctx, cx, cy, L, forma, color) {

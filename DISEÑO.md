@@ -247,6 +247,8 @@ El mensaje de los atascos vale ya para cualquier cuesta: si no hay escaleras de 
 
 El cierre del cuaderno, en el primer tablero de **4 filas**: **5 columnas y 4 filas** (15 × 12 cuadritos; la regla va de 0 a 12). Se probó con 6 columnas y 3 filas, pero en el móvil quedaba muy pequeño (casillas de 53 px); con 5 × 4 las casillas miden unos 64 px y se aprovecha el espacio vertical. Empieza donde acabó el nivel 9, a altura 3, y la meta está **arriba del todo, en el borde de la hoja**, a altura 10. Trazado **cumbre**: caída al fondo (casilla 16), colina baja con la cima a 1,5 (17), **escalera mecánica de tres filas** (18, 13 y 8: de 0,5 a 8,5), **bajada de dos filas** (9 y 14: de 8,5 a 3,5) y una rampa en S hasta la meta. Sin piezas nuevas: es un examen de todo el Mundo I.
 
+**El borde de la hoja** (`bordeHoja` en los datos del nivel): la repisa de la meta, más corta (0,9), acaba en un **acantilado**; detrás quedan una tira de papel con la **línea de agujeritos del trepado** y el **borde rasgado** de la página, y más allá, fuera de la hoja, la mesa con la sombra de la página. La pista acaba 1 cuadrito antes del borde del tablero para que quepa.
+
 **Charla corta** (solo la primera vez): «¡Mira! ¡El borde de la hoja! Es la última página del cuaderno.» (se iluminan la bandera y el 10 de la regla) y «Si llego a esa bandera, ¡me escapo! Pero esta vez no hay pistas: todo lo que has aprendido, junto.»
 
 Piezas (10 para 7 huecos): escaleras de +3, +4 y +5 y una escalera doble de +8; bajadas de madera, asfalto y arena y una bajada doble de madera; colinas de hielo y madera. La escalera de tres filas se rellena con tres simples o con una doble y una simple. De las 216 colocaciones:

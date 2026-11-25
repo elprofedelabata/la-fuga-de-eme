@@ -54,7 +54,13 @@ export const altoTablero = (nivel = NIVEL) => 3 * filas(nivel);
 /** Ancho del tablero en cuadritos. */
 export const anchoTablero = (nivel = NIVEL) => 3 * columnas(nivel);
 /** x donde empieza la repisa de la meta (llana y sin rozamiento hasta el precipicio). */
-export const inicioRepisa = (nivel = NIVEL) => anchoTablero(nivel) - 1.6;
+export const inicioRepisa = (nivel = NIVEL) => finPista(nivel) - (nivel.bordeHoja?.repisa ?? 1.6);
+/**
+ * Dónde acaba la pista (el precipicio): en el borde del tablero o, si el nivel dibuja el borde
+ * de la hoja (`bordeHoja: { margen, repisa }`), un poco antes, para que quepan el acantilado,
+ * el trepado y el borde rasgado de la página.
+ */
+export const finPista = (nivel = NIVEL) => anchoTablero(nivel) - (nivel.bordeHoja?.margen ?? 0);
 
 /**
  * Puntos de la pista del nivel con las piezas colocadas (las piezas con perfil propio
@@ -109,7 +115,7 @@ function pistaU(nivel, colocadas) {
 function pistaColina(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
   const suelo = nivel.suelo ?? 0.5, cima = nivel.cima ?? 2;
-  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const fin = finPista(nivel), repisa = inicioRepisa(nivel);
   const pts = [[0, hs], [1.2, hs]];
   // bajada: "quarter pipe" de la salida al suelo (de x = 1.2 a 3)
   for (let i = 1; i <= 48; i++) {
@@ -142,7 +148,7 @@ function pistaColina(nivel) {
  */
 function pistaEscaleras(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
-  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const fin = finPista(nivel), repisa = inicioRepisa(nivel);
   const suave = (u) => u * u * (3 - 2 * u);
   const pie = hs - 0.5;           // pie de la primera escalera
   const pts = [[0, hs], [1.2, hs]];
@@ -173,7 +179,7 @@ function pistaTravesia(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
   const valle = nivel.valle ?? 3.5, cima = nivel.cima ?? 5.5, fondo = nivel.suelo ?? 0.5;
   const arriba = nivel.escalera ?? 2.9;    // altura a la que deja la escalera
-  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const fin = finPista(nivel), repisa = inicioRepisa(nivel);
   const suave = (u) => u * u * (3 - 2 * u);
   const pts = [[0, hs], [1.2, hs]];
   // bajada: "quarter pipe" de la salida al valle (de x = 1.2 a 3)
@@ -205,7 +211,7 @@ function pistaTravesia(nivel) {
  */
 function pistaLarga(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura, suelo = nivel.suelo ?? 0.5;
-  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const fin = finPista(nivel), repisa = inicioRepisa(nivel);
   const suave = (u) => u * u * (3 - 2 * u);
   const pts = [[0, hs], [1.2, hs]];
   // bajada: "quarter pipe" de la salida al suelo (de x = 1.2 a 3)
@@ -232,7 +238,7 @@ function pistaLarga(nivel) {
 function pistaAscenso(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
   const fondo = nivel.suelo ?? 0.5, alto = nivel.alto ?? 5.5, cima = nivel.cima ?? 2;
-  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const fin = finPista(nivel), repisa = inicioRepisa(nivel);
   const suave = (u) => u * u * (3 - 2 * u);
   const pts = [[0, hs], [1.2, hs]];
   // caída de la salida al fondo (de 1.2 a 3)
@@ -265,7 +271,7 @@ function pistaAscenso(nivel) {
 function pistaFinal(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
   const fondo = nivel.suelo ?? 0.5, alto = nivel.alto ?? 5.5, cima = nivel.cima ?? 2;
-  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const fin = finPista(nivel), repisa = inicioRepisa(nivel);
   const suave = (u) => u * u * (3 - 2 * u);
   const pts = [[0, hs], [1.2, hs]];
   // caída de la salida al fondo (de 1.2 a 3)
@@ -300,7 +306,7 @@ function pistaFinal(nivel) {
 function pistaCumbre(nivel) {
   const hs = nivel.energia, hm = nivel.meta.altura;
   const fondo = nivel.suelo ?? 0.5, alto = nivel.alto ?? 8.5, valle = nivel.valle ?? 3.5, cima = nivel.cima ?? 1.5;
-  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const fin = finPista(nivel), repisa = inicioRepisa(nivel);
   const suave = (u) => u * u * (3 - 2 * u);
   const pts = [[0, hs], [1.2, hs]];
   // caída de la salida al fondo (de 1.2 a 3)
