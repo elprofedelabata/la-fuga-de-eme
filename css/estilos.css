@@ -430,7 +430,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .mundo.bloqueado .camino { opacity: 0.75; }
 
 .camino { position: relative; margin-top: 6px; }
-.camino-6 { aspect-ratio: 16 / 10.5; }
+.camino-6, .camino-8 { aspect-ratio: 16 / 10.5; }
 .camino-10 { aspect-ratio: 16 / 15; }
 .camino-1 { height: 108px; }
 .camino-linea { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }

@@ -9,6 +9,7 @@ const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Posiciones (en % de la tarjeta) de las casillas de un mundo: un zigzag de dos filas
 const POSICIONES = {
   10: [[12, 16], [37, 13], [63, 16], [88, 13], [84, 50], [50, 47], [16, 50], [16, 84], [50, 81], [84, 84]],
+  8: [[11, 24], [37, 18], [63, 24], [89, 18], [88, 74], [63, 80], [37, 74], [12, 80]],
   6: [[14, 26], [50, 19], [86, 28], [84, 74], [50, 81], [16, 72]],
   1: [[50, 46]],
 };

@@ -352,7 +352,7 @@ export function usarNivel(n) {
 // Mundos del juego: capas del libro de las que Eme escapa.
 export const MUNDOS = [
   { id: 'cuaderno', numero: 'I', nombre: 'El cuaderno', niveles: 10 },
-  { id: 'libro', numero: 'II', nombre: 'El libro de texto', niveles: 6 },
+  { id: 'libro', numero: 'II', nombre: 'El libro de texto', niveles: 8 },
   { id: 'pizarra', numero: 'III', nombre: 'La pizarra', niveles: 6 },
   { id: 'fuera', numero: '★', nombre: 'Fuera del libro', niveles: 1 },
 ];

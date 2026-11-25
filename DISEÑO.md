@@ -315,7 +315,7 @@ De momento solo «Borrar progreso» tiene efecto; el resto se recuerda en `local
 - **III · La pizarra:** tiza sobre verde y marco de madera.
 - **Final · Fuera del libro:** cielo y sol, un único nivel.
 
-Los niveles de cada mundo (10 en el cuaderno, 6 en el libro y en la pizarra, y 1 el final; numerados de forma correlativa) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con su estrella debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior que ya existe (los que aún no están hechos aparecen con candado y se saltan). Los mundos bloqueados se ven apagados con «Termina el mundo anterior». Al superar un nivel, «Siguiente» lleva al siguiente que exista.
+Los niveles de cada mundo (10 en el cuaderno, 8 en el libro, 6 en la pizarra y 1 el final: 25 en total; numerados de forma correlativa, así que el libro va del 11 al 18 y la pizarra del 19 al 24) van unidos por un camino discontinuo en zigzag. Estados: completado (naranja, con su estrella debajo), siguiente (naranja, late), bloqueado (gris con candado; al tocarlo tiembla). Un nivel se desbloquea al completar el anterior que ya existe (los que aún no están hechos aparecen con candado y se saltan). Los mundos bloqueados se ven apagados con «Termina el mundo anterior». Al superar un nivel, «Siguiente» lleva al siguiente que exista.
 
 Los niveles superados (su estrella) se guardan en `localStorage` (`js/progreso.js`); el progreso guardado con el sistema antiguo de 1 a 3 estrellas cuenta como superado. Desde el juego se vuelve al mapa con ☰ → «Elegir nivel». Flujo: carga → portada → (historia, la primera vez) → niveles → nivel. La historia termina contando el plan de los mundos, que es justo lo que muestra el mapa de niveles a continuación. Al cambiar de pantalla, la siguiente se coloca debajo y la anterior se **arranca** (ver «Transiciones»).
 
@@ -336,6 +336,33 @@ Al superar el nivel 10, el botón «Siguiente» de la hoja de resultado pasa a s
 7. **EME.** Todo se oscurece y entra por la derecha una sombra enorme con una «M» mayúscula y dos ojos: **EME, el primo grande**. Eme, sudando: «¿Q-quién eres tú?». Rótulo: «Mundo II · El libro de texto». Botón «¡Al libro!».
 
 Al terminar se vuelve al mapa: la tarjeta del **Mundo II se desbloquea** con un saltito y un brillo y, mientras no tenga niveles, dice «¡Desbloqueado! Sus niveles llegan pronto». Un mundo se abre al superar el último nivel del anterior. La escena se recuerda (`fuga-eme-fin-cuaderno-visto`) y, una vez vista, se puede volver a ver desde el menú: «Ver el final del cuaderno».
+
+## Historia: mundos II y III
+
+### EME, el primo grande
+
+**EME** es el bloque de masa **M** (mayúscula) de los problemas del libro de texto: el bloque «oficial». Serio, orgulloso y reglamentista; habla como el libro («Sustituyendo valores…», «Exprese el resultado en julios», «Compruebe sus unidades»). Aparece al final del Mundo I como una sombra enorme con una «M» y dos ojos.
+
+Arco del personaje: **rival en todo el Mundo II**, haciendo lo posible por devolver a Eme al sitio donde «debe» estar (su problema), y **redención en la pizarra (Mundo III)**: ve la luz, ayuda a Eme a escapar y **se sacrifica dejándose borrar**.
+
+### Mundo II · El libro de texto (niveles 11 a 18): números serios
+
+**Escena de entrada.** EME se presenta y planta cara: «En este libro, los bloques no se escapan: se resuelven». Cambia las reglas: «Aquí no hay julitos. Hay julios. Y todo lleva decimales». A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, longitudes con decimales). EME es el antagonista de todo el mundo: va por delante y deja trampas «reglamentarias» para devolver a Eme a su problema. Cada nivel es un problema del libro («Problema 7.11»…).
+
+1. **«Exprese el resultado en julios»** (11). El primer problema con datos reales, sin rozamiento. EME vigila: «Compruebe sus unidades».
+2. **«Datos del problema»** (12). Rozamiento en llano con μ: W = μ·m·g·d. La pérdida ya depende de la longitud del tramo y de la masa.
+3. **«La rampa ya no come lo mismo»** (13). Rozamiento en cuestas: entra cos θ. Responde a la pregunta que dejó el cuaderno: «¿por qué la rampa de arena ya no quita 3?».
+4. **«Muelle homologado»** (14). Muelles con ½·k·x². EME deja en la bandeja muelles «oficiales» que parecen ayudar pero no dan lo justo.
+5. **«El transportador del margen»** (15). Eme encuentra un transportador de ángulos: se desbloquean las **piezas giratorias** (cintas transportadoras a favor o en contra).
+6. **«La rata del margen»** (16). Ventiladores (con la rata como guiño), combinados con todo lo anterior.
+7. **«M contra m»** (17). EME echa una carrera para cortarle el paso. Nivel trampa: con mucha más masa, llega exactamente igual de lejos. «¡Imposible! ¡Yo peso mucho más!» — «La masa se va en las cuentas, primo». EME sale humillado y más decidido.
+8. **«El choque»** (18). Final del libro. EME bloquea la salida con su cuerpo y Eme tiene que usar un **choque** (momento lineal; en uno inelástico parte de la energía se va en calor) para apartarlo y saltar.
+
+**Escena final del Mundo II.** Eme sale despedido del libro y aterriza en la bandeja de la tiza, al pie de la pizarra. EME, furioso, salta detrás: «¡Vuelve a tu problema!». Rótulo: «Mundo III · La pizarra».
+
+### Mundo III · La pizarra (niveles 19 a 24): el giro
+
+EME persigue a Eme por la pizarra, entre fórmulas y dibujos de tiza. La amenaza es el **borrador**: al final de la clase, todo lo de la pizarra se borra. Cuando el borrador llega, EME «ve la luz»: si se quedan, desaparecen los dos. Empuja a Eme fuera de su camino y **se deja borrar**; solo queda, muy tenue, la «M». Eme escapa al mundo final, «Fuera del libro», con esa pérdida a cuestas. (Los niveles de la pizarra están por diseñar con el catálogo de su mundo: loops, saltos, agua viscosa, péndulo.)
 
 ## Historia de primer acceso
 
@@ -377,7 +404,7 @@ Con **`?dev`** en la dirección (por ejemplo, `https://elprofedelabata.github.io
 
 ## Pendiente
 
-- Niveles del Mundo II (el libro de texto): números con decimales y EME, el primo grande.
+- Escena de entrada del Mundo II (EME y las reglas nuevas) y sus 8 niveles (11 a 18), con julios y decimales: ver «Historia: mundos II y III».
 - Mecánicas del catálogo aún sin usar (muelles, rebotadores, paredes de papel, agua) para los mundos siguientes.
 - Animaciones de victoria y caída más elaboradas, sonido.
 - PWA, dominio propio.

@@ -1292,7 +1292,7 @@ function iniciar() {
     const despejar = () => { for (const id of ['inicio', 'niveles']) $(id).hidden = true; };
     import('./dev.js').then((m) => m.iniciarDev({
       jugar: (n) => { despejar(); cargarNivel(n); },
-      abrirMapa: () => abrirNiveles(),
+      abrirMapa: () => { despejar(); abrirNiveles(); },
       verHistoria: () => { despejar(); mostrarHistoria(); },
       verFin: () => { despejar(); mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) }); },
     }));
