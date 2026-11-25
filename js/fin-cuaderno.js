@@ -113,7 +113,14 @@ function libro(ctx, x, y, w, h, { detalle = false } = {}) {
     ctx.fillText(s, xx, yy);
   };
   imp('Tema 7 · Energía mecánica', x + 12, y + 14, 9.5, '#8b3a2e');
-  imp('4.2  Conservación de la energía', x + 12, y + 32, 12, '#4a4540', 'left', true);
+  // el título se encoge si no cabe en la página (para que no se meta en el lomo)
+  let tamTit = 12;
+  ctx.font = `bold ${tamTit}px ${IMPRENTA}`;
+  while (tamTit > 8 && ctx.measureText('4.2  Conservación de la energía').width > w / 2 - 24) {
+    tamTit -= 0.5;
+    ctx.font = `bold ${tamTit}px ${IMPRENTA}`;
+  }
+  imp('4.2  Conservación de la energía', x + 12, y + 32, tamTit, '#4a4540', 'left', true);
   ctx.fillStyle = '#e4e0d8';
   for (let k = 0; k < 4; k++) ctx.fillRect(x + 12, y + 46 + k * 9, (w / 2 - 26) * (k === 3 ? 0.5 : 1), 3);
   // fórmulas con subíndices de verdad: [texto, subíndice?]
@@ -209,11 +216,11 @@ const ESCENAS = [
       dibujarEme(ctx, 262, 128, 44, mira
         ? { expr: 'gulp', px: 0.7, py: 0.8, seed: 2, bandera: true }
         : { expr: 'win', bandera: true, seed: 2 });
-      bocadillo(ctx, 236, 76, 'Uf… Demasiado lejos para saltar.', suave(1.6, 2, t), { derecha: true });
+      bocadillo(ctx, 236, 76, 'Uf… Está demasiado lejos.', suave(1.6, 2, t), { derecha: true });
     },
   },
   {   // 2 · la idea
-    textos: [{ s: 'Pero las hojas del cuaderno tienen un trepado… para arrancarlas.', x: 18, y: 22, w: 360, tam: 16, estilo: 'mano', color: '#3b2c1c' }],
+    textos: [{ s: 'Pero la hoja tenía un trepado… ¡para arrancarla!', x: 18, y: 22, w: 370, tam: 16, estilo: 'mano', color: '#3b2c1c' }],
     dur: 4.6,
     dibujar(ctx, t) {
       mesa(ctx);
@@ -349,7 +356,7 @@ const ESCENAS = [
         const ex = 228 - 120 * s, ey = 230 - 30 * Math.sin(Math.PI * s);
         const mira = t < 3 ? 0.9 : t < 3.8 ? -0.9 : 0.4;
         dibujarEme(ctx, ex, ey, 40, { expr: t > 4.2 ? 'gulp' : 'idle', px: mira, py: -0.2, seed: 4 });
-        bocadillo(ctx, 136, 178, 'Uy… Aquí los números llevan decimales.', suave(4.2, 4.6, t));
+        bocadillo(ctx, 96, 194, 'Uy… Aquí los números llevan decimales.', suave(4.2, 4.6, t));
       }
     },
   },
@@ -370,6 +377,21 @@ const ESCENAS = [
       primo(ctx, 470 - 160 * llega, 200, 170, -1);
       dibujarEme(ctx, 108, 230, 40, { expr: llega > 0.5 ? 'fast' : 'idle', susto: llega > 0.5, px: 0.95, py: -0.3, seed: 4 });
       if (llega >= 1) bocadillo(ctx, 140, 192, '¿Q-quién eres tú?', suave(2.6, 3, t));
+      // el cartel del rótulo «Mundo II · El libro de texto» (el texto se escribe encima)
+      const cartel = suave(3.2, 3.5, t);
+      if (cartel > 0) {
+        ctx.save();
+        ctx.globalAlpha = cartel;
+        ctx.translate(200, 64);
+        ctx.rotate(-0.02);
+        const caja = [[-150, -22], [150, -22], [150, 22], [-150, 22]];
+        ctx.fillStyle = 'rgba(40,30,20,0.25)';
+        trazar(ctx, caja.map(([a, b]) => [a + 4, b + 5]), true); ctx.fill();
+        ctx.fillStyle = '#fffef9';
+        trazar(ctx, caja, true); ctx.fill();
+        lapiz(ctx, caja, { ancho: 1.6, cerrado: true, doble: false, amp: 0.3 });
+        ctx.restore();
+      }
     },
   },
 ];

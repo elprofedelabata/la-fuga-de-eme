@@ -1288,14 +1288,13 @@ function siguienteNivel() {
 function iniciar() {
   // Herramientas de desarrollo: solo con «?dev» en la dirección
   if (new URLSearchParams(location.search).has('dev')) {
+    // (desde cualquier pantalla: primero se quitan la portada y el mapa, que taparían lo demás)
+    const despejar = () => { for (const id of ['inicio', 'niveles']) $(id).hidden = true; };
     import('./dev.js').then((m) => m.iniciarDev({
-      jugar: (n) => {                     // directo al nivel, desde cualquier pantalla
-        for (const id of ['inicio', 'niveles']) $(id).hidden = true;
-        cargarNivel(n);
-      },
+      jugar: (n) => { despejar(); cargarNivel(n); },
       abrirMapa: () => abrirNiveles(),
-      verHistoria: () => mostrarHistoria(),
-      verFin: () => mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) }),
+      verHistoria: () => { despejar(); mostrarHistoria(); },
+      verFin: () => { despejar(); mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) }); },
     }));
   }
   $('bocadillo').addEventListener('click', tocarBocadillo);
