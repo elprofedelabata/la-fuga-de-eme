@@ -119,9 +119,9 @@ const ESCENAS = [
       pagina(ctx);
       eme(ctx, t, { habla: habla(t, 0.6) });
       const mareo = t > 4.4;
-      emePeque(ctx, t, { x: 74, ...(mareo ? { expr: 'mareado', giro: t * 3 } : { expr: 'idle', px: -0.2, py: -0.9 }) });
+      emePeque(ctx, t, { x: 62, ...(mareo ? { expr: 'mareado', giro: t * 3 } : { expr: 'idle', px: -0.2, py: -0.9 }) });
       diceEme(ctx, 'Y todo lleva decimales.', suave(0.6, 0.9, t));
-      bocadillo(ctx, 112, 232, '¿Veintinueve coma cuatro…?', suave(4.6, 4.9, t), { max: 110, a: boca(74, 242, 40), largo: 14 });
+      bocadillo(ctx, 92, 232, '¿Veintinueve coma cuatro…?', suave(4.6, 4.9, t), { max: 110, a: boca(62, 242, 40), largo: 8 });
     },
   },
   {   // 5 · la amenaza
