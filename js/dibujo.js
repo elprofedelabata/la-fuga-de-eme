@@ -1,7 +1,7 @@
 // Dibujo con estilo de cuaderno: trazo de lápiz, texturas de materiales, tablero y Eme.
 // Todas las medidas van en píxeles CSS; el lienzo ya viene escalado por devicePixelRatio.
 
-import { construirPista, celdasTramos, celdaDe, columnas, anchoTablero, inicioRepisa, huecosDe } from './pista.js';
+import { construirPista, celdasTramos, celdaDe, columnas, filas, anchoTablero, inicioRepisa, huecosDe } from './pista.js';
 import { NIVEL } from './nivel.js';
 
 export const C = {
@@ -177,14 +177,14 @@ function patron(ctx, mat) {
 }
 
 // ---------- vistas: de cuadritos (x, altura) a píxeles ----------
-// W es el ancho del tablero en píxeles; el alto es siempre 9 cuadritos (3 filas de casillas).
-export function vistaTablero(W, cols = columnas()) {
+// W es el ancho del tablero en píxeles; el alto son 3 cuadritos por fila de casillas.
+export function vistaTablero(W, cols = columnas(), nf = filas()) {
   const k = W / (3 * cols);
-  return { k, px: (x, h) => [x * k, (9 - h) * k] };
+  return { k, px: (x, h) => [x * k, (3 * nf - h) * k] };
 }
-export function vistaCelda(celda, lado, cols = columnas()) {
-  const c = (celda - 1) % cols, r = Math.floor((celda - 1) / cols);
-  const x0 = c * 3, h0 = (2 - r) * 3, k = lado / 3;
+export function vistaCelda(celda, lado, cols = columnas(), nf = filas()) {
+  const c = (celda - 1) % cols, r = Math.floor((celda - 1) / cols);   // r: fila contando desde arriba
+  const x0 = c * 3, h0 = (nf - 1 - r) * 3, k = lado / 3;
   return { k, px: (x, h) => [(x - x0) * k, (h0 + 3 - h) * k] };
 }
 export function rectCelda(W, celda, cols = columnas()) {
@@ -207,11 +207,11 @@ function pintarTerreno(ctx, v, pista, rect, mat) {
 /** Puntos donde la pista entra o sale de una casilla. */
 export function conectores(nivel, celda, colocadas) {
   const pista = construirPista(nivel, colocadas);
-  const cols = columnas(nivel);
+  const cols = columnas(nivel), nf = filas(nivel);
   const out = [];
   for (let i = 1; i < pista.length; i++) {
-    const a = celdaDe(...pista[i - 1], cols);
-    const b = celdaDe(...pista[i], cols);
+    const a = celdaDe(...pista[i - 1], cols, nf);
+    const b = celdaDe(...pista[i], cols, nf);
     if (a !== b && (a === celda || b === celda)) out.push(pista[i - 1]);
   }
   return out;
@@ -219,9 +219,9 @@ export function conectores(nivel, celda, colocadas) {
 
 // ---------- tablero (parte estática) ----------
 export function dibujarTablero(ctx, W, nivel, colocadas) {
-  const cols = columnas(nivel), ancho = anchoTablero(nivel);
-  const v = vistaTablero(W, cols);
-  const k = v.k, H = 9 * k;
+  const cols = columnas(nivel), nf = filas(nivel), ancho = anchoTablero(nivel);
+  const v = vistaTablero(W, cols, nf);
+  const k = v.k, H = 3 * nf * k;
   ctx.fillStyle = C.tarjeta;
   ctx.fillRect(0, 0, W, H);
   ctx.strokeStyle = C.cuadri;
@@ -230,21 +230,21 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
     if (i % 3 === 0) continue;
     ctx.beginPath(); ctx.moveTo(i * k, 0); ctx.lineTo(i * k, H); ctx.stroke();
   }
-  for (let i = 1; i < 9; i++) {
+  for (let i = 1; i < 3 * nf; i++) {
     if (i % 3 === 0) continue;
     ctx.beginPath(); ctx.moveTo(0, i * k); ctx.lineTo(W, i * k); ctx.stroke();
   }
 
   const pista = construirPista(nivel, colocadas);
   const vacia = (c) => nivel.huecos[c] && !colocadas[c];
-  for (let c = 1; c <= 3 * cols; c++) {
+  for (let c = 1; c <= nf * cols; c++) {
     if (vacia(c)) continue;
     const mat = nivel.huecos[c] ? colocadas[c].material : 'fijo';
     pintarTerreno(ctx, v, pista, rectCelda(W, c, cols), mat);
   }
 
   // trazo de la pista, cortado en los huecos vacíos
-  const celdas = celdasTramos(pista, cols);
+  const celdas = celdasTramos(pista, cols, nf);
   let tramo = [];
   const cerrar = () => {
     if (tramo.length > 1) lapiz(ctx, tramo.map(([x, h]) => v.px(x, h)), { ancho: 2.4, seed: tramo.length });
@@ -283,7 +283,7 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
   for (let i = 1; i < cols; i++) {
     lapiz(ctx, [[i * 3 * k, 0], [i * 3 * k, H]], { ancho: 2.2, color: C.rejilla, seed: 400 + i, amp: 0.5 });
   }
-  for (const i of [1, 2]) {
+  for (let i = 1; i < nf; i++) {
     lapiz(ctx, [[0, i * 3 * k], [W, i * 3 * k]], { ancho: 2.2, color: C.rejilla, seed: 410 + i, amp: 0.5 });
   }
 
@@ -406,7 +406,7 @@ export function dibujarResaltes(ctx, W, estados, t) {
 }
 
 export function dibujarBandera(ctx, W, nivel) {
-  const v = vistaTablero(W, columnas(nivel));
+  const v = vistaTablero(W, columnas(nivel), filas(nivel));
   const [bx, by] = v.px(nivel.meta.bandera, nivel.meta.altura);
   const [, ty] = v.px(nivel.meta.bandera, nivel.meta.altura + 1.6);
   ctx.save();
@@ -430,11 +430,11 @@ export const casillasMini = (pieza) => ({ nx: pieza.doble === 'h' ? 2 : 1, ny: p
  * `lado` es lo que mide una casilla; el dibujo ocupa nx·lado x ny·lado.
  */
 export function dibujarMiniatura(ctx, lado, celda, pieza, nivel = NIVEL) {
-  const cols = columnas(nivel);
+  const cols = columnas(nivel), nf = filas(nivel);
   const { nx, ny } = casillasMini(pieza);
   const ancho = nx * lado, alto = ny * lado;
   const mias = huecosDe(pieza, celda, nivel) ?? [celda];
-  const v0 = vistaCelda(celda, lado, cols);   // la primera casilla manda: es la de arriba a la izquierda
+  const v0 = vistaCelda(celda, lado, cols, nf);   // la primera casilla manda: es la de arriba a la izquierda
   ctx.fillStyle = C.tarjeta;
   ctx.fillRect(0, 0, ancho, alto);
   ctx.strokeStyle = C.cuadri;
@@ -449,7 +449,7 @@ export function dibujarMiniatura(ctx, lado, celda, pieza, nivel = NIVEL) {
   }
   const pista = construirPista(nivel, Object.fromEntries(mias.map((c) => [c, pieza])));
   pintarTerreno(ctx, v0, pista, [0, 0, ancho, alto], pieza.material);
-  const celdas = celdasTramos(pista, cols);
+  const celdas = celdasTramos(pista, cols, nf);
   const pts = [];
   for (let i = 0; i < celdas.length; i++) {
     if (!mias.includes(celdas[i])) continue;

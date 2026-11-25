@@ -3,7 +3,7 @@
 import { NIVEL, NIVELES, MATERIALES, NIVELES_JUGABLES, usarNivel } from './nivel.js';
 import {
   prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida,
-  columnas, anchoTablero, inicioRepisa, cambioDe, cambioPorCasilla, huecosDe,
+  columnas, filas, altoTablero, anchoTablero, inicioRepisa, cambioDe, cambioPorCasilla, huecosDe,
 } from './pista.js';
 import {
   C, FUENTE, dibujarTablero, dibujarResaltes, dibujarBandera, dibujarMiniatura, dibujarEme,
@@ -33,7 +33,6 @@ const lienzoEme = $('lienzo-eme');
 const ctxEme = lienzoEme.getContext('2d');
 const marcador = $('regla-eme');
 const DURACION_FIESTA = 1.1;   // segundos de saltitos hasta la bandera
-const CUADRITOS = 9;   // cuadritos de alto del tablero (el tablero aún está hecho para 9)
 
 const estado = {
   modo: 'montaje',            // montaje | directo | resultado
@@ -73,7 +72,7 @@ function ajustar() {
   lienzo.width = Math.round(w * dpr);
   lienzo.height = Math.round(H() * dpr);
   lienzoEme.width = lienzo.width;
-  lienzoEme.height = Math.round(H() * (1 + CABEZA / 9) * dpr);
+  lienzoEme.height = Math.round(H() * (1 + CABEZA / altoTablero()) * dpr);
   rehacerTablero();
 }
 
@@ -879,9 +878,9 @@ function pintar() {
 
   const pose = poseEme(w);
   if (!estado.sim) bocadilloEnLaBoca(pose);
-  marcador.style.setProperty('--h', Math.max(-0.4, Math.min(CUADRITOS + 0.4, pose.h)).toFixed(3));
+  marcador.style.setProperty('--h', Math.max(-0.4, Math.min(altoTablero() + 0.4, pose.h)).toFixed(3));
   // capa de Eme: el origen, en la esquina de arriba del tablero (por encima queda la «cabeza»)
-  const cabeza = (H() * CABEZA) / 9;
+  const cabeza = (H() * CABEZA) / altoTablero();
   ctxEme.setTransform(dpr, 0, 0, dpr, 0, cabeza * dpr);
   ctxEme.clearRect(0, -cabeza, w, H() + cabeza);
   // la bandera, en la capa de Eme (puede asomar por arriba), salvo en la guía, en la que esa
@@ -1191,10 +1190,34 @@ function terminarGuia() {
   refrescar();
 }
 
+/** Regla de alturas: un número por cuadrito, todos iguales, de 0 al alto del tablero. */
+function construirRegla() {
+  const regla = $('regla');
+  const n = altoTablero();
+  if (Number(regla.dataset.n) === n) return;
+  regla.dataset.n = n;
+  regla.style.setProperty('--n', n);
+  regla.setAttribute('aria-label', `Regla de alturas en julitos, de 0 a ${n}`);
+  regla.querySelectorAll('.regla-n').forEach((el) => el.remove());
+  for (let h = 0; h <= n; h++) {
+    const el = document.createElement('span');
+    el.className = 'regla-n';
+    el.style.setProperty('--h', h);
+    el.textContent = h;
+    regla.append(el);
+  }
+}
+
 /** Prepara todo lo que depende del nivel: textos, huecos, bandeja, estrellas… */
 function cargarNivel(n) {
   usarNivel(n);
-  $('tablero').style.setProperty('--cols', columnas());   // 3 filas y las columnas del nivel
+  // tablero con las filas y columnas del nivel; la capa de Eme sobresale CABEZA cuadritos por arriba
+  $('tablero').style.setProperty('--cols', columnas());
+  $('tablero').style.setProperty('--filas', filas());
+  const asoma = (100 * CABEZA) / altoTablero();
+  lienzoEme.style.top = `${-asoma}%`;
+  lienzoEme.style.height = `${100 + asoma}%`;
+  construirRegla();
   estado.colocadas = Object.fromEntries(Object.keys(NIVEL.huecos).map((c) => [c, null]));
   estado.seleccion = null;
   estado.huecoElegido = null;
@@ -1236,8 +1259,9 @@ function crearHuecos() {
     b.setAttribute('aria-label', `Hueco de ${forma}, casilla ${celda}`);
     const cols = columnas();
     b.style.left = `${((celda - 1) % cols) * (100 / cols)}%`;
-    b.style.top = `${Math.floor((celda - 1) / cols) * (100 / 3)}%`;
+    b.style.top = `${Math.floor((celda - 1) / cols) * (100 / filas())}%`;
     b.style.width = `${100 / cols}%`;
+    b.style.height = `${100 / filas()}%`;
     b.addEventListener('click', () => { if (!suprimirClick) tocarHueco(celda); });
     b.addEventListener('pointerdown', (e) => {
       const p = estado.colocadas[celda];
@@ -1254,17 +1278,6 @@ function siguienteNivel() {
 
 function iniciar() {
   $('bocadillo').addEventListener('click', tocarBocadillo);
-  // Regla de alturas: un número por cuadrito, todos iguales
-  const regla = $('regla');
-  regla.style.setProperty('--n', CUADRITOS);
-  regla.setAttribute('aria-label', `Regla de alturas en julitos, de 0 a ${CUADRITOS}`);
-  for (let h = 0; h <= CUADRITOS; h++) {
-    const n = document.createElement('span');
-    n.className = 'regla-n';
-    n.style.setProperty('--h', h);
-    n.textContent = h;
-    regla.append(n);
-  }
   $('btn-lanzar').addEventListener('click', lanzar);
   $('btn-vaciar').addEventListener('click', vaciar);
   $('btn-pausa').addEventListener('click', () => {

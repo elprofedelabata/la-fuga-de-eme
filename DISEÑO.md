@@ -85,7 +85,7 @@ Es el balance en estado puro: **Ep final = energía inicial − pérdidas**. El 
 
 El cuaderno tiene **10 niveles**.
 
-**Tablero.** Siempre tiene **3 filas** de casillas (9 cuadritos de alto, así que la regla va siempre de 0 a 9) y **3 o más columnas** (`columnas` en los datos del nivel; 3 por defecto). Cada casilla mide 3 x 3 cuadritos y se numeran por filas, de arriba abajo y de izquierda a derecha (en un tablero de 4 columnas, la fila de abajo son las casillas 9 a 12). Cada nivel elige su **trazado** de pista (`trazado`): la «U» de los niveles 1 a 3 o el valle con colina del nivel 4. La repisa de la meta ocupa siempre los últimos 1,6 cuadritos del tablero, hasta el precipicio.
+**Tablero.** Tiene **3 filas** de casillas (9 cuadritos de alto: la regla va de 0 a 9) o más (`filas`; con 4, 12 de alto, como en el nivel 10) y **3 o más columnas** (`columnas`; 3 por defecto). Cada casilla mide 3 x 3 cuadritos y se numeran por filas, de arriba abajo y de izquierda a derecha (en un tablero de 4 columnas, la fila de abajo son las casillas 9 a 12). Cada nivel elige su **trazado** de pista (`trazado`): la «U» de los niveles 1 a 3, el valle con colina del nivel 4, etc. La repisa de la meta ocupa siempre los últimos 1,6 cuadritos del tablero, hasta el precipicio.
 
 **Nombres de las piezas:** las que bajan son **bajadas** y las que suben, **rampas** (además de suelos, colinas y escaleras mecánicas). Todas las bajadas de un nivel aceptan las mismas piezas, aunque su forma cambie un poco de un hueco a otro.
 
@@ -245,16 +245,16 @@ El mensaje de los atascos vale ya para cualquier cuesta: si no hay escaleras de 
 
 ### Nivel 10 · «La última página» (examen final)
 
-El cierre del cuaderno, en un tablero de **3 filas y 6 columnas**. Empieza donde acabó el nivel 9, a altura 3, y la meta está en el **borde de la hoja**, arriba a la derecha, a altura 8. Trazado **final**: caída al fondo, colina baja (cima a 1,5), escalera mecánica de dos filas (casillas 15 y 9), bajada de dos filas (10 y 16), otra escalera de dos filas (17 y 11) y rampa en S hasta la meta. Sin piezas nuevas: es un examen de todo el Mundo I.
+El cierre del cuaderno, en el primer tablero de **4 filas**: **5 columnas y 4 filas** (15 × 12 cuadritos; la regla va de 0 a 12). Se probó con 6 columnas y 3 filas, pero en el móvil quedaba muy pequeño (casillas de 53 px); con 5 × 4 las casillas miden unos 64 px y se aprovecha el espacio vertical. Empieza donde acabó el nivel 9, a altura 3, y la meta está **arriba del todo, en el borde de la hoja**, a altura 10. Trazado **cumbre**: caída al fondo (casilla 16), colina baja con la cima a 1,5 (17), **escalera mecánica de tres filas** (18, 13 y 8: de 0,5 a 8,5), **bajada de dos filas** (9 y 14: de 8,5 a 3,5) y una rampa en S hasta la meta. Sin piezas nuevas: es un examen de todo el Mundo I.
 
-**Charla corta** (solo la primera vez): «¡Mira! ¡El borde de la hoja! Es la última página del cuaderno.» (se iluminan la bandera y el 8 de la regla) y «Si llego a esa bandera, ¡me escapo! Pero esta vez no hay pistas: todo lo que has aprendido, junto.»
+**Charla corta** (solo la primera vez): «¡Mira! ¡El borde de la hoja! Es la última página del cuaderno.» (se iluminan la bandera y el 10 de la regla) y «Si llego a esa bandera, ¡me escapo! Pero esta vez no hay pistas: todo lo que has aprendido, junto.»
 
-Piezas (11 para 8 huecos): escaleras de +3, +4 y +5, la averiada y una escalera doble de +8; bajadas de madera, asfalto y arena y una bajada doble de asfalto; colinas de hielo y madera. De las 864 colocaciones:
+Piezas (10 para 7 huecos): escaleras de +3, +4 y +5 y una escalera doble de +8; bajadas de madera, asfalto y arena y una bajada doble de madera; colinas de hielo y madera. La escalera de tres filas se rellena con tres simples o con una doble y una simple. De las 216 colocaciones:
 
-- **Una solución** (que se puede colocar de cuatro maneras): bajada de madera al principio, colina de hielo, escalera doble de +8 en la primera escalera, bajadas de asfalto y arena en la bajada larga y, en la segunda escalera, la de +3 y la averiada, en cualquier orden (3 + 8 + 3 = 8 + 2 + 1 + 3). Con solo 3 julitos al salir, antes de la cima de la colina no se puede perder casi nada (menos de 1,5): la bajada de madera y la colina de hielo son lo único que cabe.
-- **256 colocaciones** cuadran la suma pero fallan por el camino: no suben la colina, se quedan frenadas en una bajada o no suben la averiada.
+- **Una solución** (que se puede colocar de cuatro maneras): bajada de madera al principio, colina de hielo, escalera doble de +8 y la de +5 en la escalera de tres filas (en cualquier orden) y bajadas de asfalto y arena en la bajada larga (en cualquier orden): 3 + 8 + 5 = 10 + 2 + 3 + 1. Con solo 3 julitos al salir, antes de la cima de la colina se puede perder menos de 1,5: la bajada de madera y la colina de hielo son lo único que cabe.
+- **30 colocaciones** cuadran la suma pero fallan por el camino (no suben la colina o se quedan frenadas en una bajada).
 
-En el móvil, el tablero de 6 columnas mide unos 320 × 160 (casillas de unos 53 px): se juega, pero es el más pequeño.
+**Tablero de 4 filas.** El tablero admite ya las filas que diga el nivel (`filas`, 3 por defecto): la regla se rehace con el alto del tablero (de 0 a 12 con 4 filas), los huecos y la capa de Eme se adaptan y las casillas se numeran igual, por filas de arriba abajo (con 5 columnas y 4 filas, la fila de abajo son las casillas 16 a 20).
 
 Al hacerlo aparecieron y se corrigieron tres cosas del análisis y la simulación, que no afectaban a los niveles anteriores:
 

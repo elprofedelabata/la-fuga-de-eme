@@ -35,7 +35,7 @@ export function huecosDe(p, a, nivel = NIVEL) {
   if (!p.doble) return [a];
   const cols = columnas(nivel);
   if (p.doble === 'h') return a % cols === 0 ? null : [a, a + 1];
-  return a + cols > 3 * cols ? null : [a, a + cols];
+  return a + cols > filas(nivel) * cols ? null : [a, a + cols];
 }
 /** ¿Tiene motor? (una escalera que da julitos; la averiada no) */
 export const conMotor = (p) => (p?.gana ?? 0) > 0;
@@ -47,6 +47,10 @@ export const conMotor = (p) => (p?.gana ?? 0) > 0;
 
 /** Columnas de casillas del tablero del nivel. */
 export const columnas = (nivel = NIVEL) => nivel.columnas ?? 3;
+/** Filas de casillas del tablero del nivel (3 por defecto; con 4, el tablero mide 12 de alto). */
+export const filas = (nivel = NIVEL) => nivel.filas ?? 3;
+/** Alto del tablero en cuadritos (lo que mide la regla). */
+export const altoTablero = (nivel = NIVEL) => 3 * filas(nivel);
 /** Ancho del tablero en cuadritos. */
 export const anchoTablero = (nivel = NIVEL) => 3 * columnas(nivel);
 /** x donde empieza la repisa de la meta (llana y sin rozamiento hasta el precipicio). */
@@ -287,22 +291,55 @@ function pistaFinal(nivel) {
   return pts;
 }
 
+/**
+ * Cumbre (tablero de 5 columnas y 4 filas): caída al fondo, colina, escalera mecánica de tres
+ * filas, bajada de dos filas y una rampa en S hasta la meta, arriba del todo.
+ *   columna 1: bajada (16) · columna 2: colina (17)
+ *   columna 3: escalera (casillas 18, 13 y 8) · columna 4: bajada (9 y 14) · columna 5: rampa y meta
+ */
+function pistaCumbre(nivel) {
+  const hs = nivel.energia, hm = nivel.meta.altura;
+  const fondo = nivel.suelo ?? 0.5, alto = nivel.alto ?? 8.5, valle = nivel.valle ?? 3.5, cima = nivel.cima ?? 1.5;
+  const fin = anchoTablero(nivel), repisa = inicioRepisa(nivel);
+  const suave = (u) => u * u * (3 - 2 * u);
+  const pts = [[0, hs], [1.2, hs]];
+  // caída de la salida al fondo (de 1.2 a 3)
+  for (let i = 1; i <= 24; i++) {
+    const th = (i / 24) * Math.PI / 2;
+    pts.push([1.2 + 1.8 * (1 - Math.cos(th)), fondo + (hs - fondo) * (1 - Math.sin(th))]);
+  }
+  // colina (de 3 a 6)
+  for (let i = 1; i <= 36; i++) {
+    const x = 3 + (3 * i) / 36;
+    pts.push([x, fondo + ((cima - fondo) * (1 - Math.cos((2 * Math.PI * (x - 3)) / 3))) / 2]);
+  }
+  // escalera: recta, del fondo hasta lo alto, atravesando tres filas (de 6 a 9)
+  for (let i = 1; i <= 36; i++) pts.push([6 + (3 * i) / 36, fondo + ((alto - fondo) * i) / 36]);
+  // bajada en S de lo alto al valle, atravesando dos filas (de 9 a 12)
+  for (let i = 1; i <= 36; i++) pts.push([9 + (3 * i) / 36, alto - (alto - valle) * suave(i / 36)]);
+  // rampa en S hasta la repisa de la meta, arriba del todo
+  for (let i = 1; i <= 30; i++) pts.push([12 + (repisa - 12) * (i / 30), valle + (hm - valle) * suave(i / 30)]);
+  // repisa plana y sin rozamiento hasta el precipicio
+  for (let i = 1; i <= 8; i++) pts.push([repisa + ((fin - repisa) * i) / 8, hm]);
+  return pts;
+}
+
 const TRAZADOS = {
   u: pistaU, colina: pistaColina, escaleras: pistaEscaleras, travesia: pistaTravesia, larga: pistaLarga,
-  ascenso: pistaAscenso, final: pistaFinal,
+  ascenso: pistaAscenso, final: pistaFinal, cumbre: pistaCumbre,
 };
 
-export function celdaDe(x, h, cols = 3) {
+export function celdaDe(x, h, cols = 3, nf = 3) {
   const c = Math.min(Math.max(Math.floor(x / 3), 0), cols - 1);
-  const r = Math.min(Math.max(Math.floor(h / 3), 0), 2);
-  return (2 - r) * cols + c + 1;
+  const r = Math.min(Math.max(Math.floor(h / 3), 0), nf - 1);   // fila contando desde abajo
+  return (nf - 1 - r) * cols + c + 1;
 }
 
 /** Casilla de cada tramo de la pista (por su punto medio). */
-export function celdasTramos(pts, cols = 3) {
+export function celdasTramos(pts, cols = 3, nf = 3) {
   const out = [];
   for (let i = 0; i < pts.length - 1; i++) {
-    out.push(celdaDe((pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2, cols));
+    out.push(celdaDe((pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2, cols, nf));
   }
   return out;
 }
@@ -310,7 +347,7 @@ export function celdasTramos(pts, cols = 3) {
 // ---------- recorrido para la simulación ----------
 export function prepararRecorrido(nivel, colocadas) {
   const pts = construirPista(nivel, colocadas);
-  const celdas = celdasTramos(pts, columnas(nivel));
+  const celdas = celdasTramos(pts, columnas(nivel), filas(nivel));
   const s = [0];
   for (let i = 1; i < pts.length; i++) {
     s.push(s[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));

@@ -112,7 +112,7 @@ button { font: inherit; color: inherit; }
 .tablero {
   position: relative;
   /* 3 filas de casillas y --cols columnas (casillas cuadradas) */
-  width: min(100cqw - 31px, 100cqh * var(--cols, 3) / 3); aspect-ratio: var(--cols, 3) / 3;
+  width: min(100cqw - 31px, 100cqh * var(--cols, 3) / var(--filas, 3)); aspect-ratio: var(--cols, 3) / var(--filas, 3);
   border: 2.5px solid var(--lapiz); border-radius: 8px 6px 9px 5px / 6px 9px 5px 8px;
   background: var(--tarjeta);
   box-shadow: 4px 5px 0 rgba(80, 70, 60, 0.12);
@@ -583,7 +583,8 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .foco.visible { opacity: 0.78; }
 /* Eme (su capa del lienzo) y su bocadillo salen por encima del oscurecimiento */
 .lienzo-eme { pointer-events: none; }
-/* La capa de Eme sobresale 1,4 cuadritos por arriba del tablero (1,4 / 9 = 15,556 %): con la
+/* La capa de Eme sobresale 1,4 cuadritos por arriba del tablero (1,4 / 9 = 15,556 %; el juego lo
+   ajusta si el tablero tiene más filas): con la
    meta muy alta, la bandera y los saltos de la celebración asoman por encima del cuaderno. */
 .tablero .lienzo-eme { top: -15.556%; height: 115.556%; }
 .tablero.guiado .lienzo-eme, .tablero.guiado .bocadillo { z-index: 31; }
