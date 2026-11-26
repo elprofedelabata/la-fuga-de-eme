@@ -112,12 +112,6 @@ export function mostrarNiveles({ alElegir, alVolver, alEscena, recien, abre, ir,
   const mundos = $('mundos');
   mundos.innerHTML = construir(progreso, { recien, abre, escenaVista });
   const paginas = [...mundos.querySelectorAll('.mundo-pagina')];
-  // los puntos de abajo: uno por mundo (con su número), para saltar a él
-  $('mundos-puntos').innerHTML = MUNDOS.map((m, i) => {
-    const bloq = paginas[i].querySelector('.mundo').classList.contains('bloqueado');
-    return `<button type="button" class="mundo-punto${bloq ? ' bloqueado' : ''}" data-i="${i}"
-      aria-label="${m.id === 'fuera' ? 'Final' : `Mundo ${m.numero}`}: ${m.nombre}">${m.numero}</button>`;
-  }).join('');
   // al acabar de abrirse, el nivel vuelve a su animación de siempre
   raiz.querySelector('.nivel-btn.abriendo')?.addEventListener('animationend', (e) => {
     if (e.animationName === 'abre-nivel') e.currentTarget.classList.remove('abriendo');
@@ -142,12 +136,14 @@ export function mostrarNiveles({ alElegir, alVolver, alEscena, recien, abre, ir,
     if (i === actual) return;
     actual = i;
     mundoActual = i;
-    $('mundos-puntos').querySelectorAll('.mundo-punto').forEach((b, k) => {
-      b.classList.toggle('actual', k === i);
-      b.setAttribute('aria-current', k === i ? 'true' : 'false');
-    });
+    // las flechas dicen a qué mundo llevan (y se apagan en los extremos)
+    const nombre = (k) => `${MUNDOS[k].id === 'fuera' ? 'Final' : `Mundo ${MUNDOS[k].numero}`}: ${MUNDOS[k].nombre}`;
     $('mundo-ant').disabled = i <= 0;
     $('mundo-sig').disabled = i >= paginas.length - 1;
+    $('mundo-ant').title = i > 0 ? nombre(i - 1) : '';
+    $('mundo-sig').title = i < paginas.length - 1 ? nombre(i + 1) : '';
+    $('mundo-ant').setAttribute('aria-label', i > 0 ? `Ir al ${nombre(i - 1)}` : 'Mundo anterior');
+    $('mundo-sig').setAttribute('aria-label', i < paginas.length - 1 ? `Ir al ${nombre(i + 1)}` : 'Mundo siguiente');
     paginas.forEach((p, k) => { p.inert = k !== i; });   // (los otros mundos, fuera del foco y de los lectores)
   };
   irA = (i, suave = true) => {
@@ -159,10 +155,6 @@ export function mostrarNiveles({ alElegir, alVolver, alEscena, recien, abre, ir,
   mundos.onscroll = () => marcar(Math.round(mundos.scrollLeft / Math.max(1, mundos.clientWidth)));
   $('mundo-ant').onclick = () => irA(actual - 1);
   $('mundo-sig').onclick = () => irA(actual + 1);
-  $('mundos-puntos').onclick = (e) => {
-    const b = e.target.closest('.mundo-punto');
-    if (b) irA(Number(b.dataset.i));
-  };
 
   // Salir: la pantalla siguiente se coloca debajo y esta hoja se arranca
   let vivo = true;

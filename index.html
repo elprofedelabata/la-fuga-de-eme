@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=60349c0d">
+  <link rel="stylesheet" href="css/estilos.css?v=ad7f9368">
   <link rel="preload" as="image" href="img/logo.svg">
   <!-- versiones: lo escribe herramientas/versionar.mjs -->
   <script type="importmap">
@@ -40,7 +40,7 @@
       "./js/llegada-libro.js": "./js/llegada-libro.js?v=65f859db",
       "./js/main.js": "./js/main.js?v=37e52db2",
       "./js/nivel.js": "./js/nivel.js?v=682c8bb2",
-      "./js/niveles.js": "./js/niveles.js?v=c96df96b",
+      "./js/niveles.js": "./js/niveles.js?v=4f97d668",
       "./js/opciones.js": "./js/opciones.js?v=d62a3428",
       "./js/pista.js": "./js/pista.js?v=bc162aae",
       "./js/progreso.js": "./js/progreso.js?v=2889ee73",
@@ -61,7 +61,7 @@
   <link rel="modulepreload" href="js/fin-cuaderno.js?v=9559b692">
   <link rel="modulepreload" href="js/llegada-libro.js?v=65f859db">
   <link rel="modulepreload" href="js/inicio.js?v=7fcb3ae0">
-  <link rel="modulepreload" href="js/niveles.js?v=c96df96b">
+  <link rel="modulepreload" href="js/niveles.js?v=4f97d668">
   <link rel="modulepreload" href="js/progreso.js?v=2889ee73">
   <link rel="modulepreload" href="js/opciones.js?v=d62a3428">
   <script type="module" src="js/main.js?v=37e52db2"></script>
@@ -83,16 +83,16 @@
       <h2>Elige nivel</h2>
       <p class="niveles-total" id="niveles-total"></p>
     </header>
-    <div class="mundos" id="mundos"></div>
-    <nav class="mundos-nav" aria-label="Mundos">
-      <button class="btn redondo" id="mundo-ant" aria-label="Mundo anterior">
+    <!-- los mundos, de uno en uno, con una flecha a cada lado -->
+    <div class="mundos-marco">
+      <button class="btn mundo-flecha" id="mundo-ant" aria-label="Mundo anterior">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
       </button>
-      <div class="mundos-puntos" id="mundos-puntos"></div>
-      <button class="btn redondo" id="mundo-sig" aria-label="Mundo siguiente">
+      <div class="mundos" id="mundos"></div>
+      <button class="btn mundo-flecha" id="mundo-sig" aria-label="Mundo siguiente">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
       </button>
-    </nav>
+    </div>
   </section>
 
   <!-- Pantalla de inicio -->
