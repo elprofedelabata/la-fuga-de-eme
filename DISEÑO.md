@@ -421,7 +421,7 @@ En el libro, las piezas pueden llevar su **coeficiente de rozamiento** (`mu`) en
 
 ### Calculadora
 
-En el libro, junto a «Quitar todas las piezas», hay un botón de **calculadora**: un panel pequeño que flota sin bloquear el juego (`js/calculadora.js`). Se abre a la derecha del tablero si cabe (si no, centrada encima de los botones) y se puede **arrastrar por su cabecera** a donde quiera el jugador, que conserva ese sitio. Escribe con coma decimal, entiende + − × ÷ y paréntesis (con su propio analizador, sin `eval`) y también va con el teclado. En el cuaderno no sale.
+En el libro, junto a «Quitar todas las piezas», hay un botón de **calculadora**: un panel pequeño que flota sin bloquear el juego (`js/calculadora.js`). Se abre a la derecha del tablero si cabe (si no, centrada encima de los botones) y se puede **arrastrar por su cabecera** a donde quiera el jugador, que conserva ese sitio. Tiene el aire del juego: una tarjeta de cuaderno cuadriculada sujeta con celo, la cuenta escrita a mano en una tira de papel y teclas de papel un poco torcidas que se levantan al pasar el ratón. Mientras está abierta, su botón se queda hundido y naranja. Escribe con coma decimal, entiende + − × ÷ y paréntesis (con su propio analizador, sin `eval`) y también va con el teclado. En el cuaderno no sale.
 
 ### Nivel 12 · «Datos del problema»
 

@@ -230,33 +230,57 @@ button { font: inherit; color: inherit; }
 #btn-calculadora svg path { stroke-width: 2.6; }
 .calculadora {
   position: fixed; left: 50%; top: 40%; z-index: 25;   /* (el juego la coloca junto al tablero) */
-  width: 212px; padding: 8px; color: var(--lapiz);
-  background: #fffef9; border: 2px solid var(--lapiz); border-radius: 12px 9px 13px 8px;
+  width: 220px; padding: 10px 10px 11px; color: var(--lapiz);
+  /* una tarjeta de cuaderno, sujeta con un trozo de celo */
+  background-color: var(--tarjeta);
+  background-image: linear-gradient(var(--cuadri) 1px, transparent 1px), linear-gradient(90deg, var(--cuadri) 1px, transparent 1px);
+  background-size: 12px 12px;
+  border: 2px solid var(--lapiz); border-radius: var(--mano);
   box-shadow: 4px 6px 0 rgba(80, 70, 60, 0.18);
   animation: entra-enunciado 0.3s ease-out;
 }
+.calculadora::before {   /* el celo */
+  content: ""; position: absolute; left: 50%; top: -9px; width: 64px; height: 17px; pointer-events: none;
+  transform: translateX(-50%) rotate(-3deg);
+  background: rgba(236, 226, 196, 0.85); border-left: 1px dashed rgba(160, 140, 100, 0.5); border-right: 1px dashed rgba(160, 140, 100, 0.5);
+}
 .calculadora[hidden] { display: none; }
 .calc-cab {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 15px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; font-size: 17px;
   cursor: grab; touch-action: none; user-select: none;   /* se arrastra por aquí */
 }
+.calc-cab b { font-weight: normal; }
 .calc-cab b::before { content: "⠿ "; color: #b9b3a8; }
-.calculadora.arrastrando { opacity: 0.92; box-shadow: 6px 10px 0 rgba(80, 70, 60, 0.2); }
+.calculadora.arrastrando { opacity: 0.94; box-shadow: 7px 11px 0 rgba(80, 70, 60, 0.2); rotate: -1deg; }
 .calculadora.arrastrando .calc-cab { cursor: grabbing; }
-.calc-cerrar { border: 0; background: none; font-size: 16px; cursor: pointer; color: var(--lapiz); padding: 2px 6px; }
+.calc-cerrar {
+  width: 28px; height: 28px; padding: 0; cursor: pointer; font: inherit; font-size: 17px; line-height: 1; color: var(--lapiz);
+  background: none; border: 0; border-radius: 50%; transition: background-color 0.12s, transform 0.12s;
+}
+/* la pantalla: una tira de papel donde se escribe la cuenta a lápiz */
 .calc-pantalla {
-  display: block; min-height: 34px; margin-bottom: 7px; padding: 4px 8px; overflow-x: auto; white-space: nowrap;
-  text-align: right; font-family: system-ui, sans-serif; font-size: 20px; font-variant-numeric: tabular-nums;
-  background: #eef3ea; border: 1.5px solid #9fb39a; border-radius: 6px;
+  display: block; min-height: 40px; margin-bottom: 9px; padding: 5px 10px 3px; overflow-x: auto; white-space: nowrap;
+  text-align: right; font-family: var(--fuente); font-size: 25px; line-height: 1.25;
+  background: #fff; border: 2px solid var(--lapiz); border-radius: var(--mano-peq);
+  box-shadow: inset 2px 2px 0 rgba(80, 70, 60, 0.08);
 }
-.calc-teclas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.calc-teclas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+/* teclas: botoncitos de papel, cada uno un poco torcido */
 .calc-teclas button {
-  min-height: 36px; padding: 0; cursor: pointer; font-family: system-ui, sans-serif; font-size: 17px; color: var(--lapiz);
-  background: #fff; border: 1.5px solid #b9b3a8; border-radius: 7px;
+  min-height: 38px; padding: 0; cursor: pointer;
+  font-family: var(--fuente); font-size: 21px; line-height: 1; color: var(--lapiz);
+  background: #fff; border: 2px solid var(--lapiz); border-radius: var(--mano-peq);
+  box-shadow: 1.5px 2px 0 rgba(80, 70, 60, 0.2);
+  transition: transform 0.1s, box-shadow 0.1s, background-color 0.1s;
 }
-.calc-teclas button.op { background: #f1ede4; font-weight: 600; }
-.calc-teclas button.igual { background: var(--naranja); border-color: var(--naranja-o); }
-.calc-teclas button:active { transform: translateY(1px); }
+.calc-teclas button:nth-child(odd) { rotate: -0.6deg; }
+.calc-teclas button:nth-child(3n) { rotate: 0.7deg; }
+.calc-teclas button.op { background: #fff1db; }
+.calc-teclas button[data-t="C"] { background: #fde6df; }
+.calc-teclas button.igual { background: var(--naranja); }
+.calc-teclas button:active { transform: translate(1px, 1.5px); box-shadow: 0.5px 0.5px 0 rgba(80, 70, 60, 0.2); }
+/* el botón de la calculadora, hundido y naranja mientras está abierta */
+#btn-calculadora[aria-expanded="true"] { background: var(--naranja); transform: translate(1px, 2px); box-shadow: inset 1px 2px 0 rgba(80, 70, 60, 0.22); }
 .pieza .pegatina.gira { animation: gira-pegatina 0.4s ease-in-out; }
 @keyframes gira-pegatina { 50% { transform: rotateX(90deg) scale(1.15); } }
 .pieza.seleccionada {
@@ -849,6 +873,15 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
   .btn:not([disabled]):active { transform: translate(1px, 2px); box-shadow: 1px 1px 0 rgba(80, 70, 60, 0.18); }
   .icono:hover { background: rgba(58, 53, 48, 0.08); }
   .bocadillo:hover { box-shadow: 2px 3px 0 rgba(80, 70, 60, 0.15); }
+  /* calculadora: las teclas se levantan como el resto de botones */
+  .calc-teclas button:hover { transform: translateY(-2px); box-shadow: 2.5px 4px 0 rgba(80, 70, 60, 0.22); background-color: #fffaf0; }
+  .calc-teclas button.op:hover { background-color: #ffe7c2; }
+  .calc-teclas button[data-t="C"]:hover { background-color: #fbd4c8; }
+  .calc-teclas button.igual:hover { background-color: #f7b552; }
+  .calc-teclas button:active { transform: translate(1px, 1.5px); box-shadow: 0.5px 0.5px 0 rgba(80, 70, 60, 0.2); }
+  .calc-cerrar:hover { background-color: rgba(58, 53, 48, 0.1); transform: rotate(90deg); }
+  .calc-cab:hover b::before { color: var(--lapiz); }
+  #btn-calculadora[aria-expanded="true"]:hover { background-color: #f7b552; transform: translate(1px, 1px); box-shadow: inset 1px 2px 0 rgba(80, 70, 60, 0.22); }
 }
 
 /* ---------- herramientas de desarrollo (solo con ?dev) ---------- */
