@@ -23,6 +23,7 @@ import { sinCortes, prepararEscritura, mostrarLetras } from './escritura.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
 import { serio, coma, valorE, energia, aAltura, unidadE, julitoEnJ } from './unidades.js';
+import { iniciarCalculadora } from './calculadora.js';
 
 const $ = (id) => document.getElementById(id);
 const app = $('app');
@@ -153,7 +154,8 @@ function crearBandeja() {
     const pierde = cambioDe(p);   // negativo si da julitos
     b.setAttribute('aria-label', p.gana != null
       ? `${p.nombre.join(' ')}: da ${energia(p.gana)}`
-      : `${p.nombre.join(' ')}: pierde ${energia(pierde)}`);
+      : p.mu != null ? `${p.nombre.join(' ')}: coeficiente de rozamiento ${coma(p.mu)}`
+        : `${p.nombre.join(' ')}: pierde ${energia(pierde)}`);
     const cv = document.createElement('canvas');
     // una casilla mide 60 px en la tarjeta; las dobles, algo menos para que la tarjeta no crezca tanto
     const lado = p.doble === 'h' ? 46 : p.doble === 'v' ? 40 : 60;
@@ -168,7 +170,7 @@ function crearBandeja() {
     b.append(cv);
     b.insertAdjacentHTML('beforeend',
       `<span class="n1">${p.nombre[0]}</span><span class="n2">${p.nombre[1]}</span>` +
-      `<span class="pegatina${p.gana != null ? ' gana' : ''}${(p.gana ?? pierde) ? '' : ' cero'}">${textoPegatina(p)}</span>`);
+      `<span class="pegatina${p.gana != null ? ' gana' : ''}${p.mu != null ? ' mu' : (p.gana ?? pierde) ? '' : ' cero'}">${textoPegatina(p)}</span>`);
     b.addEventListener('pointerdown', (e) => posibleArrastre(e, { pieza: p, desde: 'bandeja' }));
     b.addEventListener('click', () => { if (!suprimirClick) tocarPieza(p.id); });
     cont.append(b);
@@ -177,6 +179,7 @@ function crearBandeja() {
 
 /** Lo que pone la pegatina de una pieza: «−2» en el cuaderno, «−9,8 J» en el libro. */
 function textoPegatina(p, viejo = estado.pegatinasViejas) {
+  if (p.mu != null) return `μ = ${coma(p.mu)}`;      // en el libro, el coeficiente de rozamiento
   const n = p.gana ?? cambioDe(p), signo = p.gana != null ? '+' : '−';
   if (serio() && !viejo) return n ? `${signo}${valorE(n)} J` : '0 J';
   return `${signo}${n}`;
@@ -1038,6 +1041,41 @@ function dibujarExplicacion(c, w) {
       c.fillText(txt, xa + 2.6 * d, m);
     }
   }
+  if (ex.tipo === 'medida' || ex.tipo === 'medidaDoble') {
+    // cotas de lo que miden los huecos de suelo: una por casilla, o una sola para la pieza doble
+    const cols = columnas();
+    const xs = Object.keys(NIVEL.huecos).filter((cs) => NIVEL.huecos[cs] === 'suelo').map((cs) => ((Number(cs) - 1) % cols) * 3);
+    const tramos = ex.tipo === 'medida' ? xs.map((x) => [x, x + 3]) : [[Math.min(...xs), Math.max(...xs) + 3]];
+    // (la cota va por encima del bocadillo de Eme, con líneas de referencia hasta el suelo)
+    const suelo = NIVEL.suelo ?? 0.5, h = Math.min(altoTablero() - 0.8, NIVEL.energia + 2);
+    tramos.forEach(([a, b], i) => {
+      const ap = aparece(0.2 + 0.4 * i, 0.4);
+      if (ap <= 0) return;
+      const [x0, y] = v.px(a + 0.04, h), [x1] = v.px(b - 0.04, h);
+      const xf = x0 + (x1 - x0) * ap, f = v.k * 0.22;
+      c.save();
+      c.globalAlpha = ap;
+      c.setLineDash([4, 4]); c.strokeStyle = 'rgba(61,106,153,0.7)'; c.lineWidth = 1.4;
+      const [, ys] = v.px(0, suelo);
+      c.beginPath(); c.moveTo(x0, y - f); c.lineTo(x0, ys); c.moveTo(x1, y - f); c.lineTo(x1, ys); c.stroke();
+      c.restore();
+      c.strokeStyle = '#3d6a99'; c.fillStyle = '#3d6a99'; c.lineWidth = 2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(x0, y - f); c.lineTo(x0, y + f); c.moveTo(x0, y); c.lineTo(xf, y); c.stroke();
+      // puntas de flecha
+      c.beginPath(); c.moveTo(x0, y); c.lineTo(x0 + f, y - f * 0.6); c.lineTo(x0 + f, y + f * 0.6); c.closePath(); c.fill();
+      if (ap >= 1) {
+        c.beginPath(); c.moveTo(x1, y - f); c.lineTo(x1, y + f); c.stroke();
+        c.beginPath(); c.moveTo(x1, y); c.lineTo(x1 - f, y - f * 0.6); c.lineTo(x1 - f, y + f * 0.6); c.closePath(); c.fill();
+      }
+      const txt = `d = ${coma((b - a) * NIVEL.unidades.cuadrito)} m`, tam = Math.round(v.k * 0.55);
+      c.globalAlpha = ap;
+      c.font = `${tam}px ${FUENTE}`; c.textAlign = 'center'; c.textBaseline = 'bottom';
+      c.lineJoin = 'round'; c.lineWidth = 4; c.strokeStyle = 'rgba(255,254,249,0.95)';
+      c.strokeText(txt, (x0 + x1) / 2, y - f * 1.2);
+      c.fillText(txt, (x0 + x1) / 2, y - f * 1.2);
+      c.globalAlpha = 1;
+    });
+  }
   if (ex.tipo === 'eme') {
     const a = aparece(0.2, 0.5), s = a * a * (3 - 2 * a);
     const B = v.k * 2.1;
@@ -1152,11 +1190,22 @@ function fotograma(ahora) {
     actualizarEnergia(e);
     // cada julito perdido aparece como «−1 ■» junto a Eme, repartidos a lo largo de la pieza
     for (const [c, L] of Object.entries(s.perdidoCelda)) {
+      if (estado.colocadas[c]?.mu != null) continue;      // (las de μ, abajo)
       const n = MATERIALES[estado.colocadas[c]?.material ?? 'fijo'].pierde;
       const deben = etiquetasPerdida(L, n);
       while (pose && (estado.etiquetas[c] ?? 0) < deben) {
         estado.etiquetas[c] = (estado.etiquetas[c] ?? 0) + 1;
         cambioJulitos(-1, pose, s.dir);
+      }
+    }
+    // en el libro, lo que quita una pieza con μ sale de una vez, al acabar de recorrerla: «−7,35 J ■»
+    for (const p of new Set(Object.values(estado.colocadas).filter((q) => q?.mu != null))) {
+      const L = Object.keys(estado.colocadas).filter((c) => estado.colocadas[c] === p)
+        .reduce((a, c) => a + (s.perdidoCelda[c] ?? 0), 0);
+      const n = cambioDe(p);
+      if (pose && n > 0 && L >= n - 1e-6 && !estado.etiquetas[p.id]) {
+        estado.etiquetas[p.id] = 1;
+        cambioJulitos(-n, pose, s.dir);
       }
     }
     // y cada julito que da una escalera mecánica, como «+1 ■»
@@ -1240,6 +1289,7 @@ function zona(nombre) {
     return [$('regla').getBoundingClientRect(), u?.offsetWidth ? u.getBoundingClientRect() : null];
   }
   if (nombre === 'enunciado') return $('enunciado').getBoundingClientRect();
+  if (nombre === 'calculadora') return $('btn-calculadora').getBoundingClientRect();
   // la columna de cuadritos de altura de la salida (con su total al lado)
   if (nombre === 'columna') return enTablero(0, NIVEL.energia + 0.2, 3.2, -0.1);
   // la esquina de arriba a la derecha, por donde asoma EME
@@ -1287,7 +1337,7 @@ function charlar(frases, alTerminar) {
     if (f.anim === 'reglaJ') ponerReglaEn(true); else ponerReglaEn(reglaEnJ);
     if (f.anim === 'pegatinas') cambiarPegatinas();
     if (f.anim === 'enunciado') mostrarEnunciado(); else ocultarEnunciado();
-    const dibujo = { julitos: 'julitos', total: 'total', eme: 'eme' }[f.anim];
+    const dibujo = { julitos: 'julitos', total: 'total', eme: 'eme', medida: 'medida', medidaDoble: 'medidaDoble' }[f.anim];
     if (dibujo !== estado.explica?.tipo) estado.explica = dibujo ? { tipo: dibujo, t0: reloj } : null;
     estado.cara = { expr: f.expr ?? 'idle', px: f.px ?? 0.3, py: f.py ?? 0.3 };
     estado.huecosEnFoco = !!f.zonas?.includes('huecos');   // los huecos laten mientras se habla de ellos
@@ -1375,7 +1425,8 @@ function construirRegla() {
   const regla = $('regla');
   const n = altoTablero();
   estado.reglaEnJ ??= reglaEnJ;
-  const clave = `${n}|${serio() ? NIVEL.unidades.cuadrito + '|' + julitoEnJ() : ''}|${estado.reglaVieja}|${estado.reglaEnJ}`;
+  const hm = NIVEL.meta.altura;
+  const clave = `${n}|${hm}|${serio() ? NIVEL.unidades.cuadrito + '|' + julitoEnJ() : ''}|${estado.reglaVieja}|${estado.reglaEnJ}`;
   if (regla.dataset.clave === clave) return;
   regla.dataset.clave = clave;
   regla.style.setProperty('--n', n);
@@ -1388,6 +1439,14 @@ function construirRegla() {
     el.className = 'regla-n';
     el.style.setProperty('--h', h);
     el.textContent = numeroRegla(h);
+    regla.append(el);
+  }
+  // la meta entre dos marcas (en el libro, a 0,25 m…): su propio número
+  if (!Number.isInteger(hm)) {
+    const el = document.createElement('span');
+    el.className = 'regla-n entre';
+    el.style.setProperty('--h', hm);
+    el.textContent = numeroRegla(hm);
     regla.append(el);
   }
   // en el libro, arriba del todo, el interruptor de la unidad: m (altura) o J (energía potencial)
@@ -1462,6 +1521,8 @@ function cargarNivel(n) {
   estado.reglaEnJ = reglaEnJ;
   ocultarEnunciado();
   $('titulo-nivel').classList.toggle('con-enunciado', !!NIVEL.enunciado);
+  $('btn-calculadora').hidden = !serio();
+  calculadora?.cerrar();
   $('titulo-nivel').title = NIVEL.enunciado ? 'Ver el enunciado' : '';
   // tablero con las filas y columnas del nivel; la capa de Eme sobresale CABEZA cuadritos por arriba
   $('tablero').style.setProperty('--cols', columnas());
@@ -1538,6 +1599,7 @@ function iniciar() {
     }));
   }
   $('bocadillo').addEventListener('click', tocarBocadillo);
+  calculadora = iniciarCalculadora();
   $('regla').addEventListener('click', () => {
     if (!serio() || estado.reglaVieja || estado.guia) return;
     ponerReglaEn(!estado.reglaEnJ, { recordar: true });
@@ -1604,6 +1666,8 @@ function abrirInicio() {
 /** Las escenas de entrada de los mundos: si ya se han visto y su primer nivel. */
 const ESCENAS_MUNDO = { libro: { vista: llegadaLibroVista, mostrar: mostrarLlegadaLibro, primero: 11 } };
 const escenaVista = (id) => ESCENAS_MUNDO[id]?.vista() ?? true;
+
+let calculadora = null;     // la calculadora del libro (se pone en marcha al iniciar)
 
 /** Nivel recién desbloqueado (al superar el anterior por primera vez): se abre con animación en el mapa. */
 let porAbrir = null;

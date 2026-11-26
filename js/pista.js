@@ -20,8 +20,19 @@ const V_ESCALERA = 1.4;
 /**
  * Julitos que cambia una pieza al recorrerla: positivo si los quita (rozamiento), negativo si
  * los da (escaleras mecánicas, con `gana`).
+ *
+ * En el cuaderno, cada material quita un número fijo de julitos por casilla. En el libro, las
+ * piezas llevan su coeficiente de rozamiento `mu`: quitan W = μ · m · g · d, con d la distancia
+ * horizontal que recorre la pieza (3 cuadritos por casilla de ancho). En julitos (que valen
+ * m · g · un cuadrito), eso es simplemente μ · d en cuadritos.
  */
-export const cambioDe = (p) => (!p ? 0 : p.gana != null ? -p.gana : MATERIALES[p.material].pierde * tamDe(p));
+export const cambioDe = (p) => (!p ? 0 : p.gana != null ? -p.gana
+  : p.mu != null ? redondo(p.mu * anchoDe(p))
+    : MATERIALES[p.material].pierde * tamDe(p));
+/** Distancia horizontal que recorre una pieza, en cuadritos: 3 por casilla de ancho. */
+export const anchoDe = (p) => 3 * (p?.doble === 'h' ? 2 : 1);
+/** Quita el ruido de los decimales (0,1 · 3 = 0,30000000000000004). */
+export const redondo = (x) => Math.round(x * 1e9) / 1e9;
 /** Casillas que ocupa una pieza: 1, o 2 si es doble (horizontal o vertical). */
 export const tamDe = (p) => (p?.doble ? 2 : 1);
 /** Julitos que cambia la pieza en cada una de sus casillas (el rozamiento va por casilla). */
@@ -402,9 +413,10 @@ export function sDeX(rec, x) {
 // ---------- resultado esperado (cuentas con julitos enteros) ----------
 export function analizar(nivel, colocadas) {
   const piezas = [...new Set(Object.values(colocadas).filter(Boolean))];   // una doble ocupa dos huecos
-  const perdidas = piezas.reduce((a, p) => a + Math.max(cambioDe(p), 0), 0);
-  const ganancias = piezas.reduce((a, p) => a + Math.max(-cambioDe(p), 0), 0);
-  const llegada = nivel.energia + ganancias - nivel.meta.altura - perdidas;   // Ec al llegar a la meta
+  const perdidas = redondo(piezas.reduce((a, p) => a + Math.max(cambioDe(p), 0), 0));
+  const ganancias = redondo(piezas.reduce((a, p) => a + Math.max(-cambioDe(p), 0), 0));
+  // Ec al llegar a la meta (redondeada: con decimales, «justo cero» tiene que salir cero)
+  const llegada = Math.round((nivel.energia + ganancias - nivel.meta.altura - perdidas) * 1e6) / 1e6;
   const atasco = buscarAtasco(nivel, colocadas);
   const tipo = atasco ? 'nollega' : llegada === 0 ? 'meta' : llegada > 0 ? 'pasaste' : 'nollega';
   return { tipo, perdidas, ganancias, llegada, piezas, atasco };

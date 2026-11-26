@@ -363,7 +363,7 @@ Sale al tocar el nivel 11 la primera vez (o con su botón en el mapa); al pulsar
 A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, longitudes con decimales). EME es el antagonista de todo el mundo: va por delante y deja trampas «reglamentarias» para devolver a Eme a su problema. Cada nivel es un problema del libro («Problema 7.11»…).
 
 1. **«El cambio de moneda»** (11). Hecho: ver «Nivel 11» más abajo. La traducción directa del cuaderno: las pegatinas dicen cuántos julios quita cada pieza. EME vigila: «Compruebe sus unidades».
-2. **«Datos del problema»** (12). Rozamiento en llano con μ: W = μ·m·g·d. La pérdida ya depende de la longitud del tramo y de la masa.
+2. **«Datos del problema»** (12). Hecho: ver «Nivel 12» más abajo. Rozamiento en llano con μ: W = μ·m·g·d. La pérdida ya depende de lo que mide el tramo.
 3. **«La rampa ya no come lo mismo»** (13). Rozamiento en cuestas: entra cos θ. Responde a la pregunta que dejó el cuaderno: «¿por qué la rampa de arena ya no quita 3?».
 4. **«Muelle homologado»** (14). Muelles con ½·k·x². EME deja en la bandeja muelles «oficiales» que parecen ayudar pero no dan lo justo.
 5. **«El transportador del margen»** (15). Eme encuentra un transportador de ángulos: se desbloquean las **piezas giratorias** (cintas transportadoras a favor o en contra).
@@ -408,6 +408,27 @@ Para que se note que se ha cambiado de mundo, el tablero del libro no es el del 
   6. Las pegatinas dan la vuelta y pasan a julios.
   7. La bandera, a 1,0 m: «¿Cuántos julios tengo que perder?».
   8. EME asoma por la esquina de arriba con una nota en rojo: «Compruebe sus unidades.» — «¿¡EME!? Me está vigilando…».
+
+### Rozamiento con μ
+
+En el libro, las piezas pueden llevar su **coeficiente de rozamiento** (`mu`) en vez de un número fijo de julitos. Quitan W = μ · m · g · d, con **d la distancia horizontal** que recorre la pieza: 1,5 m por casilla de ancho (3 cuadritos de 0,5 m), así que un suelo doble mide 3,0 m. En julitos (que valen m · g · un cuadrito) eso es simplemente μ · d en cuadritos, así que el simulador y el validador no cambian (`cambioDe` en `js/pista.js`). Que cuente la distancia horizontal también vale para las cuestas (W = μ · m · g · cos θ · L = μ · m · g · Δx): es la sorpresa del nivel 13.
+
+- La **pegatina** dice «μ = 0,25» (en azul, en cursiva): la cuenta la hace el jugador.
+- La **etiqueta flotante** sale de una vez al acabar de recorrer la pieza, con todo lo que ha quitado: «−7,35 J».
+- Las cuentas se redondean (0,1 · 3 no da exactamente 0,3) para que «justo cero» salga cero.
+- Si la meta cae entre dos marcas de la regla (0,25 m), la regla le pone su propio número, en rojo.
+
+### Calculadora
+
+En el libro, junto a «Quitar todas las piezas», hay un botón de **calculadora**: un panel pequeño que flota abajo a la derecha, sin bloquear el juego (`js/calculadora.js`). Escribe con coma decimal, entiende + − × ÷ y paréntesis (con su propio analizador, sin `eval`) y también va con el teclado. En el cuaderno no sale.
+
+### Nivel 12 · «Datos del problema»
+
+- **Datos:** m = 1,0 kg. Sale de 1,0 m (9,8 J), donde acabó el 11, y la bandera está a 0,25 m (2,45 J): hay que perder **7,35 J**. Solo rozan los suelos: las rampas son lisas.
+- **Tablero:** 4 × 2 (el nivel es bajito: con dos filas sobra menos tablero), trazado «larga» con el suelo a 0,125 m. Dos huecos de suelo seguidos (6 y 7), donde cabe un suelo doble.
+- **Piezas:** suelos de hielo (μ = 0,1), madera (0,25) y asfalto (0,5); suelos dobles de hielo y de madera.
+- **Solución única:** el suelo doble de madera: 0,25 · 1,0 · 9,8 · 3,0 = 7,35 J. Ninguna pareja de suelos sencillos da 7,35 J (no hay dos de madera).
+- **Charla** (la primera vez): qué es μ (las pegatinas), W = μ · m · g · d, una cota «d = 1,5 m» sobre cada casilla de suelo y luego una sola «d = 3,0 m» para la pieza doble («con la misma μ, ¡roza el doble!»), y la calculadora.
 
 ### Mundo III · La pizarra (niveles 19 a 24): el giro
 

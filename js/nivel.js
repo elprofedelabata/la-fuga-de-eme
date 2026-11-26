@@ -384,6 +384,45 @@ export const NIVELES = {
       { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
     ],
   },
+
+  // El rozamiento ya no viene hecho: cada superficie tiene su coeficiente μ y quita
+  // W = μ · m · g · d, así que importa lo que mide la pieza. Solo rozan los suelos (las rampas
+  // son lisas). Hay que perder 7,35 J: lo hace el suelo doble de madera (μ = 0,25, d = 3,0 m).
+  12: {
+    numero: 12,
+    titulo: 'Datos del problema',
+    frase: 'μ, m, g, d… ¿Esto es un problema o una sopa de letras?',
+    unidades: { m: 1.0, g: 9.8, cuadrito: 0.5 },
+    enunciado: {
+      problema: '7.12',
+      texto: 'Un bloque de masa <i>m</i> = 1,0 kg parte del reposo a 1,0 m de altura, baja por una rampa lisa, '
+        + 'recorre un tramo horizontal de 3,0 m con rozamiento y sube por otra rampa lisa. ¿Qué superficie hay que '
+        + 'poner en el tramo horizontal para que se pare justo en la bandera, a 0,25 m de altura? Dato: <i>g</i> = 9,8 m/s².',
+    },
+    columnas: 4,
+    filas: 2,              // un nivel bajito: con dos filas sobra menos tablero vacío
+    trazado: 'larga',
+    suelo: 0.25,           // el tramo horizontal, a 0,125 m (no entra en las cuentas)
+    energia: 2,            // empieza donde acabó el nivel 11: a 1,0 m (9,8 J)
+    salidaX: 1.0,
+    meta: { altura: 0.5, bandera: 11.55 },   // 0,25 m: 2,45 J. Hay que perder 7,35 J.
+    huecos: { 6: 'suelo', 7: 'suelo' },
+    // La primera vez, Eme cuenta qué es μ y por qué importa lo que mide la pieza
+    charla: [
+      { texto: '¿Y estas pegatinas? Ya no dicen julios: dicen μ, el coeficiente de rozamiento de cada superficie.', expr: 'gulp', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
+      { texto: 'El rozamiento me quita W\u00a0=\u00a0μ\u00a0·\u00a0m\u00a0·\u00a0g\u00a0·\u00a0d. Y d es lo que recorro rozando.', expr: 'effort' },
+      { texto: 'Cada casilla de suelo mide 1,5 m: tres cuadritos de 0,5 m.', anim: 'medida', zonas: ['huecos'], px: 0.9, py: 0.6 },
+      { texto: 'Y una pieza doble mide 3,0 m. Con la misma μ… ¡roza el doble!', anim: 'medidaDoble', zonas: ['huecos'], px: 0.9, py: 0.6 },
+      { texto: 'Salgo de 1,0 m y me tengo que parar a 0,25 m. Para las cuentas, ahí tienes una calculadora.', zonas: ['salida', 'meta', 'calculadora'], px: 0.95, py: 0.3 },
+    ],
+    piezas: [
+      { id: 'suelo-hielo', forma: 'suelo', material: 'hielo', mu: 0.1, nombre: ['Suelo', 'de hielo'] },
+      { id: 'suelo-madera', forma: 'suelo', material: 'madera', mu: 0.25, nombre: ['Suelo', 'de madera'] },
+      { id: 'suelo-asfalto', forma: 'suelo', material: 'asfalto', mu: 0.5, nombre: ['Suelo', 'de asfalto'] },
+      { id: 'suelo-doble-hielo', forma: 'suelo', doble: 'h', material: 'hielo', mu: 0.1, nombre: ['Suelo doble', 'de hielo'] },
+      { id: 'suelo-doble-madera', forma: 'suelo', doble: 'h', material: 'madera', mu: 0.25, nombre: ['Suelo doble', 'de madera'] },
+    ],
+  },
 };
 
 /**
