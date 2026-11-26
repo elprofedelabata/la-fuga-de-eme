@@ -2,7 +2,7 @@
 // Todas las medidas van en píxeles CSS; el lienzo ya viene escalado por devicePixelRatio.
 
 import { construirPista, celdasTramos, celdaDe, columnas, filas, anchoTablero, inicioRepisa, finPista, huecosDe } from './pista.js';
-import { NIVEL } from './nivel.js';
+import { NIVEL, mundoDe } from './nivel.js';
 
 export const C = {
   papel: '#FBF8EF', tarjeta: '#FFFEF9', cuadri: '#E2EBF5', rejilla: '#A0A3AA',
@@ -14,7 +14,34 @@ export const C = {
 export const MAT_COLOR = {
   fijo: '#E9E1CE', hielo: '#D4EBF7', arena: '#EED298', madera: '#CD965C', asfalto: '#96969C',
   escalera: '#A9B0B8',
+  // el terreno fijo en el libro de texto: una tinta plana de imprenta, con su trama de puntos
+  'fijo-libro': '#E6E1F0',
 };
+
+/** ¿Se dibuja el nivel con el estilo del libro de texto (Mundo II)? */
+const enLibro = (nivel) => mundoDe(nivel.numero) === 'libro';
+
+/**
+ * Fondo de una zona del tablero: en el cuaderno, cuadrícula; en el libro, solo renglones
+ * horizontales. Sin las líneas que caen en los bordes de las casillas (`saltarBordes`).
+ */
+function fondo(ctx, ancho, alto, k, nivel, saltarBordes) {
+  ctx.fillStyle = C.tarjeta;
+  ctx.fillRect(0, 0, ancho, alto);
+  const libro = enLibro(nivel);
+  ctx.strokeStyle = libro ? '#D9E1EC' : C.cuadri;
+  ctx.lineWidth = 1;
+  if (!libro) {
+    for (let i = 1; i < Math.round(ancho / k); i++) {
+      if (saltarBordes && i % 3 === 0) continue;
+      ctx.beginPath(); ctx.moveTo(i * k, 0); ctx.lineTo(i * k, alto); ctx.stroke();
+    }
+  }
+  for (let i = 1; i < Math.round(alto / k); i++) {
+    if (saltarBordes && i % 3 === 0) continue;
+    ctx.beginPath(); ctx.moveTo(0, i * k); ctx.lineTo(ancho, i * k); ctx.stroke();
+  }
+}
 export const FUENTE = '"Patrick Hand", "Segoe Print", "Comic Sans MS", cursive';
 
 // ---------- azar con semilla ----------
@@ -130,7 +157,13 @@ function patron(ctx, mat) {
   g.fillStyle = MAT_COLOR[mat];
   g.fillRect(0, 0, N, N);
   const r = azar(mat.length * 97);
-  if (mat === 'fijo') {
+  if (mat === 'fijo-libro') {
+    // trama de puntos de imprenta, en filas alternas
+    g.fillStyle = 'rgba(105,92,150,0.42)';
+    for (let y = 0, f = 0; y < N; y += 4, f++) {
+      for (let x = f % 2 ? 2 : 0; x < N; x += 4) { g.beginPath(); g.arc(x, y, 0.85, 0, 6.29); g.fill(); }
+    }
+  } else if (mat === 'fijo') {
     g.strokeStyle = 'rgba(90,80,60,0.2)';
     g.lineWidth = 1;
     for (let k = 0; k <= 2 * N; k += 8) {
@@ -222,24 +255,13 @@ export function dibujarTablero(ctx, W, nivel, colocadas) {
   const cols = columnas(nivel), nf = filas(nivel), ancho = anchoTablero(nivel);
   const v = vistaTablero(W, cols, nf);
   const k = v.k, H = 3 * nf * k;
-  ctx.fillStyle = C.tarjeta;
-  ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = C.cuadri;
-  ctx.lineWidth = 1;
-  for (let i = 1; i < ancho; i++) {
-    if (i % 3 === 0) continue;
-    ctx.beginPath(); ctx.moveTo(i * k, 0); ctx.lineTo(i * k, H); ctx.stroke();
-  }
-  for (let i = 1; i < 3 * nf; i++) {
-    if (i % 3 === 0) continue;
-    ctx.beginPath(); ctx.moveTo(0, i * k); ctx.lineTo(W, i * k); ctx.stroke();
-  }
+  fondo(ctx, ancho * k, H, k, nivel, true);
 
   const pista = construirPista(nivel, colocadas);
   const vacia = (c) => nivel.huecos[c] && !colocadas[c];
   for (let c = 1; c <= nf * cols; c++) {
     if (vacia(c)) continue;
-    const mat = nivel.huecos[c] ? colocadas[c].material : 'fijo';
+    const mat = nivel.huecos[c] ? colocadas[c].material : enLibro(nivel) ? 'fijo-libro' : 'fijo';
     pintarTerreno(ctx, v, pista, rectCelda(W, c, cols), mat);
   }
 
@@ -476,12 +498,7 @@ export function dibujarMiniatura(ctx, lado, celda, pieza, nivel = NIVEL) {
   const ancho = nx * lado, alto = ny * lado;
   const mias = huecosDe(pieza, celda, nivel) ?? [celda];
   const v0 = vistaCelda(celda, lado, cols, nf);   // la primera casilla manda: es la de arriba a la izquierda
-  ctx.fillStyle = C.tarjeta;
-  ctx.fillRect(0, 0, ancho, alto);
-  ctx.strokeStyle = C.cuadri;
-  ctx.lineWidth = 1;
-  for (let i = 1; i < 3 * nx; i++) { ctx.beginPath(); ctx.moveTo((i * lado) / 3, 0); ctx.lineTo((i * lado) / 3, alto); ctx.stroke(); }
-  for (let i = 1; i < 3 * ny; i++) { ctx.beginPath(); ctx.moveTo(0, (i * lado) / 3); ctx.lineTo(ancho, (i * lado) / 3); ctx.stroke(); }
+  fondo(ctx, ancho, alto, lado / 3, nivel, false);
   if (nx * ny > 1) {   // la junta entre las dos casillas
     ctx.strokeStyle = 'rgba(160,163,170,0.7)';
     ctx.beginPath();

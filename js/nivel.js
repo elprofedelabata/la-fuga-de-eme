@@ -405,3 +405,13 @@ export const MUNDOS = [
   { id: 'fuera', numero: '★', nombre: 'Fuera del libro', niveles: 1 },
 ];
 export const NIVELES_JUGABLES = new Set(Object.keys(NIVELES).map(Number));
+
+/** Id del mundo al que pertenece el nivel n (los niveles van numerados seguidos, mundo a mundo). */
+export function mundoDe(n) {
+  let hasta = 0;
+  for (const m of MUNDOS) {
+    hasta += m.niveles;
+    if (n <= hasta) return m.id;
+  }
+  return null;
+}

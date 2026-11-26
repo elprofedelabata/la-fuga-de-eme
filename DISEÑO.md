@@ -385,6 +385,14 @@ Por dentro todo sigue en **julitos** (la Eₚ de un cuadrito de altura) y en cua
 - La **hoja de resultado** da el balance y la cuenta en julios: 29,4 J = 9,8 J + 4,9 J + 14,7 J.
 - Cada nivel tiene su **enunciado** («Problema 7.11. Un bloque de masa m = 1,0 kg…»): una ficha del libro que sale en la charla y se vuelve a ver tocando el título del nivel.
 
+### Aspecto del tablero en el libro
+
+Para que se note que se ha cambiado de mundo, el tablero del libro no es el del cuaderno:
+
+- **Fondo:** solo renglones horizontales (uno por cuadrito), como una página impresa, en vez de la cuadrícula.
+- **Terreno fijo** (lo que no son piezas): una tinta plana de imprenta, lila claro, con una trama de puntos, en vez del beis con rayado diagonal. No se parece a ningún material (hielo, madera, asfalto, arena).
+- Las miniaturas de las piezas usan el mismo fondo. El mundo de cada nivel sale de `MUNDOS` (`mundoDe(n)` en `js/nivel.js`).
+
 ### Nivel 11 · «El cambio de moneda»
 
 - **Datos:** m = 1,0 kg, g = 9,8 m/s², cuadritos de 0,5 m. Sale de 3,0 m (29,4 J) y la bandera está a 1,0 m (9,8 J): hay que perder **19,6 J**. Empieza el mundo, así que no sigue la altura del nivel 10 (`inicioMundo`).
