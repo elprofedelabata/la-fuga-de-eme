@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=1c2caa01">
+  <link rel="stylesheet" href="css/estilos.css?v=ff9feccc">
   <link rel="preload" as="image" href="img/logo.svg">
   <!-- versiones: lo escribe herramientas/versionar.mjs -->
   <script type="importmap">
@@ -37,19 +37,20 @@
       "./js/historia.js": "./js/historia.js?v=70bc1437",
       "./js/inicio.js": "./js/inicio.js?v=7fcb3ae0",
       "./js/llegada-libro.js": "./js/llegada-libro.js?v=65f859db",
-      "./js/main.js": "./js/main.js?v=1a10544b",
-      "./js/nivel.js": "./js/nivel.js?v=8eee7495",
+      "./js/main.js": "./js/main.js?v=6855f40c",
+      "./js/nivel.js": "./js/nivel.js?v=c50c8a41",
       "./js/niveles.js": "./js/niveles.js?v=0e70aef8",
       "./js/opciones.js": "./js/opciones.js?v=d62a3428",
       "./js/pista.js": "./js/pista.js?v=59de9360",
       "./js/progreso.js": "./js/progreso.js?v=2889ee73",
       "./js/transicion.js": "./js/transicion.js?v=c6c6e9f1",
-      "./js/tutorial.js": "./js/tutorial.js?v=2c476a29"
+      "./js/tutorial.js": "./js/tutorial.js?v=2c476a29",
+      "./js/unidades.js": "./js/unidades.js?v=d35aa2d8"
     }
   }
   </script>
   <!-- /versiones -->
-  <link rel="modulepreload" href="js/nivel.js?v=8eee7495">
+  <link rel="modulepreload" href="js/nivel.js?v=c50c8a41">
   <link rel="modulepreload" href="js/pista.js?v=59de9360">
   <link rel="modulepreload" href="js/dibujo.js?v=e52f0383">
   <link rel="modulepreload" href="js/arrastre.js?v=ebaf139f">
@@ -62,7 +63,7 @@
   <link rel="modulepreload" href="js/niveles.js?v=0e70aef8">
   <link rel="modulepreload" href="js/progreso.js?v=2889ee73">
   <link rel="modulepreload" href="js/opciones.js?v=d62a3428">
-  <script type="module" src="js/main.js?v=1a10544b"></script>
+  <script type="module" src="js/main.js?v=6855f40c"></script>
 </head>
 <body>
   <!-- Pantalla de carga: tapa el juego al menos 2 s, mientras se cargan fuentes y módulos -->
@@ -120,6 +121,7 @@
       <div class="tablero" id="tablero">
         <canvas id="lienzo" role="img" aria-label="Tablero de 3 por 3 casillas con el recorrido de Eme"></canvas>
         <canvas id="lienzo-eme" class="lienzo-eme" aria-hidden="true"></canvas>
+        <aside class="enunciado" id="enunciado" aria-live="polite" hidden></aside>
         <p class="bocadillo" id="bocadillo"></p>
       </div>
       </div>

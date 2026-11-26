@@ -362,7 +362,7 @@ Sale al tocar el nivel 11 la primera vez (o con su botón en el mapa); al pulsar
 
 A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, longitudes con decimales). EME es el antagonista de todo el mundo: va por delante y deja trampas «reglamentarias» para devolver a Eme a su problema. Cada nivel es un problema del libro («Problema 7.11»…).
 
-1. **«Exprese el resultado en julios»** (11). El primer problema con datos reales, sin rozamiento. EME vigila: «Compruebe sus unidades».
+1. **«El cambio de moneda»** (11). Hecho: ver «Nivel 11» más abajo. La traducción directa del cuaderno: las pegatinas dicen cuántos julios quita cada pieza. EME vigila: «Compruebe sus unidades».
 2. **«Datos del problema»** (12). Rozamiento en llano con μ: W = μ·m·g·d. La pérdida ya depende de la longitud del tramo y de la masa.
 3. **«La rampa ya no come lo mismo»** (13). Rozamiento en cuestas: entra cos θ. Responde a la pregunta que dejó el cuaderno: «¿por qué la rampa de arena ya no quita 3?».
 4. **«Muelle homologado»** (14). Muelles con ½·k·x². EME deja en la bandeja muelles «oficiales» que parecen ayudar pero no dan lo justo.
@@ -372,6 +372,32 @@ A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, lo
 8. **«El choque»** (18). Final del libro. EME bloquea la salida con su cuerpo y Eme tiene que usar un **choque** (momento lineal; en uno inelástico parte de la energía se va en calor) para apartarlo y saltar.
 
 **Escena final del Mundo II.** Eme sale despedido del libro y aterriza en la bandeja de la tiza, al pie de la pizarra. EME, furioso, salta detrás: «¡Vuelve a tu problema!». Rótulo: «Mundo III · La pizarra».
+
+### Unidades del libro
+
+Por dentro todo sigue en **julitos** (la Eₚ de un cuadrito de altura) y en cuadritos; el simulador y el validador no cambian. Un nivel del libro lleva `unidades: { m, g, cuadrito }` y lo que se enseña se traduce (`js/unidades.js`):
+
+- **Alturas en metros:** cuadritos · `cuadrito` (en el Mundo II, 0,5 m por cuadrito). La regla va en metros, con una «m» arriba.
+- **Energías en julios:** julitos · m · g · `cuadrito`. Con m = 1,0 kg y g = 9,8 m/s², un julito vale 4,9 J.
+- **Números con coma** y, como en los problemas, con al menos una cifra decimal (29,4 J · 3,0 m · 2,45 J); el cero, «0».
+- Las **pegatinas** dicen julios (−4,9 J); la **barra de energía** en directo es continua, con una cifra decimal; las etiquetas flotantes, «−4,9 J ■» (cada cuadradito sigue siendo un julito).
+- La **hoja de resultado** da el balance y la cuenta en julios: 29,4 J = 9,8 J + 4,9 J + 14,7 J.
+- Cada nivel tiene su **enunciado** («Problema 7.11. Un bloque de masa m = 1,0 kg…»): una ficha del libro que sale en la charla y se vuelve a ver tocando el título del nivel.
+
+### Nivel 11 · «El cambio de moneda»
+
+- **Datos:** m = 1,0 kg, g = 9,8 m/s², cuadritos de 0,5 m. Sale de 3,0 m (29,4 J) y la bandera está a 1,0 m (9,8 J): hay que perder **19,6 J**. Empieza el mundo, así que no sigue la altura del nivel 10 (`inicioMundo`).
+- **Tablero:** 4 × 3, trazado de la colina (cima a 1,5 m). Huecos: bajada (9), suelo (10) y colina (11).
+- **Piezas:** bajadas de hielo, madera y asfalto; suelos de madera y arena; colinas de madera y arena.
+- **Solución única:** bajada de hielo + suelo de madera + colina de arena (0 + 4,9 + 14,7 = 19,6 J). Las otras cuentas que suman 19,6 J se quedan en la colina: llegan a ella con demasiado poco.
+- **Charla con animaciones** (la primera vez; mientras, la regla y las pegatinas empiezan en julitos):
+  1. Entra la ficha del enunciado: «¡Un problema de verdad!».
+  2. Los números de la regla dan la vuelta, uno a uno, y pasan a metros: «Cada cuadrito mide 0,5 m».
+  3. Los 6 cuadritos de altura de la salida se llenan de julitos con «4,9» dentro: m · g · 0,5 m = 4,9 J.
+  4. Una llave los suma: Eₚ = 1,0 · 9,8 · 3,0 = 29,4 J.
+  5. Las pegatinas dan la vuelta y pasan a julios.
+  6. La bandera, a 1,0 m: «¿Cuántos julios tengo que perder?».
+  7. EME asoma por la esquina de arriba con una nota en rojo: «Compruebe sus unidades.» — «¿¡EME!? Me está vigilando…».
 
 ### Mundo III · La pizarra (niveles 19 a 24): el giro
 

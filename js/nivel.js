@@ -336,6 +336,53 @@ export const NIVELES = {
       { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
     ],
   },
+
+  // ---------- Mundo II · El libro de texto ----------
+  // Aquí todo va en unidades de verdad: alturas en metros y energías en julios, con decimales.
+  // Por dentro sigue en julitos: cada cuadrito mide 0,5 m y, con m = 1,0 kg y g = 9,8 m/s²,
+  // un julito vale m · g · 0,5 m = 4,9 J. El 11 es la traducción directa del cuaderno: las
+  // piezas dicen cuántos julios quitan (la μ llega en el 12).
+  11: {
+    numero: 11,
+    titulo: 'El cambio de moneda',
+    frase: 'Metros, julios, decimales… Esto ya no es el cuaderno.',
+    inicioMundo: true,     // empieza un mundo: no sigue donde acabó el nivel anterior
+    unidades: { m: 1.0, g: 9.8, cuadrito: 0.5 },
+    enunciado: {
+      problema: '7.11',
+      texto: 'Un bloque de masa <i>m</i> = 1,0 kg parte del reposo a 3,0 m de altura y desliza por la pista. '
+        + '¿Qué piezas hay que poner para que se pare justo en la bandera, a 1,0 m de altura? Dato: <i>g</i> = 9,8 m/s².',
+    },
+    columnas: 4,
+    trazado: 'colina',
+    suelo: 0.5,            // 0,25 m
+    cima: 3,               // 1,5 m
+    energia: 6,            // sale de 3,0 m: 29,4 J
+    salidaX: 1.0,
+    meta: { altura: 2, bandera: 11.55 },   // 1,0 m: 9,8 J. Hay que perder 19,6 J.
+    // Una solución: bajada de hielo, suelo de madera y colina de arena (0 + 4,9 + 14,7 = 19,6 J).
+    // Las otras cuentas que dan 19,6 J se quedan en la colina: llegan a ella con poco.
+    huecos: { 9: 'bajada', 10: 'suelo', 11: 'colina' },
+    // La primera vez, Eme cuenta las unidades del libro mientras la regla y las pegatinas cambian
+    charla: [
+      { texto: '¡Un problema de verdad! Con su enunciado, sus datos… y sus decimales.', expr: 'gulp', anim: 'enunciado', zonas: ['enunciado'], px: 0.6, py: 0.9 },
+      { texto: 'Aquí las alturas no se cuentan en cuadritos: van en metros. Cada cuadrito mide 0,5 m.', anim: 'regla', zonas: ['regla'], px: -0.95, py: 0.2 },
+      { texto: '¿Y mis julitos? Cada cuadrito de altura vale m\u00a0·\u00a0g\u00a0·\u00a00,5\u00a0m: 1,0\u00a0·\u00a09,8\u00a0·\u00a00,5\u00a0=\u00a04,9\u00a0J.', anim: 'julitos', zonas: ['columna'], px: -0.4, py: 0.95 },
+      { texto: 'Salgo de 3,0 m de altura: Eₚ\u00a0=\u00a0m\u00a0·\u00a0g\u00a0·\u00a0h = 1,0\u00a0·\u00a09,8\u00a0·\u00a03,0\u00a0=\u00a029,4\u00a0J.', anim: 'total', zonas: ['columna', 'salida'], px: -0.4, py: 0.95 },
+      { texto: 'Las piezas tampoco quitan julitos: quitan julios. La madera, 4,9 J; el asfalto, 9,8 J; la arena, 14,7 J.', anim: 'pegatinas', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
+      { texto: 'La bandera está a 1,0 m de altura. ¿Cuántos julios tengo que perder por el camino?', zonas: ['meta'], px: 0.95, py: 0.3 },
+      { texto: '¿¡EME!? Me está vigilando… Mejor hacemos bien las cuentas.', expr: 'gulp', anim: 'eme', zonas: ['esquina'], px: 0.95, py: -0.5 },
+    ],
+    piezas: [
+      { id: 'bajada-hielo', forma: 'bajada', material: 'hielo', nombre: ['Bajada', 'de hielo'] },
+      { id: 'bajada-madera', forma: 'bajada', material: 'madera', nombre: ['Bajada', 'de madera'] },
+      { id: 'bajada-asfalto', forma: 'bajada', material: 'asfalto', nombre: ['Bajada', 'de asfalto'] },
+      { id: 'suelo-madera', forma: 'suelo', material: 'madera', nombre: ['Suelo', 'de madera'] },
+      { id: 'suelo-arena', forma: 'suelo', material: 'arena', nombre: ['Suelo', 'de arena'] },
+      { id: 'colina-madera', forma: 'colina', material: 'madera', nombre: ['Colina', 'de madera'] },
+      { id: 'colina-arena', forma: 'colina', material: 'arena', nombre: ['Colina', 'de arena'] },
+    ],
+  },
 };
 
 /**

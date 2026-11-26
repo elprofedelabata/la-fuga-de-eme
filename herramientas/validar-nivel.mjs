@@ -70,7 +70,7 @@ for (const nivel of Object.values(NIVELES)) {
   }
   // Continuidad: empieza donde acabó el nivel anterior
   const anterior = NIVELES[nivel.numero - 1];
-  const continua = !anterior || anterior.meta.altura === nivel.energia;
+  const continua = !anterior || nivel.inicioMundo || anterior.meta.altura === nivel.energia;
   if (!continua) console.log(`✗ No empieza donde acabó el nivel ${anterior.numero}: sale de ${nivel.energia} y aquel acababa en ${anterior.meta.altura}`);
   const soluciones = juegos.size;
   const esperadas = nivel.soluciones ?? 1;

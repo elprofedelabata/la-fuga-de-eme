@@ -50,6 +50,22 @@ button { font: inherit; color: inherit; }
 }
 .barra-sup .marca { font-size: 13px; color: var(--naranja-o); letter-spacing: 0.04em; }
 .barra-sup #titulo-nivel { font-size: 19px; }
+/* en el libro, el título abre el enunciado del problema */
+#titulo-nivel.con-enunciado { cursor: pointer; text-decoration: underline dotted 1.5px; text-underline-offset: 4px; }
+
+/* la ficha del enunciado: un recuadro del libro de texto, sobre la parte de abajo del tablero */
+.enunciado {
+  position: absolute; left: 5%; right: 5%; bottom: 5%; z-index: 32;
+  padding: 9px 13px 10px; cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif; font-size: 15px; line-height: 1.35; color: #2c2824;
+  background: #fffef9; border: 1.5px solid #7d9cbf; border-left: 5px solid #3d6a99; border-radius: 3px;
+  box-shadow: 3px 4px 0 rgba(60, 50, 40, 0.18);
+  animation: entra-enunciado 0.45s cubic-bezier(0.2, 1.3, 0.5, 1);
+}
+.enunciado[hidden] { display: none; }
+.enunciado b { display: block; margin-bottom: 2px; font-size: 14px; color: #3d6a99; }
+.enunciado p { margin: 0; }
+@keyframes entra-enunciado { from { opacity: 0; transform: translateY(14px) rotate(-1.5deg); } }
 .icono {
   width: 44px; height: 44px; border: 0; background: none; padding: 8px; border-radius: 10px; cursor: pointer;
 }
@@ -97,6 +113,12 @@ button { font: inherit; color: inherit; }
 }
 .regla-n::after { content: ""; width: 8px; height: 1.5px; background: #8aa3c4; border-radius: 1px; }
 .regla-n.meta { color: var(--calor); }
+/* en el libro, en metros: la unidad, arriba del todo */
+.regla-u { display: none; position: absolute; right: 2px; top: -17px; font-size: 13px; color: #4a6a94; }
+.regla.metros .regla-u { display: block; }
+/* al cambiar de unidades, cada número da la vuelta */
+.regla-n.gira { animation: gira-regla 0.4s ease-in-out; }
+@keyframes gira-regla { 50% { transform: translateY(-50%) rotateX(90deg); } }
 .regla-n.meta::after { background: var(--calor); height: 2px; }
 /* marcador: altura actual de Eme */
 .regla-eme {
@@ -180,6 +202,8 @@ button { font: inherit; color: inherit; }
 }
 .pieza .pegatina.gana { background: #3C8D3C; }   /* da julitos */
 .pieza .pegatina.cero { background: #9a9a9a; }
+.pieza .pegatina.gira { animation: gira-pegatina 0.4s ease-in-out; }
+@keyframes gira-pegatina { 50% { transform: rotateX(90deg) scale(1.15); } }
 .pieza.seleccionada {
   transform: translateY(-10px); border-color: var(--naranja-o); border-width: 3px;
   box-shadow: 0 0 0 4px rgba(242, 163, 58, 0.35), 3px 10px 0 rgba(80, 70, 60, 0.15);
@@ -732,7 +756,7 @@ sub { font-size: 0.68em; line-height: 0; vertical-align: -0.28em; margin-left: 0
 .btn.saltar svg { width: 18px; height: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada, .bienvenida.escrita .bienvenida-seguir, .bocadillo.escrito .boc-seguir, .mundo.recien, .nivel-btn.abriendo, .nivel-btn.abriendo .nivel-num { animation: none; }
+  .cargando-logo, .cargando-julitos i, .inicio-logo, .nivel-btn.siguiente, .pieza.guiada, .bienvenida.escrita .bienvenida-seguir, .bocadillo.escrito .boc-seguir, .mundo.recien, .nivel-btn.abriendo, .nivel-btn.abriendo .nivel-num, .enunciado { animation: none; }
   .candado-suelto { display: none; }
   .bienvenida-eme, .bienvenida-bocadillo { transition: none !important; }
   .cargando-julitos i { background: var(--ep); }

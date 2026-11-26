@@ -22,6 +22,7 @@ import { mostrarBienvenida, mostrarPrimerPlano, bienvenidaVista } from './bienve
 import { sinCortes, prepararEscritura, mostrarLetras } from './escritura.js';
 import { mostrarNiveles } from './niveles.js';
 import { estrellasDe, guardarEstrellas } from './progreso.js';
+import { serio, coma, valorE, energia, aAltura, unidadE, julitoEnJ } from './unidades.js';
 
 const $ = (id) => document.getElementById(id);
 const app = $('app');
@@ -56,6 +57,10 @@ const estado = {
   encima: false,              // Eme y su bocadillo, por encima del oscurecimiento
   cara: null,                 // cara de Eme mientras habla en el tablero: { expr, px, py }
   huecosEnFoco: false,        // Eme está hablando de los huecos: laten todos
+  // En el libro, la primera vez, la regla y las pegatinas empiezan en julitos y la charla de
+  // Eme las cambia a metros y julios delante del jugador
+  reglaVieja: false, pegatinasViejas: false,
+  explica: null,              // dibujo de la charla sobre el tablero: { tipo, t0 }
 };
 
 const pieza = (id) => NIVEL.piezas.find((p) => p.id === id);
@@ -147,8 +152,8 @@ function crearBandeja() {
     b.dataset.id = p.id;
     const pierde = cambioDe(p);   // negativo si da julitos
     b.setAttribute('aria-label', p.gana != null
-      ? `${p.nombre.join(' ')}: da ${p.gana} julitos`
-      : `${p.nombre.join(' ')}: pierde ${pierde} julitos`);
+      ? `${p.nombre.join(' ')}: da ${energia(p.gana)}`
+      : `${p.nombre.join(' ')}: pierde ${energia(pierde)}`);
     const cv = document.createElement('canvas');
     // una casilla mide 60 px en la tarjeta; las dobles, algo menos para que la tarjeta no crezca tanto
     const lado = p.doble === 'h' ? 46 : p.doble === 'v' ? 40 : 60;
@@ -163,13 +168,33 @@ function crearBandeja() {
     b.append(cv);
     b.insertAdjacentHTML('beforeend',
       `<span class="n1">${p.nombre[0]}</span><span class="n2">${p.nombre[1]}</span>` +
-      (p.gana != null
-        ? `<span class="pegatina gana${p.gana ? '' : ' cero'}">+${p.gana}</span>`
-        : `<span class="pegatina${pierde ? '' : ' cero'}">−${pierde}</span>`));
+      `<span class="pegatina${p.gana != null ? ' gana' : ''}${(p.gana ?? pierde) ? '' : ' cero'}">${textoPegatina(p)}</span>`);
     b.addEventListener('pointerdown', (e) => posibleArrastre(e, { pieza: p, desde: 'bandeja' }));
     b.addEventListener('click', () => { if (!suprimirClick) tocarPieza(p.id); });
     cont.append(b);
   }
+}
+
+/** Lo que pone la pegatina de una pieza: «−2» en el cuaderno, «−9,8 J» en el libro. */
+function textoPegatina(p, viejo = estado.pegatinasViejas) {
+  const n = p.gana ?? cambioDe(p), signo = p.gana != null ? '+' : '−';
+  if (serio() && !viejo) return n ? `${signo}${valorE(n)} J` : '0 J';
+  return `${signo}${n}`;
+}
+
+/** Las pegatinas pasan de julitos a julios: cada una da la vuelta y cambia de número. */
+function cambiarPegatinas() {
+  if (!estado.pegatinasViejas) return;
+  estado.pegatinasViejas = false;
+  [...$('piezas').querySelectorAll('.pieza')].forEach((b, i) => {
+    const el = b.querySelector('.pegatina'), p = pieza(b.dataset.id);
+    if (reducido) { el.textContent = textoPegatina(p); return; }
+    setTimeout(() => {
+      el.classList.add('gira');
+      setTimeout(() => { el.textContent = textoPegatina(p); }, 180);
+      setTimeout(() => el.classList.remove('gira'), 400);
+    }, 120 * i);
+  });
 }
 
 function refrescar() {
@@ -512,10 +537,10 @@ function lanzar() {
   estado.analisis = analizar(NIVEL, estado.colocadas);
   estado.escalaE = NIVEL.energia + estado.analisis.ganancias;   // la barra, con lo que darán las escaleras
   const E = NIVEL.energia, ganancias = estado.analisis.ganancias;
-  const jul = (n) => `${n} ${n === 1 ? 'julito' : 'julitos'}`;
   $('directo-pie').textContent = ganancias
-    ? `Total: sale con ${jul(E)} y las escaleras le dan ${ganancias} más.`
-    : `Total: ${jul(E)}. Siempre.`;
+    ? `Total: sale con ${energia(E)} y las escaleras le dan ${energia(ganancias)} más.`
+    : `Total: ${energia(E)}. Siempre.`;
+  ocultarEnunciado();
   estado.espera = 0;
   estado.etiquetas = {};
   estado.metaVista = false;
@@ -574,11 +599,26 @@ const ICONOS = {
 const NOMBRES = { Ep: 'E<sub>p</sub>', Ec: 'E<sub>c</sub>', calor: 'Calor' };
 const NOMBRES_LARGOS = { Ep: 'Energía potencial', Ec: 'Energía cinética', calor: 'Calor' };
 const EC = 'E<sub>c</sub>';
+const EP = 'E<sub>p</sub>';
 
 function actualizarEnergia(e) {
-  const n = enteros(e);
   const E = estado.escalaE ?? NIVEL.energia;
   const [sEp, sEc, sCal] = $('barra-e').children;
+  if (serio()) {
+    // en el libro, la energía es continua y va en julios (con su coma)
+    const ep = Math.max(0, e.ep), calor = Math.max(0, Math.min(e.calor, E)), ec = Math.max(0, Math.min(e.ec, E - calor));
+    for (const [el, val, nom] of [[sEp, ep, 'Ep'], [sEc, ec, 'Ec'], [sCal, calor, 'calor']]) {
+      el.style.width = `${(100 * val) / E}%`;
+      const txt = coma(val * julitoEnJ(), 1), parte = val / E;   // (en directo, una sola cifra decimal)
+      const html = parte > 0.3 ? `${ICONOS[nom]}<span>${NOMBRES[nom]} · ${txt} J</span>` : parte > 0.13 ? `${ICONOS[nom]}<span>${txt}</span>` : '';
+      if (el.dataset.v === html) continue;
+      el.dataset.v = html;
+      el.innerHTML = html;
+      el.title = `${NOMBRES_LARGOS[nom]}: ${txt} J`;
+    }
+    return;
+  }
+  const n = enteros(e);
   for (const [el, val, nom] of [[sEp, n.ep, 'Ep'], [sEc, n.ec, 'Ec'], [sCal, n.calor, 'calor']]) {
     el.style.width = `${(100 * val) / E}%`;
     if (el.dataset.v === String(val)) continue;     // solo se rehace cuando cambia
@@ -606,7 +646,7 @@ function grupo(n, clase, etiqueta) {
   if (n % 1 > 0.25) fs.append(Object.assign(document.createElement('i'), { className: `ficha ${clase} media` }));
   const icono = ICONOS[{ ep: 'Ep', ec: 'Ec', calor: 'calor', gana: 'motor' }[clase]];
   const txt = document.createElement('small');
-  txt.innerHTML = `${icono}<span>${etiqueta} · ${String(Math.round(n * 100) / 100).replace('.', ',')}</span>`;
+  txt.innerHTML = `${icono}<span>${etiqueta} · ${valorE(n)}${unidadE()}</span>`;
   g.append(fs, txt);
   return g;
 }
@@ -644,70 +684,74 @@ function mostrarResultado() {
   // escaleras mecánicas: lo que dan se suma a la energía de salida
   const conGanancia = piezas.filter((p) => cambioDe(p) < 0);
   const gananciasGrupos = () => conGanancia.forEach((p) => bal.append(grupo(p.gana, 'gana', 'escalera')));
-  const entra = [E, ...conGanancia.map((p) => p.gana)].join(' + ');   // lado izquierdo del balance
+  // las cuentas: en el cuaderno, números sueltos (7 = 4 + 3); en el libro, en julios (29,4 J = 9,8 J + …)
+  const u = unidadE();
+  const suma = (xs) => xs.map((x) => `${valorE(x)}${u}`).join(' + ');
+  const entra = suma([E, ...conGanancia.map((p) => p.gana)]);   // lado izquierdo del balance
+  const metaTxt = serio() ? `${aAltura(hm)} (allí, ${EP} = ${energia(hm)})` : aAltura(hm);
   let msg, ecu;
   if (tipo === 'meta') {
-    msg = `Llega a la meta con 0 julitos de ${EC} y se queda justo en la bandera. ${aLaPrimera ? '¡A la primera!' : ''}`;
+    msg = `Llega a la meta con ${energia(0)} de ${EC} y se queda justo en la bandera. ${aLaPrimera ? '¡A la primera!' : ''}`;
     gananciasGrupos();
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
-    ecu = `${entra} = ${[hm, ...perdidasPiezas].join(' + ')}`;
+    ecu = `${entra} = ${suma([hm, ...perdidasPiezas])}`;
   } else if (tipo === 'pasaste') {
-    msg = `Llegó a la meta con ${llegada} ${llegada === 1 ? 'julito' : 'julitos'} de ${EC}: le sobraba energía, ` +
+    msg = `Llegó a la meta con ${energia(llegada)} de ${EC}: le sobraba energía, ` +
       'cruzó la repisa y cayó por el precipicio.';
     gananciasGrupos();
     bal.append(grupo(hm, 'ep', 'altura meta'));
     piezasGrupos();
     bal.append(grupo(llegada, 'ec', 'sobran'));
-    ecu = `${entra} = ${[hm, ...perdidasPiezas, llegada].join(' + ')}`;
+    ecu = `${entra} = ${suma([hm, ...perdidasPiezas, llegada])}`;
   } else if (atasco?.frenado) {
     // se quedó frenado en una bajada: roza más de lo que baja
-    msg = 'Se quedó frenado en una bajada: el rozamiento le quitaba más julitos de los que ganaba al bajar, ' +
+    msg = `Se quedó frenado en una bajada: el rozamiento le quitaba más ${serio() ? 'julios' : 'julitos'} de los que ganaba al bajar, ` +
       'y se le acabó la energía antes de llegar abajo.' + (llegada === 0 ? ' Las cuentas cuadraban… ¡pero el orden de las piezas importa!' : '');
     gananciasGrupos();
     piezasGrupos();
-    ecu = `${entra} = ${[hm, ...perdidasPiezas].join(' + ')}`;
+    ecu = `${entra} = ${suma([hm, ...perdidasPiezas])}`;
   } else if (atasco) {
     // se quedó en una cuesta por el camino (una colina, o una escalera averiada que no subió)
-    const num = (x) => String(Math.round(x * 100) / 100).replace('.', ',');   // decimales con coma
-    const julitos = (x) => `${num(x)} ${x === 1 ? 'julito' : 'julitos'}`;
+    const julitos = (x) => energia(x);
     const forma = NIVEL.huecos[atasco.celda];
     const nombre = { colina: 'la colina', escalera: 'la escalera' }[forma] ?? 'la cuesta';
     const margen = E - atasco.cima;      // lo que podía perder antes de la cima (sin escaleras de por medio)
     const tenia = E - atasco.antes;      // la energía que tenía al llegar arriba (atasco.antes ya descuenta lo ganado)
     const orden = llegada === 0 ? ' Las cuentas cuadraban… ¡pero el orden de las piezas importa!' : '';
     if (margen > 0 && atasco.antes >= 0) {
-      msg = `No pudo subir ${nombre}. Su cima está a altura ${num(atasco.cima)}: para pasarla tenía que llegar arriba ` +
+      msg = `No pudo subir ${nombre}. Su cima está ${aAltura(atasco.cima)}: para pasarla tenía que llegar arriba ` +
         `habiendo perdido menos de ${julitos(margen)}, y perdió ${julitos(atasco.antes)}.` + orden;
       bal.append(grupo(atasco.cima, 'ep', 'cima'));
       bal.append(grupo(margen, 'ec', 'margen'));
-      ecu = `${E} = ${num(atasco.cima)} (cima) + ${num(margen)} (margen)`;
+      ecu = `${valorE(E)}${u} = ${valorE(atasco.cima)}${u} (cima) + ${valorE(margen)}${u} (margen)`;
     } else {
       const averiada = forma === 'escalera' && estado.colocadas[atasco.celda]?.gana === 0;
-      msg = `No pudo subir ${nombre}: para llegar arriba, a altura ${num(atasco.cima)}, necesitaba más de ` +
+      msg = `No pudo subir ${nombre}: para llegar arriba, ${aAltura(atasco.cima)}, necesitaba más de ` +
         `${julitos(atasco.cima)}, y solo tenía ${julitos(tenia)}.` +
         (averiada ? ' La averiada no da julitos: hay que llegar a ella con impulso.' : '') + orden;
       bal.append(grupo(atasco.cima, 'ep', 'altura'));
       bal.append(grupo(Math.max(tenia, 0), 'ec', 'tenía'));
-      ecu = `${num(tenia)} < ${num(atasco.cima)}`;
+      ecu = `${valorE(tenia)}${u} < ${valorE(atasco.cima)}${u}`;
     }
   } else {
     const tiene = E + ganancias - perdidas;   // la energía con la que podía subir
     msg = ganancias
-      ? `Las escaleras le dieron ${ganancias} julitos: en total tenía ${tiene}, y la meta está a altura ${hm}. No le llegaba para subir.`
-      : `Por el camino perdió ${perdidas} julitos: solo le quedaban ${tiene} para subir, y la meta está a altura ${hm}.`;
+      ? `Las escaleras le dieron ${energia(ganancias)}: en total tenía ${energia(tiene)}, y la meta está ${metaTxt}. No le llegaba para subir.`
+      : `Por el camino perdió ${energia(perdidas)}: solo le quedaban ${energia(tiene)} para subir, y la meta está ${metaTxt}.`;
     gananciasGrupos();
     bal.append(grupo(Math.max(tiene, 0), 'ep', 'altura máx.'));
     piezasGrupos();
-    ecu = `${entra} = ${[tiene, ...perdidasPiezas].join(' + ')}`;
+    ecu = `${entra} = ${suma([tiene, ...perdidasPiezas])}`;
   }
   $('hoja-msg').innerHTML = msg;
   $('ecuacion').textContent = ecu;
   const pista = $('pista-ayuda');
   pista.hidden = !(tipo !== 'meta' && estado.fallos >= 2);
+  const enMeta = serio() ? 'Eₚ en la meta' : 'altura de la meta';
   pista.textContent = NIVEL.piezas.some((p) => p.gana != null)
-    ? `Pista: ${E} + ¿? (lo que tienen que dar las escaleras) = ${hm} (altura de la meta)`
-    : `Pista: ${E} = ${hm} (altura de la meta) + ¿? (lo que tienen que perder las piezas)`;
+    ? `Pista: ${valorE(E)}${u} + ¿? (lo que tienen que dar las escaleras) = ${valorE(hm)}${u} (${enMeta})`
+    : `Pista: ${valorE(E)}${u} = ${valorE(hm)}${u} (${enMeta}) + ¿? (lo que tienen que perder las piezas)`;
   // «Al mapa» (allí se ve desbloquearse el siguiente nivel). Si está superado, es el botón
   // principal; si no, lo es «Reintentar». En el último nivel de un mundo superado, «¡A escapar!»
   // lanza la escena del final.
@@ -916,6 +960,7 @@ function pintar() {
   }
 
   dibujarEme(ctxEme, pose.cx, pose.cy, pose.B, { ...pose.o, ang: pose.ang });
+  if (estado.explica) dibujarExplicacion(ctxEme, w);
 
   // partículas y etiquetas ±1, también en la capa de Eme
   const ce = ctxEme;
@@ -943,6 +988,82 @@ function pintar() {
   return pose;
 }
 
+/**
+ * Lo que se dibuja sobre el tablero mientras Eme explica las unidades del libro:
+ *   julitos: los cuadritos de altura de la salida se llenan, uno a uno, con lo que vale cada uno (4,9 J)
+ *   total:   lo mismo, con una llave y lo que suman (la Eₚ de la salida)
+ *   eme:     EME asoma por la esquina de arriba con una nota en rojo
+ */
+function dibujarExplicacion(c, w) {
+  const ex = estado.explica, t = reloj - ex.t0;
+  const v = vistaTablero(w);
+  const aparece = (desde, dura = 0.25) => (reducido ? 1 : Math.max(0, Math.min(1, (t - desde) / dura)));
+  c.save();
+  if (ex.tipo === 'julitos' || ex.tipo === 'total') {
+    const E = NIVEL.energia, lado = v.k * 0.84;
+    for (let k = 0; k < E; k++) {
+      const a = ex.tipo === 'total' ? 1 : aparece(0.3 + 0.3 * k);
+      if (a <= 0) continue;
+      const [x, y] = v.px(0.55, k + 0.5);
+      const esc = a < 1 ? 0.4 + 0.6 * a + 0.25 * Math.sin(a * Math.PI) : 1;
+      c.save();
+      c.translate(x, y);
+      c.scale(esc, esc);
+      cuadradito(c, 0, 0, lado, C.julito, 0);
+      c.font = `${Math.round(lado * 0.36)}px ${FUENTE}`;
+      c.fillStyle = C.lapiz;
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText(valorE(1), 0, 1);
+      c.restore();
+    }
+    if (ex.tipo === 'total') {
+      const a = aparece(0.1, 0.4);
+      const [xa, ya] = v.px(1.08, E - 0.05), [, yb] = v.px(1.08, 0.05);
+      c.globalAlpha = a;
+      c.strokeStyle = C.lapiz; c.lineWidth = 2; c.lineCap = 'round';
+      const m = (ya + yb) / 2, d = v.k * 0.22;
+      c.beginPath();      // llave: } de arriba abajo
+      c.moveTo(xa, ya); c.quadraticCurveTo(xa + d, ya, xa + d, ya + d);
+      c.lineTo(xa + d, m - d); c.quadraticCurveTo(xa + d, m, xa + 2 * d, m);
+      c.quadraticCurveTo(xa + d, m, xa + d, m + d);
+      c.lineTo(xa + d, yb - d); c.quadraticCurveTo(xa + d, yb, xa, yb);
+      c.stroke();
+      const txt = energia(E), tam = Math.round(v.k * 0.62);
+      c.font = `${tam}px ${FUENTE}`;
+      c.textBaseline = 'middle';
+      c.lineJoin = 'round'; c.lineWidth = 5; c.strokeStyle = 'rgba(255,254,249,0.95)';
+      c.strokeText(txt, xa + 2.6 * d, m);
+      c.fillStyle = C.calor;
+      c.fillText(txt, xa + 2.6 * d, m);
+    }
+  }
+  if (ex.tipo === 'eme') {
+    const a = aparece(0.2, 0.5), s = a * a * (3 - 2 * a);
+    const B = v.k * 2.1;
+    const [x1, y1] = v.px(anchoTablero(), altoTablero());
+    const cx = x1 - B * 0.6 + (1 - s) * B * 1.3, cy = y1 + B * 0.62;
+    c.beginPath(); c.rect(0, y1 - v.k * 1.4, x1, H() + v.k * 3); c.clip();   // asoma desde el borde del tablero
+    dibujarEme(c, cx, cy, B, { primo: true, expr: 'serio', px: -0.9, py: 0.2, seed: 8 });
+    const nota = aparece(0.8, 0.4);
+    if (nota > 0) {
+      c.globalAlpha = nota;
+      const tam = Math.round(v.k * 0.6);
+      c.font = `${tam}px ${FUENTE}`;
+      c.textAlign = 'right'; c.textBaseline = 'middle';
+      const xt = cx - B * 0.62, yt = cy - B * 0.15;
+      c.lineJoin = 'round'; c.lineWidth = 5; c.strokeStyle = 'rgba(255,254,249,0.95)';
+      c.strokeText('Compruebe sus unidades.', xt, yt);
+      c.fillStyle = '#B4503F';
+      c.fillText('Compruebe sus unidades.', xt, yt);
+      const ancho = c.measureText('Compruebe sus unidades.').width;
+      c.strokeStyle = '#B4503F'; c.lineWidth = 1.6;
+      c.beginPath(); c.moveTo(xt - ancho, yt + tam * 0.62); c.lineTo(xt, yt + tam * 0.55); c.stroke();
+    }
+  }
+  c.restore();
+}
+
 /** Etiqueta flotante «−1 ■» / «+1 ■» junto a Eme. */
 function cambioJulitos(n, pose, dir = 1) {
   particulas.push({
@@ -962,7 +1083,7 @@ function dibujarCambio(ctx, p) {
   ctx.translate(p.x, p.y);
   ctx.scale(pop, pop);
   const tam = p.lado * 1.25;
-  const texto = (p.n < 0 ? '−' : '+') + Math.abs(p.n);
+  const texto = (p.n < 0 ? '−' : '+') + valorE(Math.abs(p.n)) + unidadE();
   ctx.font = `${tam}px ${FUENTE}`;
   ctx.textBaseline = 'middle';
   const ancho = ctx.measureText(texto).width;
@@ -1114,6 +1235,11 @@ function zona(nombre) {
   // la repisa de la meta con su bandera
   const bandera = () => enTablero(inicioRepisa() - 0.3, NIVEL.meta.altura + 2.6, anchoTablero(), NIVEL.meta.altura - 1.1);
   if (nombre === 'bandera') return bandera();
+  if (nombre === 'enunciado') return $('enunciado').getBoundingClientRect();
+  // la columna de cuadritos de altura de la salida (con su total al lado)
+  if (nombre === 'columna') return enTablero(0, NIVEL.energia + 0.2, 3.2, -0.1);
+  // la esquina de arriba a la derecha, por donde asoma EME
+  if (nombre === 'esquina') return enTablero(anchoTablero() - 7.5, altoTablero() + 0.3, anchoTablero(), altoTablero() - 2.6);
   // salida: Eme en su plataforma y su altura en la regla; meta: la bandera y su altura en la regla
   if (nombre === 'salida') return [enTablero(0, NIVEL.energia + 1.4, NIVEL.salidaX + 0.8, NIVEL.energia - 0.4), enRegla(NIVEL.energia)];
   if (nombre === 'meta') return [bandera(), enRegla(NIVEL.meta.altura)];
@@ -1141,11 +1267,22 @@ function charlar(frases, alTerminar) {
     n++;
     if (n >= frases.length) {
       estado.huecosEnFoco = false;
+      estado.explica = null;
+      ocultarEnunciado();
+      cambiarRegla();
+      cambiarPegatinas();
       marcarVisto(`charla-${NIVEL.numero}`);
       alTerminar();
       return;
     }
     const f = frases[n];
+    // lo que se anima mientras habla (en el libro: la regla y las pegatinas cambian de unidades,
+    // los cuadritos de altura se convierten en julios, EME asoma por una esquina…)
+    if (f.anim === 'regla') cambiarRegla();
+    if (f.anim === 'pegatinas') cambiarPegatinas();
+    if (f.anim === 'enunciado') mostrarEnunciado(); else ocultarEnunciado();
+    const dibujo = { julitos: 'julitos', total: 'total', eme: 'eme' }[f.anim];
+    if (dibujo !== estado.explica?.tipo) estado.explica = dibujo ? { tipo: dibujo, t0: reloj } : null;
     estado.cara = { expr: f.expr ?? 'idle', px: f.px ?? 0.3, py: f.py ?? 0.3 };
     estado.huecosEnFoco = !!f.zonas?.includes('huecos');   // los huecos laten mientras se habla de ellos
     mostrarFoco(() => (f.zonas ?? []).flatMap(zona));
@@ -1199,27 +1336,74 @@ function terminarGuia() {
   refrescar();
 }
 
+/** El número de la regla a la altura h: en julitos (cuadritos) o, en el libro, en metros. */
+const numeroRegla = (h, viejo = estado.reglaVieja) => (serio() && !viejo ? coma(h * NIVEL.unidades.cuadrito) : String(h));
+
 /** Regla de alturas: un número por cuadrito, todos iguales, de 0 al alto del tablero. */
 function construirRegla() {
   const regla = $('regla');
   const n = altoTablero();
-  if (Number(regla.dataset.n) === n) return;
-  regla.dataset.n = n;
+  const clave = `${n}|${serio() ? NIVEL.unidades.cuadrito : ''}|${estado.reglaVieja}`;
+  if (regla.dataset.clave === clave) return;
+  regla.dataset.clave = clave;
   regla.style.setProperty('--n', n);
-  regla.setAttribute('aria-label', `Regla de alturas en julitos, de 0 a ${n}`);
-  regla.querySelectorAll('.regla-n').forEach((el) => el.remove());
+  regla.classList.toggle('metros', serio() && !estado.reglaVieja);
+  regla.setAttribute('aria-label', serio() && !estado.reglaVieja
+    ? `Regla de alturas en metros, de 0 a ${numeroRegla(n)}`
+    : `Regla de alturas en julitos, de 0 a ${n}`);
+  regla.querySelectorAll('.regla-n, .regla-u').forEach((el) => el.remove());
   for (let h = 0; h <= n; h++) {
     const el = document.createElement('span');
     el.className = 'regla-n';
     el.style.setProperty('--h', h);
-    el.textContent = h;
+    el.textContent = numeroRegla(h);
     regla.append(el);
   }
+  // en metros, la unidad arriba del todo
+  regla.insertAdjacentHTML('beforeend', '<span class="regla-u" aria-hidden="true">m</span>');
 }
+
+/** La regla pasa de cuadritos a metros: cada número da la vuelta, de abajo arriba. */
+function cambiarRegla() {
+  if (!estado.reglaVieja) return;
+  estado.reglaVieja = false;
+  const regla = $('regla');
+  regla.dataset.clave = `${altoTablero()}|${NIVEL.unidades.cuadrito}|false`;
+  regla.setAttribute('aria-label', `Regla de alturas en metros, de 0 a ${numeroRegla(altoTablero())}`);
+  const nums = [...regla.querySelectorAll('.regla-n')];
+  nums.forEach((el, i) => {
+    const h = Number(el.style.getPropertyValue('--h'));
+    if (reducido) { el.textContent = numeroRegla(h); return; }
+    setTimeout(() => {
+      el.classList.add('gira');
+      setTimeout(() => { el.textContent = numeroRegla(h); }, 180);
+      setTimeout(() => el.classList.remove('gira'), 400);
+    }, 90 * i);
+  });
+  setTimeout(() => regla.classList.add('metros'), reducido ? 0 : 90 * nums.length + 200);
+}
+
+/** La ficha del enunciado del problema (en el libro): se ve en la charla y al tocar el título. */
+function mostrarEnunciado() {
+  const e = NIVEL.enunciado;
+  if (!e) return;
+  const el = $('enunciado');
+  el.innerHTML = `<b>Problema ${e.problema}</b><p>${e.texto}</p>`;
+  el.hidden = false;
+}
+function ocultarEnunciado() { $('enunciado').hidden = true; }
 
 /** Prepara todo lo que depende del nivel: textos, huecos, bandeja, estrellas… */
 function cargarNivel(n) {
   usarNivel(n);
+  // en el libro, la primera vez, la charla cambia la regla y las pegatinas a metros y julios
+  const cambia = serio() && hayCharla(n);
+  estado.reglaVieja = cambia && NIVEL.charla.some((f) => f.anim === 'regla');
+  estado.pegatinasViejas = cambia && NIVEL.charla.some((f) => f.anim === 'pegatinas');
+  estado.explica = null;
+  ocultarEnunciado();
+  $('titulo-nivel').classList.toggle('con-enunciado', !!NIVEL.enunciado);
+  $('titulo-nivel').title = NIVEL.enunciado ? 'Ver el enunciado' : '';
   // tablero con las filas y columnas del nivel; la capa de Eme sobresale CABEZA cuadritos por arriba
   $('tablero').style.setProperty('--cols', columnas());
   $('tablero').style.setProperty('--filas', filas());
@@ -1246,8 +1430,8 @@ function cargarNivel(n) {
   $('bocadillo').classList.toggle('oculto', conAyuda);
   if (conAyuda) temporizadorGuia = setTimeout(empezarAyuda, 1000);
   // (de dónde sale y adónde llega se ve en el tablero y la regla; para lectores de pantalla, aquí)
-  lienzo.setAttribute('aria-label', `Tablero del nivel: Eme sale a altura ${NIVEL.energia} (${NIVEL.energia} julitos) `
-    + `y tiene que pararse en la bandera, a altura ${NIVEL.meta.altura}`);
+  lienzo.setAttribute('aria-label', `Tablero del nivel: Eme sale ${aAltura(NIVEL.energia)} (${energia(NIVEL.energia)}) `
+    + `y tiene que pararse en la bandera, ${aAltura(NIVEL.meta.altura)}`);
   for (const r of $('regla').querySelectorAll('.regla-n')) {
     r.classList.toggle('meta', Number(r.style.getPropertyValue('--h')) === NIVEL.meta.altura);
   }
@@ -1295,6 +1479,11 @@ function iniciar() {
     }));
   }
   $('bocadillo').addEventListener('click', tocarBocadillo);
+  $('titulo-nivel').addEventListener('click', () => {
+    if (!NIVEL.enunciado || estado.guia) return;
+    if ($('enunciado').hidden) mostrarEnunciado(); else ocultarEnunciado();
+  });
+  $('enunciado').addEventListener('click', () => { if (!estado.guia) ocultarEnunciado(); });
   $('btn-lanzar').addEventListener('click', lanzar);
   $('btn-vaciar').addEventListener('click', vaciar);
   $('btn-pausa').addEventListener('click', () => {
