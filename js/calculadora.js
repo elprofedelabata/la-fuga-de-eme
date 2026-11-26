@@ -57,8 +57,12 @@ export function formatear(v) {
   return String(Object.is(r, -0) ? 0 : r).replace('.', ',').replace('-', '−');
 }
 
-/** Pone en marcha el botón y el panel de la calculadora. */
-export function iniciarCalculadora() {
+/**
+ * Pone en marcha el botón y el panel de la calculadora. `junto()` da el rectángulo del tablero:
+ * la primera vez se abre a su derecha si cabe (si no, centrada abajo). Se mueve arrastrándola
+ * por la cabecera y se queda donde la deje el jugador.
+ */
+export function iniciarCalculadora({ junto } = {}) {
   const boton = $('btn-calculadora'), panel = $('calculadora'), pantalla = $('calc-pantalla');
   const teclas = panel.querySelector('.calc-teclas');
   teclas.innerHTML = TECLAS.map((k) => `<button type="button" data-t="${k}" class="${OPS.includes(k) || k === '=' ? 'op' : ''}${k === '=' ? ' igual' : ''}"
@@ -87,7 +91,42 @@ export function iniciarCalculadora() {
     const b = e.target.closest('button');
     if (b) pulsar(b.dataset.t);
   });
-  const abrir = () => { panel.hidden = false; boton.setAttribute('aria-expanded', 'true'); };
+  let movida = false;          // el jugador la ha colocado: se respeta su sitio
+  const ponerEn = (x, y) => {
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    panel.style.left = `${Math.max(4, Math.min(innerWidth - w - 4, x))}px`;
+    panel.style.top = `${Math.max(4, Math.min(innerHeight - h - 4, y))}px`;
+  };
+  function colocar() {
+    const t = junto?.(), w = panel.offsetWidth, h = panel.offsetHeight;
+    if (t && t.right + 16 + w <= innerWidth - 8) ponerEn(t.right + 16, t.top + Math.max(0, (t.height - h) / 2));   // a la derecha del tablero
+    else ponerEn((innerWidth - w) / 2, innerHeight - h - 110);                                                     // centrada, encima de los botones
+  }
+  const abrir = () => {
+    panel.hidden = false;
+    boton.setAttribute('aria-expanded', 'true');
+    if (!movida) colocar();
+    else ponerEn(parseFloat(panel.style.left), parseFloat(panel.style.top));   // (por si ha cambiado la ventana)
+  };
+  // arrastrar por la cabecera
+  const cab = panel.querySelector('.calc-cab');
+  let agarre = null;
+  cab.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button')) return;
+    const r = panel.getBoundingClientRect();
+    agarre = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    cab.setPointerCapture(e.pointerId);
+    panel.classList.add('arrastrando');
+  });
+  cab.addEventListener('pointermove', (e) => {
+    if (!agarre) return;
+    ponerEn(e.clientX - agarre.dx, e.clientY - agarre.dy);
+    movida = true;
+  });
+  const soltar = () => { agarre = null; panel.classList.remove('arrastrando'); };
+  cab.addEventListener('pointerup', soltar);
+  cab.addEventListener('pointercancel', soltar);
+  addEventListener('resize', () => { if (!panel.hidden) (movida ? abrir : colocar)(); });
   const cerrar = () => { panel.hidden = true; boton.setAttribute('aria-expanded', 'false'); };
   boton.addEventListener('click', () => (panel.hidden ? abrir() : cerrar()));
   panel.querySelector('.calc-cerrar').addEventListener('click', cerrar);

@@ -99,7 +99,7 @@ button { font: inherit; color: inherit; }
 
 /* ---------- tablero ---------- */
 .tablero-zona { flex: 1 1 auto; min-height: 220px; container-type: size; display: grid; place-items: center; }
-.tablero-marco { display: flex; align-items: stretch; gap: 3px; margin-left: -8px; }
+.tablero-marco { display: flex; align-items: stretch; gap: 3px; margin-left: -8px; padding-bottom: var(--abajo, 0px); }
 
 /* regla de alturas, por fuera a la izquierda: cada cuadrito es un julito de Ep.
    --n es el número de cuadritos de alto del tablero; letra y posiciones se adaptan solas. */
@@ -133,6 +133,13 @@ button { font: inherit; color: inherit; }
 .regla-n.gira { animation: gira-regla 0.4s ease-in-out; }
 @keyframes gira-regla { 50% { transform: translateY(-50%) rotateX(90deg); } }
 .regla-n.meta::after { background: var(--calor); height: 2px; }
+/* regla horizontal del libro: distancias en metros, debajo del tablero */
+.regla-x { position: absolute; left: 0; right: 0; top: calc(100% + 3px); height: 19px; pointer-events: none; }
+.regla-x[hidden] { display: none; }
+.rx-t { position: absolute; top: 0; width: 1.5px; height: 4px; background: #8aa3c4; transform: translateX(-50%); }
+.rx-t.mayor { height: 7px; background: #4a6a94; }
+.rx-n { position: absolute; top: 8px; transform: translateX(-50%); font-size: 12px; line-height: 1; color: #4a6a94; white-space: nowrap; }
+.rx-n.ultima { transform: translateX(-70%); }
 .regla-n.entre { font-size: clamp(8px, 100cqh / var(--n) * 0.34, 12px); z-index: 1; background: var(--papel); }
 /* marcador: altura actual de Eme */
 .regla-eme {
@@ -148,7 +155,8 @@ button { font: inherit; color: inherit; }
 .tablero {
   position: relative;
   /* 3 filas de casillas y --cols columnas (casillas cuadradas) */
-  width: min(100cqw - 31px, 100cqh * var(--cols, 3) / var(--filas, 3)); aspect-ratio: var(--cols, 3) / var(--filas, 3);
+  /* (--abajo: lo que ocupa debajo la regla horizontal del libro) */
+  width: min(100cqw - 31px, (100cqh - var(--abajo, 0px)) * var(--cols, 3) / var(--filas, 3)); aspect-ratio: var(--cols, 3) / var(--filas, 3);
   border: 2.5px solid var(--lapiz); border-radius: 8px 6px 9px 5px / 6px 9px 5px 8px;
   background: var(--tarjeta);
   box-shadow: 4px 5px 0 rgba(80, 70, 60, 0.12);
@@ -221,14 +229,20 @@ button { font: inherit; color: inherit; }
 #btn-calculadora svg { stroke-width: 2; }
 #btn-calculadora svg path { stroke-width: 2.6; }
 .calculadora {
-  position: fixed; right: max(10px, env(safe-area-inset-right)); bottom: 92px; z-index: 25;
+  position: fixed; left: 50%; top: 40%; z-index: 25;   /* (el juego la coloca junto al tablero) */
   width: 212px; padding: 8px; color: var(--lapiz);
   background: #fffef9; border: 2px solid var(--lapiz); border-radius: 12px 9px 13px 8px;
   box-shadow: 4px 6px 0 rgba(80, 70, 60, 0.18);
   animation: entra-enunciado 0.3s ease-out;
 }
 .calculadora[hidden] { display: none; }
-.calc-cab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 15px; }
+.calc-cab {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 15px;
+  cursor: grab; touch-action: none; user-select: none;   /* se arrastra por aquí */
+}
+.calc-cab b::before { content: "⠿ "; color: #b9b3a8; }
+.calculadora.arrastrando { opacity: 0.92; box-shadow: 6px 10px 0 rgba(80, 70, 60, 0.2); }
+.calculadora.arrastrando .calc-cab { cursor: grabbing; }
 .calc-cerrar { border: 0; background: none; font-size: 16px; cursor: pointer; color: var(--lapiz); padding: 2px 6px; }
 .calc-pantalla {
   display: block; min-height: 34px; margin-bottom: 7px; padding: 4px 8px; overflow-x: auto; white-space: nowrap;

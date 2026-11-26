@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=a22a2b92">
+  <link rel="stylesheet" href="css/estilos.css?v=02ac0725">
   <link rel="preload" as="image" href="img/logo.svg">
   <!-- versiones: lo escribe herramientas/versionar.mjs -->
   <script type="importmap">
@@ -29,7 +29,7 @@
     "imports": {
       "./js/arrastre.js": "./js/arrastre.js?v=ebaf139f",
       "./js/bienvenida.js": "./js/bienvenida.js?v=6a0dfa88",
-      "./js/calculadora.js": "./js/calculadora.js?v=0d4f0e7a",
+      "./js/calculadora.js": "./js/calculadora.js?v=88b5b010",
       "./js/dev.js": "./js/dev.js?v=e347b7e7",
       "./js/dibujo.js": "./js/dibujo.js?v=b803394d",
       "./js/escritura.js": "./js/escritura.js?v=d96bef86",
@@ -38,7 +38,7 @@
       "./js/historia.js": "./js/historia.js?v=70bc1437",
       "./js/inicio.js": "./js/inicio.js?v=7fcb3ae0",
       "./js/llegada-libro.js": "./js/llegada-libro.js?v=65f859db",
-      "./js/main.js": "./js/main.js?v=84189bf7",
+      "./js/main.js": "./js/main.js?v=54c96e2e",
       "./js/nivel.js": "./js/nivel.js?v=682c8bb2",
       "./js/niveles.js": "./js/niveles.js?v=0e70aef8",
       "./js/opciones.js": "./js/opciones.js?v=d62a3428",
@@ -64,7 +64,7 @@
   <link rel="modulepreload" href="js/niveles.js?v=0e70aef8">
   <link rel="modulepreload" href="js/progreso.js?v=2889ee73">
   <link rel="modulepreload" href="js/opciones.js?v=d62a3428">
-  <script type="module" src="js/main.js?v=84189bf7"></script>
+  <script type="module" src="js/main.js?v=54c96e2e"></script>
 </head>
 <body>
   <!-- Pantalla de carga: tapa el juego al menos 2 s, mientras se cargan fuentes y módulos -->
@@ -123,6 +123,7 @@
         <canvas id="lienzo" role="img" aria-label="Tablero de 3 por 3 casillas con el recorrido de Eme"></canvas>
         <canvas id="lienzo-eme" class="lienzo-eme" aria-hidden="true"></canvas>
         <aside class="enunciado" id="enunciado" aria-live="polite" hidden></aside>
+        <div class="regla-x" id="regla-x" role="img" hidden></div>
         <p class="bocadillo" id="bocadillo"></p>
       </div>
       </div>

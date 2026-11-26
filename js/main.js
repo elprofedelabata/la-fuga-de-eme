@@ -1456,6 +1456,28 @@ function construirRegla() {
   pintarInterruptor();
 }
 
+/**
+ * Regla horizontal, debajo del tablero (solo en el libro): una marca por cuadrito y, en cada
+ * borde de casilla, la distancia en metros (0 · 1,5 · 3,0 · …). Así se ven las d de μ · m · g · d.
+ */
+function construirReglaX() {
+  const rx = $('regla-x'), zona = $('tablero').closest('.tablero-zona');
+  if (!serio()) {
+    rx.hidden = true;
+    zona.style.removeProperty('--abajo');
+    return;
+  }
+  const n = anchoTablero(), c = NIVEL.unidades.cuadrito;
+  zona.style.setProperty('--abajo', '22px');       // (el tablero deja sitio debajo para ella)
+  rx.hidden = false;
+  rx.setAttribute('aria-label', `Regla de distancias en metros, de 0 a ${coma(n * c)}`);
+  rx.innerHTML = Array.from({ length: n + 1 }, (_, i) => {
+    const pos = `left:${((100 * i) / n).toFixed(4)}%`, mayor = i % 3 === 0;
+    return `<span class="rx-t${mayor ? ' mayor' : ''}" style="${pos}"></span>`
+      + (mayor ? `<span class="rx-n${i === n ? ' ultima' : ''}" style="${pos}">${coma(i * c)}${i === n ? '\u00a0m' : ''}</span>` : '');
+  }).join('');
+}
+
 /** Los números de la regla dan la vuelta, de abajo arriba, y cambian a lo que toque. */
 function girarRegla() {
   const regla = $('regla');
@@ -1531,6 +1553,7 @@ function cargarNivel(n) {
   lienzoEme.style.top = `${-asoma}%`;
   lienzoEme.style.height = `${100 + asoma}%`;
   construirRegla();
+  construirReglaX();
   estado.colocadas = Object.fromEntries(Object.keys(NIVEL.huecos).map((c) => [c, null]));
   estado.seleccion = null;
   estado.huecoElegido = null;
@@ -1599,7 +1622,7 @@ function iniciar() {
     }));
   }
   $('bocadillo').addEventListener('click', tocarBocadillo);
-  calculadora = iniciarCalculadora();
+  calculadora = iniciarCalculadora({ junto: () => $('tablero').getBoundingClientRect() });
   $('regla').addEventListener('click', () => {
     if (!serio() || estado.reglaVieja || estado.guia) return;
     ponerReglaEn(!estado.reglaEnJ, { recordar: true });
