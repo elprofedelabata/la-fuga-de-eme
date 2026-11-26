@@ -6,6 +6,20 @@ import { arrancar, restaurar } from './transicion.js';
 
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Ir a un mundo del mapa (la pone mostrarNiveles) y el que se está viendo. Con las flechas del
+// teclado, el anterior o el siguiente.
+let irA = null, mundoActual = 0;
+addEventListener('keydown', (e) => {
+  const raiz = document.getElementById('niveles');
+  if (!irA || raiz.hidden || document.querySelector('dialog[open]')) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); irA(mundoActual - 1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); irA(mundoActual + 1); }
+});
+// al cambiar el tamaño de la ventana, se sigue viendo el mismo mundo
+addEventListener('resize', () => {
+  if (irA && !document.getElementById('niveles').hidden) irA(mundoActual, false);
+});
+
 // Posiciones (en % de la tarjeta) de las casillas de un mundo: un zigzag de dos filas
 const POSICIONES = {
   10: [[12, 16], [37, 13], [63, 16], [88, 13], [84, 50], [50, 47], [16, 50], [16, 84], [50, 81], [84, 84]],
@@ -65,6 +79,7 @@ function construir(progreso, { recien, abre, escenaVista }) {
     const pronto = !bloqueado && sinNiveles;
     const linea = pos.map(([x, y]) => `${x},${y}`).join(' ');
     return `
+      <div class="mundo-pagina" data-mundo="${m.id}">
       <article class="mundo ${m.id}${bloqueado ? ' bloqueado' : ''}${pronto ? ' pronto' : ''}${m.id === recien ? ' recien' : ''}">
         <h3><span class="mundo-num">${m.id === 'fuera' ? 'Final' : `Mundo ${m.numero}`}</span>${m.nombre}
           ${bloqueado ? `<span class="mundo-candado" aria-label="bloqueado">${CANDADO}</span>` : ''}</h3>
@@ -76,7 +91,8 @@ function construir(progreso, { recien, abre, escenaVista }) {
             <polyline points="${linea}" vector-effect="non-scaling-stroke"/></svg>` : ''}
           ${casillas}
         </div>
-      </article>`;
+      </article>
+      </div>`;
   }).join('');
 }
 
@@ -93,9 +109,15 @@ export function mostrarNiveles({ alElegir, alVolver, alEscena, recien, abre, ir,
   const total = MUNDOS.reduce((a, m) => a + m.niveles, 0);          // una estrella por nivel
   const conseguidas = Object.values(progreso).filter(Boolean).length;
   $('niveles-total').innerHTML = `<i class="estrella-mini"></i>${conseguidas} / ${total}`;
-  $('mundos').innerHTML = construir(progreso, { recien, abre, escenaVista });
-  const destino = raiz.querySelector('.mundo.recien') ?? raiz.querySelector('.nivel-btn.abriendo') ?? (ir && raiz.querySelector(`.mundo.${ir}`));
-  if (destino) requestAnimationFrame(() => destino.scrollIntoView({ block: 'center', behavior: reducido ? 'auto' : 'smooth' }));
+  const mundos = $('mundos');
+  mundos.innerHTML = construir(progreso, { recien, abre, escenaVista });
+  const paginas = [...mundos.querySelectorAll('.mundo-pagina')];
+  // los puntos de abajo: uno por mundo (con su número), para saltar a él
+  $('mundos-puntos').innerHTML = MUNDOS.map((m, i) => {
+    const bloq = paginas[i].querySelector('.mundo').classList.contains('bloqueado');
+    return `<button type="button" class="mundo-punto${bloq ? ' bloqueado' : ''}" data-i="${i}"
+      aria-label="${m.id === 'fuera' ? 'Final' : `Mundo ${m.numero}`}: ${m.nombre}">${m.numero}</button>`;
+  }).join('');
   // al acabar de abrirse, el nivel vuelve a su animación de siempre
   raiz.querySelector('.nivel-btn.abriendo')?.addEventListener('animationend', (e) => {
     if (e.animationName === 'abre-nivel') e.currentTarget.classList.remove('abriendo');
@@ -103,6 +125,44 @@ export function mostrarNiveles({ alElegir, alVolver, alEscena, recien, abre, ir,
   restaurar(raiz);
   raiz.hidden = false;
   raiz.scrollTop = 0;
+
+  // Los mundos se ven de uno en uno: se pasa de uno a otro deslizando o con las flechas.
+  // Se abre por el que toca: el recién desbloqueado, el del nivel que se acaba de abrir, el
+  // que se pide (`ir`, el del nivel del que se viene) o, si no, el del siguiente nivel por jugar.
+  const indice = (el) => (el ? paginas.indexOf(el.closest('.mundo-pagina')) : -1);
+  let inicial = [
+    indice(mundos.querySelector('.mundo.recien')),
+    indice(mundos.querySelector('.nivel-btn.abriendo')),
+    ir ? paginas.findIndex((p) => p.dataset.mundo === ir) : -1,
+    indice(mundos.querySelector('.nivel-btn.siguiente, .nivel-btn.pronto')),
+  ].find((i) => i >= 0);
+  if (inicial == null) inicial = Math.max(0, paginas.findLastIndex((p) => !p.querySelector('.mundo.bloqueado')));
+  let actual = -1;
+  const marcar = (i) => {
+    if (i === actual) return;
+    actual = i;
+    mundoActual = i;
+    $('mundos-puntos').querySelectorAll('.mundo-punto').forEach((b, k) => {
+      b.classList.toggle('actual', k === i);
+      b.setAttribute('aria-current', k === i ? 'true' : 'false');
+    });
+    $('mundo-ant').disabled = i <= 0;
+    $('mundo-sig').disabled = i >= paginas.length - 1;
+    paginas.forEach((p, k) => { p.inert = k !== i; });   // (los otros mundos, fuera del foco y de los lectores)
+  };
+  irA = (i, suave = true) => {
+    i = Math.max(0, Math.min(paginas.length - 1, i));
+    mundos.scrollTo({ left: i * mundos.clientWidth, behavior: suave && !reducido ? 'smooth' : 'auto' });
+    marcar(i);
+  };
+  irA(inicial, false);
+  mundos.onscroll = () => marcar(Math.round(mundos.scrollLeft / Math.max(1, mundos.clientWidth)));
+  $('mundo-ant').onclick = () => irA(actual - 1);
+  $('mundo-sig').onclick = () => irA(actual + 1);
+  $('mundos-puntos').onclick = (e) => {
+    const b = e.target.closest('.mundo-punto');
+    if (b) irA(Number(b.dataset.i));
+  };
 
   // Salir: la pantalla siguiente se coloca debajo y esta hoja se arranca
   let vivo = true;

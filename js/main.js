@@ -1,6 +1,6 @@
 // La fuga de Eme · boceto jugable del nivel 1.
 
-import { NIVEL, NIVELES, MATERIALES, usarNivel } from './nivel.js';
+import { NIVEL, NIVELES, MATERIALES, usarNivel, mundoDe } from './nivel.js';
 import {
   prepararRecorrido, nuevaSimulacion, avanzar, muestra, energias, analizar, sDeX, etiquetasPerdida,
   columnas, filas, altoTablero, anchoTablero, inicioRepisa, cambioDe, cambioPorCasilla, huecosDe,
@@ -1649,7 +1649,7 @@ function iniciar() {
       mostrarFinCuaderno({ alTerminar: () => abrirNiveles({ recien: 'libro' }) });
       return;
     }
-    abrirNiveles();
+    abrirNiveles({ ir: mundoDe(NIVEL.numero) });
   });
   $('btn-menu').addEventListener('click', () => {
     $('acerca').returnValue = '';
@@ -1661,7 +1661,7 @@ function iniciar() {
     if ($('acerca').returnValue === 'historia') mostrarHistoria();
     if ($('acerca').returnValue === 'fin1') mostrarFinCuaderno();
     if ($('acerca').returnValue === 'libro') mostrarLlegadaLibro();
-    if ($('acerca').returnValue === 'niveles') abrirNiveles();
+    if ($('acerca').returnValue === 'niveles') abrirNiveles({ ir: mundoDe(NIVEL.numero) });
     if ($('acerca').returnValue === 'opciones') abrirOpciones();
   });
 
