@@ -369,6 +369,7 @@ export const NIVELES = {
       { texto: 'Aquí las alturas no se cuentan en cuadritos: van en metros. Cada cuadrito mide 0,5 m.', anim: 'regla', zonas: ['regla'], px: -0.95, py: 0.2 },
       { texto: '¿Y mis julitos? Cada cuadrito de altura vale m\u00a0·\u00a0g\u00a0·\u00a00,5\u00a0m: 1,0\u00a0·\u00a09,8\u00a0·\u00a00,5\u00a0=\u00a04,9\u00a0J.', anim: 'julitos', zonas: ['columna'], px: -0.4, py: 0.95 },
       { texto: 'Salgo de 3,0 m de altura: Eₚ\u00a0=\u00a0m\u00a0·\u00a0g\u00a0·\u00a0h = 1,0\u00a0·\u00a09,8\u00a0·\u00a03,0\u00a0=\u00a029,4\u00a0J.', anim: 'total', zonas: ['columna', 'salida'], px: -0.4, py: 0.95 },
+      { texto: 'Un truco: toca la regla y cambia de metros a julios. Así te dice la Eₚ de cada altura, ¡sin multiplicar!', expr: 'win', anim: 'reglaJ', zonas: ['regla'], px: -0.95, py: 0.2 },
       { texto: 'Las piezas tampoco quitan julitos: quitan julios. La madera, 4,9 J; el asfalto, 9,8 J; la arena, 14,7 J.', anim: 'pegatinas', zonas: ['pegatinas'], px: 0.2, py: 0.95 },
       { texto: 'La bandera está a 1,0 m de altura. ¿Cuántos julios tengo que perder por el camino?', zonas: ['meta'], px: 0.95, py: 0.3 },
       { texto: '¿¡EME!? Me está vigilando… Mejor hacemos bien las cuentas.', expr: 'gulp', anim: 'eme', zonas: ['esquina'], px: 0.95, py: -0.5 },

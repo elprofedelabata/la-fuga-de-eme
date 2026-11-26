@@ -1235,6 +1235,10 @@ function zona(nombre) {
   // la repisa de la meta con su bandera
   const bandera = () => enTablero(inicioRepisa() - 0.3, NIVEL.meta.altura + 2.6, anchoTablero(), NIVEL.meta.altura - 1.1);
   if (nombre === 'bandera') return bandera();
+  if (nombre === 'regla') {      // la regla y, si se ve, su interruptor de unidades
+    const u = $('regla').querySelector('.regla-u');
+    return [$('regla').getBoundingClientRect(), u?.offsetWidth ? u.getBoundingClientRect() : null];
+  }
   if (nombre === 'enunciado') return $('enunciado').getBoundingClientRect();
   // la columna de cuadritos de altura de la salida (con su total al lado)
   if (nombre === 'columna') return enTablero(0, NIVEL.energia + 0.2, 3.2, -0.1);
@@ -1270,6 +1274,7 @@ function charlar(frases, alTerminar) {
       estado.explica = null;
       ocultarEnunciado();
       cambiarRegla();
+      ponerReglaEn(reglaEnJ);
       cambiarPegatinas();
       marcarVisto(`charla-${NIVEL.numero}`);
       alTerminar();
@@ -1279,6 +1284,7 @@ function charlar(frases, alTerminar) {
     // lo que se anima mientras habla (en el libro: la regla y las pegatinas cambian de unidades,
     // los cuadritos de altura se convierten en julios, EME asoma por una esquina…)
     if (f.anim === 'regla') cambiarRegla();
+    if (f.anim === 'reglaJ') ponerReglaEn(true); else ponerReglaEn(reglaEnJ);
     if (f.anim === 'pegatinas') cambiarPegatinas();
     if (f.anim === 'enunciado') mostrarEnunciado(); else ocultarEnunciado();
     const dibujo = { julitos: 'julitos', total: 'total', eme: 'eme' }[f.anim];
@@ -1336,21 +1342,46 @@ function terminarGuia() {
   refrescar();
 }
 
-/** El número de la regla a la altura h: en julitos (cuadritos) o, en el libro, en metros. */
-const numeroRegla = (h, viejo = estado.reglaVieja) => (serio() && !viejo ? coma(h * NIVEL.unidades.cuadrito) : String(h));
+// En el libro, la regla puede marcar las alturas en metros o la Eₚ de cada altura en julios
+// (se cambia tocándola). Lo que prefiere el jugador se recuerda.
+const CLAVE_REGLA = 'fuga-eme-regla-julios';
+let reglaEnJ = (() => { try { return localStorage.getItem(CLAVE_REGLA) === '1'; } catch { return false; } })();
+
+/** El número de la regla a la altura h: en julitos (cuadritos) o, en el libro, en metros o en julios. */
+function numeroRegla(h, viejo = estado.reglaVieja) {
+  if (!serio() || viejo) return String(h);
+  return estado.reglaEnJ ? coma(h * julitoEnJ()) : coma(h * NIVEL.unidades.cuadrito);
+}
+
+/** Lo que dice la regla, para lectores de pantalla. */
+function describirRegla() {
+  const n = altoTablero();
+  if (!serio() || estado.reglaVieja) return `Regla de alturas en julitos, de 0 a ${n}`;
+  return estado.reglaEnJ
+    ? `Regla de energía potencial en julios, de 0 a ${numeroRegla(n)} J`
+    : `Regla de alturas en metros, de 0 a ${numeroRegla(n)} m`;
+}
+
+/** El interruptor de arriba de la regla: m o J, con el que está puesto marcado. */
+function pintarInterruptor() {
+  const b = $('regla').querySelector('.regla-u');
+  if (!b) return;
+  b.classList.toggle('en-j', !!estado.reglaEnJ);
+  b.setAttribute('aria-pressed', String(!!estado.reglaEnJ));
+}
 
 /** Regla de alturas: un número por cuadrito, todos iguales, de 0 al alto del tablero. */
 function construirRegla() {
   const regla = $('regla');
   const n = altoTablero();
-  const clave = `${n}|${serio() ? NIVEL.unidades.cuadrito : ''}|${estado.reglaVieja}`;
+  estado.reglaEnJ ??= reglaEnJ;
+  const clave = `${n}|${serio() ? NIVEL.unidades.cuadrito + '|' + julitoEnJ() : ''}|${estado.reglaVieja}|${estado.reglaEnJ}`;
   if (regla.dataset.clave === clave) return;
   regla.dataset.clave = clave;
   regla.style.setProperty('--n', n);
   regla.classList.toggle('metros', serio() && !estado.reglaVieja);
-  regla.setAttribute('aria-label', serio() && !estado.reglaVieja
-    ? `Regla de alturas en metros, de 0 a ${numeroRegla(n)}`
-    : `Regla de alturas en julitos, de 0 a ${n}`);
+  regla.classList.toggle('julios', serio() && !estado.reglaVieja && !!estado.reglaEnJ);
+  regla.setAttribute('aria-label', describirRegla());
   regla.querySelectorAll('.regla-n, .regla-u').forEach((el) => el.remove());
   for (let h = 0; h <= n; h++) {
     const el = document.createElement('span');
@@ -1359,17 +1390,18 @@ function construirRegla() {
     el.textContent = numeroRegla(h);
     regla.append(el);
   }
-  // en metros, la unidad arriba del todo
-  regla.insertAdjacentHTML('beforeend', '<span class="regla-u" aria-hidden="true">m</span>');
+  // en el libro, arriba del todo, el interruptor de la unidad: m (altura) o J (energía potencial)
+  regla.insertAdjacentHTML('beforeend', `<button class="regla-u" type="button" aria-pressed="false"
+    aria-label="Regla en julios de energía potencial" title="Cambiar la regla entre metros y julios">
+    <span class="u-m">m</span><span class="u-j">J</span></button>`);
+  pintarInterruptor();
 }
 
-/** La regla pasa de cuadritos a metros: cada número da la vuelta, de abajo arriba. */
-function cambiarRegla() {
-  if (!estado.reglaVieja) return;
-  estado.reglaVieja = false;
+/** Los números de la regla dan la vuelta, de abajo arriba, y cambian a lo que toque. */
+function girarRegla() {
   const regla = $('regla');
-  regla.dataset.clave = `${altoTablero()}|${NIVEL.unidades.cuadrito}|false`;
-  regla.setAttribute('aria-label', `Regla de alturas en metros, de 0 a ${numeroRegla(altoTablero())}`);
+  regla.dataset.clave = '';      // (la próxima construcción la rehace entera)
+  regla.setAttribute('aria-label', describirRegla());
   const nums = [...regla.querySelectorAll('.regla-n')];
   nums.forEach((el, i) => {
     const h = Number(el.style.getPropertyValue('--h'));
@@ -1378,9 +1410,35 @@ function cambiarRegla() {
       el.classList.add('gira');
       setTimeout(() => { el.textContent = numeroRegla(h); }, 180);
       setTimeout(() => el.classList.remove('gira'), 400);
-    }, 90 * i);
+    }, (reducido ? 0 : 60) * i);
   });
-  setTimeout(() => regla.classList.add('metros'), reducido ? 0 : 90 * nums.length + 200);
+  return nums.length;
+}
+
+/** La regla pasa de cuadritos a metros (en la charla del primer nivel del libro). */
+function cambiarRegla() {
+  if (!estado.reglaVieja) return;
+  estado.reglaVieja = false;
+  const regla = $('regla');
+  const n = girarRegla();
+  setTimeout(() => {
+    regla.classList.add('metros');
+    regla.classList.toggle('julios', !!estado.reglaEnJ);
+    pintarInterruptor();
+  }, reducido ? 0 : 60 * n + 200);
+}
+
+/** Cambia la regla a julios (enJ) o a metros. `recordar`: lo ha elegido el jugador. */
+function ponerReglaEn(enJ, { recordar = false } = {}) {
+  if (recordar) {
+    reglaEnJ = enJ;
+    try { localStorage.setItem(CLAVE_REGLA, enJ ? '1' : '0'); } catch { /* da igual */ }
+  }
+  if (!serio() || estado.reglaVieja || !!estado.reglaEnJ === enJ) return;
+  estado.reglaEnJ = enJ;
+  $('regla').classList.toggle('julios', enJ);
+  pintarInterruptor();
+  girarRegla();
 }
 
 /** La ficha del enunciado del problema (en el libro): se ve en la charla y al tocar el título. */
@@ -1401,6 +1459,7 @@ function cargarNivel(n) {
   estado.reglaVieja = cambia && NIVEL.charla.some((f) => f.anim === 'regla');
   estado.pegatinasViejas = cambia && NIVEL.charla.some((f) => f.anim === 'pegatinas');
   estado.explica = null;
+  estado.reglaEnJ = reglaEnJ;
   ocultarEnunciado();
   $('titulo-nivel').classList.toggle('con-enunciado', !!NIVEL.enunciado);
   $('titulo-nivel').title = NIVEL.enunciado ? 'Ver el enunciado' : '';
@@ -1479,6 +1538,10 @@ function iniciar() {
     }));
   }
   $('bocadillo').addEventListener('click', tocarBocadillo);
+  $('regla').addEventListener('click', () => {
+    if (!serio() || estado.reglaVieja || estado.guia) return;
+    ponerReglaEn(!estado.reglaEnJ, { recordar: true });
+  });
   $('titulo-nivel').addEventListener('click', () => {
     if (!NIVEL.enunciado || estado.guia) return;
     if ($('enunciado').hidden) mostrarEnunciado(); else ocultarEnunciado();

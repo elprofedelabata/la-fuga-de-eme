@@ -113,9 +113,22 @@ button { font: inherit; color: inherit; }
 }
 .regla-n::after { content: ""; width: 8px; height: 1.5px; background: #8aa3c4; border-radius: 1px; }
 .regla-n.meta { color: var(--calor); }
-/* en el libro, en metros: la unidad, arriba del todo */
-.regla-u { display: none; position: absolute; right: 2px; top: -17px; font-size: 13px; color: #4a6a94; }
-.regla.metros .regla-u { display: block; }
+/* en el libro, arriba del todo, el interruptor de la unidad: m (altura) o J (energía potencial) */
+.regla-u {
+  display: none; position: absolute; right: -4px; top: -28px; padding: 0; cursor: pointer;
+  font: inherit; font-size: 13px; line-height: 1; color: #4a6a94;
+  background: #fff; border: 1.5px solid #8aa3c4; border-radius: 9px; overflow: hidden;
+}
+.regla-u span { display: inline-block; padding: 2px 5px 3px; }
+.regla-u .u-m, .regla-u.en-j .u-j { background: #4a6a94; color: #fff; }
+.regla-u.en-j .u-m { background: none; color: #4a6a94; }
+.regla.metros .regla-u { display: flex; }
+.regla.metros { cursor: pointer; }
+/* en julios, números más largos: letra un poco más pequeña */
+.regla.julios .regla-n { font-size: clamp(8px, 100cqh / var(--n) * 0.36, 13px); color: #6b5a2a; }
+.regla.julios .regla-n::after { background: #d9b85a; }
+.regla.julios .regla-n.meta { color: var(--calor); }
+.regla.julios .regla-n.meta::after { background: var(--calor); }
 /* al cambiar de unidades, cada número da la vuelta */
 .regla-n.gira { animation: gira-regla 0.4s ease-in-out; }
 @keyframes gira-regla { 50% { transform: translateY(-50%) rotateX(90deg); } }

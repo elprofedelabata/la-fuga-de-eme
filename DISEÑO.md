@@ -377,7 +377,8 @@ A partir de aquí, Eₚ = m·g·h con g = 9,8 y datos reales (masas, alturas, lo
 
 Por dentro todo sigue en **julitos** (la Eₚ de un cuadrito de altura) y en cuadritos; el simulador y el validador no cambian. Un nivel del libro lleva `unidades: { m, g, cuadrito }` y lo que se enseña se traduce (`js/unidades.js`):
 
-- **Alturas en metros:** cuadritos · `cuadrito` (en el Mundo II, 0,5 m por cuadrito). La regla va en metros, con una «m» arriba.
+- **Alturas en metros:** cuadritos · `cuadrito` (en el Mundo II, 0,5 m por cuadrito). La regla va en metros.
+- **Regla en metros o en julios:** arriba de la regla hay un interruptor **m | J**; tocándolo (o tocando la regla) cada marca pasa a decir la **Eₚ de esa altura en julios** (0 · 4,9 · 9,8 · … J), y vuelta. Lo elegido se recuerda (`fuga-eme-regla-julios`).
 - **Energías en julios:** julitos · m · g · `cuadrito`. Con m = 1,0 kg y g = 9,8 m/s², un julito vale 4,9 J.
 - **Números con coma** y, como en los problemas, con al menos una cifra decimal (29,4 J · 3,0 m · 2,45 J); el cero, «0».
 - Las **pegatinas** dicen julios (−4,9 J); la **barra de energía** en directo es continua, con una cifra decimal; las etiquetas flotantes, «−4,9 J ■» (cada cuadradito sigue siendo un julito).
@@ -395,9 +396,10 @@ Por dentro todo sigue en **julitos** (la Eₚ de un cuadrito de altura) y en cua
   2. Los números de la regla dan la vuelta, uno a uno, y pasan a metros: «Cada cuadrito mide 0,5 m».
   3. Los 6 cuadritos de altura de la salida se llenan de julitos con «4,9» dentro: m · g · 0,5 m = 4,9 J.
   4. Una llave los suma: Eₚ = 1,0 · 9,8 · 3,0 = 29,4 J.
-  5. Las pegatinas dan la vuelta y pasan a julios.
-  6. La bandera, a 1,0 m: «¿Cuántos julios tengo que perder?».
-  7. EME asoma por la esquina de arriba con una nota en rojo: «Compruebe sus unidades.» — «¿¡EME!? Me está vigilando…».
+  5. El truco de la regla: se pone en julios sola («toca la regla y cambia de metros a julios: te dice la Eₚ de cada altura, ¡sin multiplicar!») y, en la frase siguiente, vuelve a metros.
+  6. Las pegatinas dan la vuelta y pasan a julios.
+  7. La bandera, a 1,0 m: «¿Cuántos julios tengo que perder?».
+  8. EME asoma por la esquina de arriba con una nota en rojo: «Compruebe sus unidades.» — «¿¡EME!? Me está vigilando…».
 
 ### Mundo III · La pizarra (niveles 19 a 24): el giro
 
